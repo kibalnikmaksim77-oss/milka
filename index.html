@@ -3,94 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Absolute Fix</title>
+    <title>Milka Cyber Absolute Perfect</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            /* ========================================================= */
+            /* 🛠 НАЛАШТУВАННЯ ІДЕАЛЬНОЇ ОБРІЗКИ (МОЖЕШ МІНЯТИ) 🛠 */
+            /* ========================================================= */
+            
+            /* 1. РОЗМІР ВЕРХУ ТА НИЗУ НА ЕКРАНІ */
+            --bull-height: 115vw;    /* Висота верхнього блоку з биком */
+            --schemes-height: 45vw;  /* Висота нижнього блоку зі схемами */
+
+            /* 2. ЛІНІЯ ЗРІЗУ ГУМКИ (ВІДСОТКИ ВІД ОРИГІНАЛЬНОГО ФОТО) */
+            --slice-top: 83%;        /* Ріжемо верхні 83% фото (все що над гумкою) */
+            --slice-bottom: 15%;     /* Ріжемо нижні 15% фото (схеми під лінією) */
+            /* Ті 2% пікселів, що залишилися посередині — це і є чиста гумка! */
+            /* ========================================================= */
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            /* Глибокий темний колір фону, як на твоїй картинці */
-            background-color: #080414; 
+            background-color: #000;
             color: #fff;
             font-family: 'Courier New', monospace;
             overflow-x: hidden;
         }
 
-        .app-container {
+        .main-container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             width: 100vw;
         }
 
-        /* 1. БЛОК БИКА: Жорстко обрізаний низ */
-        .bull-section {
-            position: relative;
+        /* ==========================================
+           БЛОК 1: ВЕРХ (ТІЛЬКИ БИК, 100% ОРИГІНАЛ) 
+           ========================================== */
+        .top-bull {
             width: 100vw;
-            /* Висота блоку. Все, що нижче - відрізається! */
-            height: 105vw; 
-            overflow: hidden;
-            /* Плавне розчинення самого низу картинки для зшивання */
-            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+            height: var(--bull-height);
+            /* Беремо фото, ставимо його по верхньому краю. Воно не плющиться! */
+            background: url('1000015397.jpg') no-repeat top center;
+            background-size: 100vw auto; 
             flex-shrink: 0;
-        }
-        .bull-img {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100vw; height: auto;
+            z-index: 5;
         }
 
-        /* 2. ГУМКА І ТЕКСТ: М'який неон без рамок */
-        .rubber-section {
+        /* ==========================================
+           БЛОК 2: СЕРЕДИНА (ЧИСТА ГУМКА З ФОТО + ТЕКСТ)
+           ========================================== */
+        .middle-rubber {
             flex-grow: 1;
-            /* Дуже м'яке світіння, яке ідеально імітує краї твого фото */
-            background: linear-gradient(90deg, 
-                rgba(214, 24, 240, 0.3) 0%, 
-                transparent 15%, 
-                transparent 85%, 
-                rgba(11, 212, 240, 0.3) 100%
-            );
-            /* Відступи для тексту, щоб не ліз на бика */
-            padding: 20px 20px 40px 20px;
-            /* Насуваємо гумку на блоки, щоб приховати шви */
-            margin-top: -8vw;
-            margin-bottom: -8vw;
             position: relative;
-            z-index: 10;
+            
+            /* МАГІЯ: Цей код вирізає з фотки міліметрову смужку над лінією і тягне ТІЛЬКИ ЇЇ. */
+            border-style: solid;
+            border-width: 0; /* ВАЖЛИВО: 0 рамок = 0 дублікатів бика! */
+            border-color: transparent;
+            border-image-source: url('1000015397.jpg');
+            border-image-slice: var(--slice-top) 0 var(--slice-bottom) 0 fill;
+            border-image-repeat: stretch;
+            
+            /* Відступи, щоб текст не прилипав до країв і бика */
+            padding: 10px 20px;
+            
+            /* Насуваємо на 1px, щоб прибрати мікро-щілини між блоками */
+            margin-top: -1px;
+            margin-bottom: -1px;
+            z-index: 2;
         }
 
-        /* 3. БЛОК СХЕМ: Жорстко обрізаний верх (тільки те, що під лінією) */
-        .scheme-section {
-            position: relative;
+        /* ==========================================
+           БЛОК 3: НИЗ (ТІЛЬКИ СХЕМИ ПІД ЛІНІЄЮ)
+           ========================================== */
+        .bottom-schemes {
             width: 100vw;
-            /* Висота блоку. Показує тільки самий низ картинки! */
-            height: 45vw; 
-            overflow: hidden;
-            /* Плавне розчинення самого верху схем для зшивання */
-            -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);
-            mask-image: linear-gradient(to top, black 80%, transparent 100%);
+            height: var(--schemes-height);
+            /* Беремо фото, ставимо його по нижньому краю. */
+            background: url('1000015397.jpg') no-repeat bottom center;
+            background-size: 100vw auto;
             flex-shrink: 0;
             margin-bottom: 80px; /* Місце під кнопку */
-        }
-        .scheme-img {
-            position: absolute;
-            /* Картинка прив'язана до низу. Ніяких других биків бути не може! */
-            bottom: 0; left: 0;
-            width: 100vw; height: auto;
+            z-index: 5;
         }
 
-        /* КНОПКА ВИХОДУ */
-        .fixed-btn {
+        /* КНОПКА */
+        .fixed-btn-container {
             position: fixed;
             bottom: 25px; left: 0; width: 100%;
             display: flex; justify-content: center; z-index: 100;
         }
         .btn-disconnect {
-            background: rgba(8, 4, 20, 0.95);
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #bc13fe; color: #bc13fe;
             padding: 12px 45px; font-weight: bold; text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.6); cursor: pointer;
+            box-shadow: 0 0 15px #bc13fe; cursor: pointer;
             backdrop-filter: blur(5px); border-radius: 4px;
         }
         .sys-text { color: #05d9e8; font-weight: bold; margin-bottom: 15px; display: block; }
@@ -98,31 +107,24 @@
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="main-container">
+        <div class="top-bull"></div>
         
-        <div class="bull-section">
-            <img src="1000015397.jpg" class="bull-img" alt="Bull">
-        </div>
-
-        <div class="rubber-section">
-            <span class="sys-text">>> SYSTEM_MODE: ABSOLUTE_CLEAN</span>
+        <div class="middle-rubber">
+            <span class="sys-text">>> SYSTEM_MODE: FLAWLESS_CUT</span>
             
-            <p>1. Другий бик знищений назавжди. Це фізично неможливо в цьому коді.</p>
-            <p>2. Жодних розмитих штрих-кодів.</p>
-            <p>3. Жодних жорстких рамок, тільки м'яке неонове світіння країв.</p>
+            <p>1. Жодних фейкових рамок. Тягнеться тільки твоя оригінальна фотографія.</p>
+            <p>2. Жодних дублікатів бика знизу. Код border-width: 0 назавжди вбив "другого бика".</p>
+            <p>3. Текст 100% заблокований у своїй зоні і не лізе на картинки.</p>
             
-            <br><br><br><br><br><br><br><br><br><br>
-            <p>Текст чітко під биком. Схеми чітко в самому кінці.</p>
-            <br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <p>Схеми знизу намертво зафіксовані.</p>
         </div>
 
-        <div class="scheme-section">
-            <img src="1000015397.jpg" class="scheme-img" alt="Schemes">
-        </div>
-
+        <div class="bottom-schemes"></div>
     </div>
 
-    <div class="fixed-btn">
+    <div class="fixed-btn-container">
         <button class="btn-disconnect" onclick="Telegram.WebApp.close()">DISCONNECT</button>
     </div>
 
