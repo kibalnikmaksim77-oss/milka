@@ -3,96 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka True Image Rubber</title>
+    <title>Milka Cyber Final</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         html, body {
             margin: 0;
             padding: 0;
             background-color: #000;
-            overflow-x: hidden; 
-            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            font-family: monospace;
             color: #fff;
-        }
-
-        /* МАГІЯ ГУМИ: Контейнер, який розрізає і розтягує твоє фото */
-        .rubber-wrapper {
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
-            width: 100vw;
-            box-sizing: border-box;
-            
-            /* Обов'язково для роботи border-image */
-            border-style: solid;
-            border-color: transparent;
-            
-            /* БЕРЕМО ТВОЄ ФОТО */
-            border-image-source: url('1000015397.jpg');
-            
-            /* РОЗРІЗАЄМО: 45% зверху (бик), 20% знизу (схеми). 
-               Слово "fill" каже коду залити порожнечу розтягнутою серединою фотографії! */
-            border-image-slice: 45% 0 20% 0 fill; 
-            
-            /* ВІДОБРАЖЕННЯ НА ЕКРАНІ: 110vw для бика, 50vw для схем */
-            border-width: 110vw 0 50vw 0; 
-            
-            /* КОМАНДА ТЯГНУТИ: тягне середину фотографії (всі твої технологічні лінії) як гуму */
-            border-image-repeat: stretch;
-            
-            /* Внутрішній відступ для тексту, щоб не прилипав до країв екрану */
-            padding: 20px; 
-            padding-bottom: 50px; 
         }
 
-        /* Кнопка виходу */
-        .fixed-bottom-bar {
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            /* Гумова середина: беремо колір фону з твоєї фотки */
+            background-color: #0d1128; 
+        }
+
+        /* ВЕРХ: БИК (оригінальний розмір) */
+        .header-bull {
+            width: 100%;
+            /* Співвідношення сторін для верхньої частини */
+            aspect-ratio: 10 / 11; 
+            background: url('1000015397.jpg') no-repeat top center;
+            background-size: 100% auto;
+            flex-shrink: 0;
+        }
+
+        /* СЕРЕДИНА: ТЕКСТ (гума) */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            z-index: 2;
+        }
+
+        /* НИЗ: СХЕМИ (ТОЧНИЙ ОРИГІНАЛЬНИЙ РОЗМІР) */
+        .footer-schemes {
+            width: 100%;
+            /* aspect-ratio гарантує, що схеми не збільшаться і не зменшаться відносно ширини */
+            aspect-ratio: 10 / 5; 
+            background: url('1000015397.jpg') no-repeat bottom center;
+            background-size: 100% auto;
+            flex-shrink: 0;
+            margin-bottom: 70px; /* Місце для кнопки */
+        }
+
+        .fixed-exit {
             position: fixed;
             bottom: 20px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 10;
         }
 
-        .btn-exit {
-            background: rgba(0, 0, 0, 0.7);
+        .btn {
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid #bc13fe;
             color: #bc13fe;
-            padding: 12px 40px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
-            backdrop-filter: blur(5px);
-            cursor: pointer;
+            padding: 10px 30px;
             text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 0 10px #bc13fe;
         }
     </style>
 </head>
 <body>
 
-    <div class="rubber-wrapper">
-        <h3 style="color: #05d9e8;">[ SYSTEM LOG : TRUE IMAGE RUBBER ]</h3>
-        <p>> Бик на місці, без деформацій... OK</p>
-        <br><br><br><br><br><br>
-        
-        <p>> Оригінальні неонові лінії розтягуються... OK</p>
-        <br><br><br><br><br><br>
-        
-        <p>> Схеми чекають під текстом... OK</p>
-        <br><br><br><br><br><br>
-        
-        <p style="color: #bc13fe;">> УВАГА: ТЕПЕР ТЯГНЕТЬСЯ САМЕ ФОТО!</p>
-        <br><br><br><br><br><br>
-        
-        <p>> Кінець логу.</p>
+    <div class="wrapper">
+        <div class="header-bull"></div>
+
+        <div class="main-content">
+            <h3 style="color:#05d9e8">LOG_STATUS: READY</h3>
+            <p>Тут буде твій довгий текст...</p>
+            <br><br><br><br><br><br><br><br><br><br>
+            <p>Кінець тексту. Нижче — оригінальні схеми.</p>
+        </div>
+
+        <div class="footer-schemes"></div>
     </div>
 
-    <div class="fixed-bottom-bar">
-        <button class="btn-exit" onclick="Telegram.WebApp.close()">DISCONNECT</button>
+    <div class="fixed-exit">
+        <button class="btn" onclick="Telegram.WebApp.close()">DISCONNECT</button>
     </div>
 
     <script>
