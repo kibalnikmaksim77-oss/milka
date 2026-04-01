@@ -3,40 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Infinite Photo</title>
+    <title>Milka Infinite Photo</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Обнуляємо все, прибираємо БУДЬ-ЯКІ рамки по боках */
+        /* ПОВНІСТЮ ЧИСТИЙ ЕКРАН - ЖОДНИХ РАМОК */
         html, body {
             margin: 0;
             padding: 0;
-            background-color: #000; 
-            overflow-x: hidden; /* Забороняє гортати вбік */
+            
+            /* Робимо сторінку дуже довгою для гортання */
+            min-height: 300vh; 
+            
+            /* МАГІЯ БЕЗКІНЕЧНОГО ФОТО: беремо твій файл і повторюємо його вниз */
+            background-image: url('1000015397.jpg');
+            background-size: 100vw auto; /* Ширина на весь екран */
+            background-repeat: repeat-y; /* Повторення тільки вниз (безкінечно) */
+            background-color: #000;
+            
+            overflow-x: hidden; /* Заборона гортати вбік */
         }
 
-        /* Контейнер для безкінечного скролу */
-        .scroll-container {
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Твоя фотографія. Вона стоїть зверху і буде гортатися вгору (бик іде вгору) */
-        .cyber-bull {
-            width: 100vw;
-            height: auto;
-            display: block; /* Прибирає будь-які щілини під фото */
-        }
-
-        /* Це "безкінечне" продовження фотографії вниз */
-        .infinite-bottom {
-            width: 100vw;
-            min-height: 200vh; /* Штучно робить сторінку дуже довгою */
-            /* Плавний градієнт, який імітує продовження твого неонового фону */
-            background: linear-gradient(to bottom, #100020, #000000);
-        }
-
-        /* Кнопка виходу завжди висить знизу на екрані телефону */
+        /* Кнопка виходу завжди висить знизу */
         .fixed-bottom-bar {
             position: fixed;
             bottom: 30px;
@@ -64,12 +51,6 @@
     </style>
 </head>
 <body>
-
-    <div class="scroll-container">
-        <img src="1000015397.jpg" class="cyber-bull">
-        
-        <div class="infinite-bottom"></div>
-    </div>
 
     <div class="fixed-bottom-bar">
         <button class="btn-exit" onclick="Telegram.WebApp.close()">DISCONNECT</button>
