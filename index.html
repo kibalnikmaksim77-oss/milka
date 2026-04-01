@@ -11,32 +11,30 @@
             margin: 0;
             padding: 0;
             
-            /* Сторінка займає рівно 1 екран. Скрол з'явиться ТІЛЬКИ якщо буде багато тексту */
+            /* Сторінка займає мінімум 1 екран. Скрол є, бо тексту багато */
             min-height: 100vh; 
             
-            /* МАГІЯ РЕЗИНИ: 
-               1. no-repeat - бик більше ніколи не повториться.
-               2. Колір #0d1128 - це темний космічний колір, який продовжує низ твоєї фотки */
+            /* МАГІЯ РЕЗИНИ: Темний космічний колір + одне фото зверху */
             background-color: #0d1128; 
             background-image: url('1000015397.jpg');
-            background-size: 100vw auto; /* Картинка чітко на всю ширину */
-            background-position: top center; /* Бик намертво прикріплений до самого верху */
-            background-repeat: no-repeat; /* ЗАБОРОНА ПОВТОРЕННЯ */
+            background-size: 100vw auto; 
+            background-position: top center; 
+            background-repeat: no-repeat; 
             
-            overflow-x: hidden; /* Заборона гортати вбік */
+            overflow-x: hidden; 
             font-family: 'Courier New', monospace;
             color: #fff;
         }
 
-        /* Контейнер для твого майбутнього тексту */
+        /* Контейнер для тексту */
         .content-area {
             padding: 20px;
-            /* Відступ зверху, щоб текст починався нижче бика (можеш міняти цифру) */
+            /* Відступ зверху, щоб текст починався нижче бика */
             margin-top: 350px; 
-            padding-bottom: 100px; /* Місце знизу, щоб кнопка не перекривала текст */
+            padding-bottom: 100px; 
         }
 
-        /* Кнопка виходу завжди висить знизу екрану телефону */
+        /* Кнопка виходу завжди висить знизу екрану */
         .fixed-bottom-bar {
             position: fixed;
             bottom: 30px;
@@ -66,7 +64,30 @@
 <body>
 
     <div class="content-area">
-        </div>
+        <h3 style="color: #05d9e8;">[ SYSTEM LOG : TEST SCROLL ]</h3>
+        <p>> Ініціалізація нейромережі... OK</p>
+        <br><br><br><br><br><br>
+        
+        <p>> Підключення до бази даних Milka... OK</p>
+        <br><br><br><br><br><br>
+        
+        <p>> Перевірка захисних протоколів... OK</p>
+        <br><br><br><br><br><br>
+        
+        <p>> Синхронізація з Telegram API... OK</p>
+        <br><br><br><br><br><br>
+        
+        <p style="color: #bc13fe;">> УВАГА: Перевірка гумового фону!</p>
+        <br><br><br><br><br><br>
+        
+        <p>> Завантаження модулів пам'яті... 99%</p>
+        <br><br><br><br><br><br>
+        
+        <p>> Зв'язок стабільний.</p>
+        <br><br><br><br><br><br>
+        
+        <h3 style="color: #05d9e8;">[ END OF LOG ]</h3>
+    </div>
 
     <div class="fixed-bottom-bar">
         <button class="btn-exit" onclick="Telegram.WebApp.close()">DISCONNECT</button>
