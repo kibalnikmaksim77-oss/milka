@@ -3,38 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Seamless Pro</title>
+    <title>Milka Cyber Rubber Fix</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Обнуляємо все */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            /* ГОЛОВНЕ ВИПРАВЛЕННЯ: 
-               Ми робимо горизонтальний градієнт, який імітує краї твого фото.
-               Фіолетовий зліва (#320b4a), чорний центр, синій справа (#032d42).
-               Це і є твоя "нескінченна гумка". */
-            background: #000 linear-gradient(90deg, #320b4a 0%, #000 15%, #000 85%, #032d42 100%);
-            background-attachment: fixed;
+            background-color: #000;
             color: #fff;
             font-family: 'Courier New', monospace;
-            overflow-x: hidden;
             min-height: 100vh;
+            overflow-x: hidden;
+            
+            /* ЦЕ ТВОЯ ГУМКА: ми беремо неонові кольори з країв твого фото 
+               і змушуємо їх тягнутися вічно по боках. Жодних рамок, тільки лінії. */
+            background-image: linear-gradient(90deg, #bc13fe 0%, #000 5%, #000 95%, #05d9e8 100%);
+            background-attachment: fixed;
         }
 
-        .main-wrapper {
+        .main-container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             width: 100vw;
         }
 
-        /* 1. ВЕРХ: БИК ТА ЛОГО (Оригінальний розмір, без деформації) */
+        /* ВЕРХ: БИК І ЛОГО (Тільки верхня частина фото) */
         .header-bull {
             width: 100%;
+            /* Висота до твоєї лінії "гумки" */
             aspect-ratio: 1000 / 1150; 
             background: url('1000015397.jpg') no-repeat top center;
             background-size: 100% auto;
@@ -42,28 +40,28 @@
             z-index: 1;
         }
 
-        /* 2. ЦЕНТР: ТЕКСТ (Тут працює гумка) */
-        .content-rubber {
-            flex-grow: 1;
+        /* СЕРЕДИНА: ТЕКСТ (Зона, яка тягнеться) */
+        .content-area {
+            flex-grow: 1; /* Це і є гумка, вона розсовує верх і низ */
             padding: 20px;
             position: relative;
             z-index: 2;
-            /* Текст плавно витікає з-під бика */
+            /* Текст починається чітко під биком */
         }
 
-        /* 3. НИЗ: СХЕМИ (Точно під оранжевою лінією, оригінальний розмір) */
+        /* НИЗ: СХЕМИ (Все, що нижче твоєї оранжевої лінії) */
         .footer-schemes {
             width: 100%;
+            /* Точний оригінальний розмір нижньої частини фото */
             aspect-ratio: 1000 / 530; 
             background: url('1000015397.jpg') no-repeat bottom center;
             background-size: 100% auto;
             flex-shrink: 0;
-            margin-bottom: 80px; 
-            z-index: 1;
+            margin-bottom: 80px; /* Місце для кнопки DISCONNECT */
         }
 
-        /* Кнопка DISCONNECT */
-        .fixed-btn-container {
+        /* Кнопка */
+        .fixed-footer {
             position: fixed;
             bottom: 25px;
             left: 0;
@@ -80,41 +78,38 @@
             padding: 12px 45px;
             font-weight: bold;
             text-transform: uppercase;
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.6);
+            box-shadow: 0 0 15px #bc13fe;
             cursor: pointer;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
             border-radius: 4px;
         }
 
-        .status-line {
+        .log-text {
             color: #05d9e8;
             font-weight: bold;
-            text-shadow: 0 0 8px #05d9e8;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             display: block;
         }
     </style>
 </head>
 <body>
 
-    <div class="main-wrapper">
+    <div class="main-container">
         <div class="header-bull"></div>
 
-        <div class="content-rubber">
-            <span class="status-line">>> SYSTEM_CHECK: STABLE_V2</span>
-            
-            <p>Тут твій довгий текст.</p>
-            <p>Завдяки горизонтальному градієнту, неонові боки тепер тягнуться безкінечно.</p>
+        <div class="content-area">
+            <span class="log-text">>> SYSTEM_RUBBER_MODE: ACTIVE</span>
+            <p>Тут твій текст. Він розтягує сторінку.</p>
+            <p>Бокові неонові лінії тепер тягнуться суто кодом разом із текстом.</p>
             
             <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-            <p>Схеми нижче завжди будуть в кінці інформації.</p>
-            <br><br><br><br><br><br><br><br><br><br>
+            <p>Нижче — твої схеми в оригінальному розмірі.</p>
         </div>
 
         <div class="footer-schemes"></div>
     </div>
 
-    <div class="fixed-btn-container">
+    <div class="fixed-footer">
         <button class="btn-disconnect" onclick="Telegram.WebApp.close()">DISCONNECT</button>
     </div>
 
