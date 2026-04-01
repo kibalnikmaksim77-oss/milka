@@ -3,68 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Pure Background</title>
+    <title>Milka Infinite Scroll</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Налаштування самої сторінки */
         html, body {
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%;
-            background-color: #000; 
-            overflow: hidden; /* Ніякого скролу, екран зафіксований */
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            
+            /* Робимо сторінку штучно дуже довгою, щоб завжди можна було гортати */
+            min-height: 200vh; 
+            
+            /* Безкінечні неонові краї, які тягнуться вниз */
+            border-left: 3px solid #bc13fe;
+            border-right: 3px solid #bc13fe;
+            box-shadow: inset 0 0 20px rgba(188, 19, 254, 0.6);
+            
+            box-sizing: border-box;
             font-family: 'Courier New', monospace;
         }
 
-        /* Чистий фон на весь екран без затемнень */
+        /* Бик приклеєний до екрану. Ти гортаєш вниз, а він стоїть на місці. */
         .bg-bull {
-            position: fixed; 
-            top: 0; 
+            position: fixed;
+            top: 0;
             left: 0;
-            width: 100vw; 
+            width: 100vw;
             height: 100vh;
-            object-fit: cover; 
+            object-fit: cover;
             z-index: -1;
         }
 
-        /* Шар для інтерфейсу */
-        .ui-layer {
-            display: flex; 
-            flex-direction: column;
-            height: 100vh;
-            justify-content: space-between; /* Притискає текст до самого низу */
-        }
-
-        /* ПУСТА ЗОНА - захищає бика від перекриття текстом */
-        .safe-zone {
-            flex: 1; /* Займає весь вільний простір, відштовхуючи текст */
-        }
-
-        /* Панель керування (знизу) */
-        .bottom-panel {
-            padding: 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 10%, transparent); /* Легка тінь тільки знизу для читабельності */
-            text-align: center;
-        }
-
-        /* Інформація (за замовчуванням прихована, з'являється тільки при роботі) */
-        .cmd-info {
-            color: #bc13fe;
-            font-size: 12px;
-            margin-bottom: 15px;
-            text-shadow: 0 0 8px #bc13fe;
-            /* opacity: 0; */ /* Розкоментуй це, якщо хочеш, щоб тексту взагалі не було видно зі старту */
+        /* Кнопка виходу - вона теж приклеєна до низу екрану */
+        .fixed-bottom-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
         }
 
         .btn-exit {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             border: 1px solid #bc13fe;
             color: #bc13fe;
-            padding: 10px 40px;
+            padding: 12px 40px;
             border-radius: 8px;
+            font-size: 16px;
             font-weight: bold;
-            box-shadow: 0 0 10px rgba(188, 19, 254, 0.3);
-            backdrop-filter: blur(3px);
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
+            backdrop-filter: blur(5px);
             cursor: pointer;
         }
     </style>
@@ -73,28 +65,13 @@
 
     <img src="1000015397.jpg" class="bg-bull">
 
-    <div class="ui-layer">
-        
-        <div class="safe-zone"></div>
-
-        <div class="bottom-panel">
-            <div class="cmd-info">
-                [ SYSTEM READY ] <span id="u-name"></span>
-            </div>
-            <button class="btn-exit" onclick="tg.close()">DISCONNECT</button>
-        </div>
-
+    <div class="fixed-bottom-bar">
+        <button class="btn-exit" onclick="Telegram.WebApp.close()">DISCONNECT</button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('u-name').innerText = " | USR: " + user.first_name.toUpperCase();
-        }
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
     </script>
 </body>
 </html>
