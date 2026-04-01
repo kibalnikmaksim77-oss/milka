@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Perfect Original</title>
+    <title>Milka Cyber Final</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,40 +16,38 @@
             overflow-x: hidden;
         }
 
-        .main-container {
+        .cyber-container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             width: 100vw;
             
-            /* БЕРЕМО ТВОЮ ОРИГІНАЛЬНУ ФОТОГРАФІЮ */
+            /* БЕРЕМО ОРИГІНАЛЬНЕ ФОТО */
             border-style: solid;
             border-color: transparent;
             border-image-source: url('1000015397.jpg');
             
-            /* МАГІЯ ІДЕАЛЬНОЇ НАРІЗКИ:
-               58% - від верху до копит бика.
-               40% - від схем до самого низу.
-               fill - тягне чистий космос між ними. */
-            border-image-slice: 58% 0 40% 0 fill;
+            /* РІЖЕМО ЧІТКО ПО ТВОЇХ ЛІНІЯХ: 
+               75% фото — це верх (бик)
+               15% фото — це низ (схеми під помаранчевою лінією)
+               fill — тягне тільки чисті лінії між ними */
+            border-image-slice: 75% 0 15% 0 fill;
             
-            /* МАТЕМАТИЧНО ТОЧНІ ПРОПОРЦІЇ ДЛЯ ЕКРАНУ:
-               Щоб бик не був товстим, а схеми не були сплющеними. */
-            border-width: 66vw 0 46vw 0;
+            /* РОЗМІРИ НА ЕКРАНІ (щоб не плющило оригінал) */
+            border-width: 125vw 0 25vw 0;
             
-            /* ВМИКАЄМО ГУМКУ ТІЛЬКИ ДЛЯ ЦЕНТРУ */
+            /* ТЯГНЕМО ТІЛЬКИ СЕРЕДИНУ */
             border-image-repeat: stretch;
         }
 
         .content-area {
             flex-grow: 1;
-            /* Відступи захищають морду бика і схеми від тексту */
+            /* Текст заблокований відступами */
             padding: 10px 20px 80px 20px;
             position: relative;
             z-index: 10;
         }
 
-        /* КНОПКА ВИХОДУ */
         .fixed-btn-container {
             position: fixed;
             bottom: 25px; left: 0; width: 100%;
@@ -69,17 +67,15 @@
 </head>
 <body>
 
-    <div class="main-container">
+    <div class="cyber-container">
         <div class="content-area">
-            <span class="sys-text">>> SYSTEM_MODE: ORIGINAL_PHOTO_RUBBER</span>
+            <span class="sys-text">>> SYSTEM_READY</span>
             
-            <p>1. Тягнеться тільки твоє оригінальне фото.</p>
-            <p>2. Жодних фейкових рамок чи CSS-градієнтів.</p>
-            <p>3. Штрих-кодів більше немає, бо ми тягнемо чисте місце на фотці.</p>
+            <p>Тепер лінії оригіналу зберігаються на максимум і тягнуться.</p>
+            <p>Схеми під помаранчевою смужкою завжди в кінці.</p>
             
-            <br><br><br><br><br><br><br><br><br><br><br><br>
-            <p>Текст чітко у своїй зоні.</p>
-            <p>А схеми надійно чекають тебе в самому низу.</p>
+            <br><br><br><br><br><br><br><br><br><br>
+            <p>Жодних дублікатів і розмиття.</p>
             <br><br><br><br><br><br><br><br><br><br>
         </div>
     </div>
