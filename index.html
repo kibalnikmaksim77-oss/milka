@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber True Rubber</title>
+    <title>Milka Cyber Perfect HD</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,102 +15,102 @@
             overflow-x: hidden;
         }
 
-        .main-wrapper {
+        /* 1. ФІКСОВАНИЙ ФОН: Це оригінальна фотка, яка стоїть на місці. 
+           Вона не розмита, бо займає рівно 1 екран у висоту (100vh). */
+        .fixed-backdrop {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url('1000015397.jpg');
+            background-size: 100vw 100vh;
+            background-position: center;
+            z-index: -1;
+        }
+
+        .scroll-container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             width: 100vw;
         }
 
-        /* 1. ВЕРХ: БИК ТА ЛОГО */
+        /* 2. ВЕРХ: БИК ТА ЛОГО (Ідеальні пропорції) */
         .top-bull {
             width: 100vw;
-            /* Фіксована пропорція (висота підлаштовується під ширину). 
-               Бик завжди буде ідеальним, без розтягувань! */
+            /* Точний розмір, щоб бик не спотворювався */
             aspect-ratio: 1000 / 1150; 
             background: url('1000015397.jpg') no-repeat top center;
-            background-size: 100% auto;
+            background-size: 100vw auto;
             flex-shrink: 0;
-            z-index: 3;
-        }
-
-        /* 2. СЕРЕДИНА: ГУМКА І ТЕКСТ */
-        .middle-rubber {
-            flex-grow: 1;
-            /* МАГІЯ КОДУ: Беремо саму фотку і розтягуємо її висоту в 50 разів. 
-               Вона витягує твої неонові лінії з фотографії як струни! Ніяких рамок! */
-            background-image: url('1000015397.jpg');
-            background-size: 100% 5000%; 
-            background-position: center 65%; /* Беремо ту частину фото, де немає деталей, тільки неон */
-            
-            /* Робимо так, щоб текст не прилипав до бика */
-            padding: 30px 20px 40px 20px;
-            
-            /* Зшиваємо блоки без щілин */
-            margin-top: -2px;
-            margin-bottom: -2px;
-            position: relative;
+            /* Плавне розчинення низу, щоб він злився з фіксованим фоном */
+            -webkit-mask-image: linear-gradient(to bottom, #000 85%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 85%, transparent 100%);
             z-index: 2;
         }
 
-        /* 3. НИЗ: СХЕМИ ПІД ОРАНЖЕВОЮ ЛІНІЄЮ */
-        .bottom-schemes {
-            width: 100vw;
-            /* Фіксована пропорція низу. Схеми не будуть стиснутими чи видовженими. */
-            aspect-ratio: 1000 / 450; 
-            background: url('1000015397.jpg') no-repeat bottom center;
-            background-size: 100% auto;
-            flex-shrink: 0;
-            margin-bottom: 80px; /* Місце для кнопки */
-            z-index: 3;
+        /* 3. СЕРЕДИНА: ТЕКСТ (Їздить поверх фону) */
+        .content-area {
+            flex-grow: 1;
+            padding: 0 20px;
+            /* ВІДСТУП: Текст точно під биком і не налазить на нього */
+            margin-top: -5vw; 
+            position: relative;
+            z-index: 10;
         }
 
-        /* КНОПКА DISCONNECT */
+        /* 4. НИЗ: СХЕМИ ПІД ОРАНЖЕВОЮ ЛІНІЄЮ */
+        .bottom-schemes {
+            width: 100vw;
+            /* Точний розмір нижньої частини, щоб не було сплющень */
+            aspect-ratio: 1000 / 500; 
+            background: url('1000015397.jpg') no-repeat bottom center;
+            background-size: 100vw auto;
+            flex-shrink: 0;
+            /* Плавне розчинення верху схем */
+            -webkit-mask-image: linear-gradient(to top, #000 75%, transparent 100%);
+            mask-image: linear-gradient(to top, #000 75%, transparent 100%);
+            margin-bottom: 80px; /* Місце під кнопку */
+            margin-top: 20px;
+            z-index: 2;
+        }
+
+        /* КНОПКА */
         .fixed-btn-container {
             position: fixed;
             bottom: 25px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            z-index: 100;
+            left: 0; width: 100%;
+            display: flex; justify-content: center; z-index: 100;
         }
 
         .btn-disconnect {
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #bc13fe;
             color: #bc13fe;
             padding: 12px 45px;
-            font-weight: bold;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px #bc13fe;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-            border-radius: 4px;
+            font-weight: bold; text-transform: uppercase;
+            box-shadow: 0 0 15px #bc13fe; cursor: pointer;
+            backdrop-filter: blur(5px); border-radius: 4px;
         }
 
         .sys-text {
-            color: #05d9e8;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: block;
+            color: #05d9e8; font-weight: bold; margin-bottom: 15px; display: block;
         }
     </style>
 </head>
 <body>
 
-    <div class="main-wrapper">
+    <div class="fixed-backdrop"></div>
+
+    <div class="scroll-container">
         <div class="top-bull"></div>
 
-        <div class="middle-rubber">
-            <span class="sys-text">>> RUBBER_MODE: PERFECT</span>
+        <div class="content-area">
+            <span class="sys-text">>> SYSTEM_MODE: HD_PARALLAX</span>
             
-            <p>Текст починається чітко під биком і не зачіпає його.</p>
-            <p>Бик має ідеальний розмір. Схеми знизу мають ідеальний розмір.</p>
+            <p>Тепер текст чітко під биком. Нічого не налазить.</p>
+            <p>Жодного розмиття і жодних смугастих штрих-кодів!</p>
             
             <br><br><br><br><br><br><br><br><br><br><br><br>
-            <p>А краї цього блоку — це розтягнуті пікселі твоєї ж фотографії!</p>
-            <p>Тепер це виглядає максимально дорого.</p>
+            <p>Коли ти гортаєш, здається, що картинка безкінечна, але насправді фон стоїть на місці.</p>
             <br><br><br><br><br><br><br><br><br><br>
         </div>
 
