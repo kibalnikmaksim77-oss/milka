@@ -1,76 +1,54 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Split Rubber</title>
+    <title>Milka True Image Rubber</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ОСНОВНИЙ ФОН (РЕЗИНА) */
         html, body {
             margin: 0;
             padding: 0;
-            /* Це градієнтна гума: зліва фіолетова, справа синя. Вона заповнює пустоту між биком і низом */
-            background: linear-gradient(90deg, #3d054d 0%, #0c0822 50%, #02384d 100%);
-            
-            min-height: 100vh; 
-            display: flex; /* Це змусить нижній блок завжди падати в кінець сторінки */
-            flex-direction: column;
+            background-color: #000;
             overflow-x: hidden; 
             font-family: 'Courier New', monospace;
             color: #fff;
         }
 
-        /* 1. ВЕРХ: Могутній бик. Прив'язаний до верху. */
-        .bg-top {
-            position: absolute;
-            top: 0;
-            left: 0;
+        /* МАГІЯ ГУМИ: Контейнер, який розрізає і розтягує твоє фото */
+        .rubber-wrapper {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
             width: 100vw;
-            height: 140vw; /* Висота захоплює бика і плавно розчиняється */
-            background-image: url('1000015397.jpg');
-            background-size: 100vw auto;
-            background-position: top center;
-            background-repeat: no-repeat;
-            /* Розчинення внизу */
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* 2. СЕРЕДИНА: Текст. Розтягує сторінку як гуму. */
-        .content-area {
-            flex-grow: 1; /* Виштовхує нижній блок у самісінький кінець */
-            position: relative;
-            z-index: 2;
-            padding: 20px;
-            margin-top: 110vw; /* Відступ, щоб текст починався нижче бика */
-        }
-
-        /* 3. НИЗ: Схеми (те, що під помаранчевою лінією). */
-        .bg-bottom {
-            position: relative;
-            z-index: 0;
-            width: 100vw;
-            height: 90vw; /* Захоплює тільки нижню частину картинки */
-            background-image: url('1000015397.jpg');
-            background-size: 100vw auto;
-            /* ОСЬ ВОНО: бере тільки самий низ твого фото */
-            background-position: bottom center; 
-            background-repeat: no-repeat;
-            /* Розчинення зверху */
-            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
-            mask-image: linear-gradient(to top, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
-            margin-top: auto; /* Намертво прибиває схеми до кінця скролу */
-            margin-bottom: 80px; /* Місце, щоб кнопка не закривала схеми */
-            pointer-events: none;
+            box-sizing: border-box;
+            
+            /* Обов'язково для роботи border-image */
+            border-style: solid;
+            border-color: transparent;
+            
+            /* БЕРЕМО ТВОЄ ФОТО */
+            border-image-source: url('1000015397.jpg');
+            
+            /* РОЗРІЗАЄМО: 45% зверху (бик), 20% знизу (схеми). 
+               Слово "fill" каже коду залити порожнечу розтягнутою серединою фотографії! */
+            border-image-slice: 45% 0 20% 0 fill; 
+            
+            /* ВІДОБРАЖЕННЯ НА ЕКРАНІ: 110vw для бика, 50vw для схем */
+            border-width: 110vw 0 50vw 0; 
+            
+            /* КОМАНДА ТЯГНУТИ: тягне середину фотографії (всі твої технологічні лінії) як гуму */
+            border-image-repeat: stretch;
+            
+            /* Внутрішній відступ для тексту, щоб не прилипав до країв екрану */
+            padding: 20px; 
+            padding-bottom: 50px; 
         }
 
         /* Кнопка виходу */
         .fixed-bottom-bar {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             left: 0;
             width: 100%;
             display: flex;
@@ -96,26 +74,22 @@
 </head>
 <body>
 
-    <div class="bg-top"></div>
-
-    <div class="content-area">
-        <h3 style="color: #05d9e8;">[ SYSTEM LOG : SPLIT SCROLL ]</h3>
-        <p>> Бик на своєму місці... OK</p>
+    <div class="rubber-wrapper">
+        <h3 style="color: #05d9e8;">[ SYSTEM LOG : TRUE IMAGE RUBBER ]</h3>
+        <p>> Бик на місці, без деформацій... OK</p>
         <br><br><br><br><br><br>
         
-        <p>> Гума розтягується... OK</p>
+        <p>> Оригінальні неонові лінії розтягуються... OK</p>
         <br><br><br><br><br><br>
         
-        <p>> Нижні схеми чекають у кінці... OK</p>
+        <p>> Схеми чекають під текстом... OK</p>
         <br><br><br><br><br><br>
         
-        <p style="color: #bc13fe;">> УВАГА: ІДЕАЛЬНИЙ КОД ЗАВАНТАЖЕНО!</p>
+        <p style="color: #bc13fe;">> УВАГА: ТЕПЕР ТЯГНЕТЬСЯ САМЕ ФОТО!</p>
         <br><br><br><br><br><br>
         
         <p>> Кінець логу.</p>
     </div>
-
-    <div class="bg-bottom"></div>
 
     <div class="fixed-bottom-bar">
         <button class="btn-exit" onclick="Telegram.WebApp.close()">DISCONNECT</button>
