@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Pro</title>
+    <title>Milka Cyber Final Fixed</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         html, body {
@@ -13,49 +13,55 @@
             color: #fff;
             font-family: 'Courier New', monospace;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* ГОЛОВНА МАГІЯ ТУТ: ТІЛЬКИ КОД, НІЯКОЇ ГЕНЕРАЦІЇ */
-        .cyber-container {
-            width: 100vw;
-            min-height: 100vh;
+        .main-wrapper {
             display: flex;
             flex-direction: column;
-            box-sizing: border-box;
-
-            /* Використовуємо border-image для ідеальної гуми без розривів */
-            border-style: solid;
-            border-image-source: url('1000015397.jpg');
-            
-            /* Розрізаємо фото: верх 42%, низ 18%. 
-               'fill' залишає середину картинки як гумове наповнення */
-            border-image-slice: 42% 0 18% 0 fill;
-            
-            /* Виставляємо точні пропорції: верхня частина (бик) і нижня (схеми) */
-            border-width: 115vw 0 50vw 0;
-            
-            /* stretch тягне пікселі неону по вертикалі, створюючи 'резину' */
-            border-image-repeat: stretch;
+            min-height: 100vh;
+            width: 100vw;
+            /* Колір фону для всієї сторінки, щоб гума була безшовною */
+            background-color: #0d1128; 
         }
 
-        .content-area {
-            /* Текст лежить поверх 'гуми' */
+        /* ВЕРХНЯ ЧАСТИНА: БИК (Фіксований) */
+        .top-bull {
+            width: 100vw;
+            /* Пропорція картинки, щоб бик був ідеальним */
+            aspect-ratio: 1000 / 1100; 
+            background: url('1000015397.jpg') no-repeat top center;
+            background-size: 100% auto;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* СЕРЕДНЯ ЧАСТИНА: ТЕКСТ (Гума) */
+        .rubber-center {
+            flex-grow: 1;
             padding: 0 20px;
-            margin-top: -10vw; /* Коригування позиції тексту відносно бика */
-            z-index: 5;
+            /* ОСЬ ТУТ ВИПРАВЛЕННЯ: відступ, щоб текст не заходив на бика */
+            padding-top: 40px; 
+            position: relative;
+            z-index: 2;
+            /* Плавний перехід кольору від картинки до фону */
+            background: linear-gradient(to bottom, transparent, #0d1128 15%);
         }
 
-        .status-header {
-            color: #05d9e8;
-            font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
+        /* НИЖНЯ ЧАСТИНА: СХЕМИ (Фіксований оригінал) */
+        .bottom-schemes {
+            width: 100vw;
+            aspect-ratio: 1000 / 450;
+            background: url('1000015397.jpg') no-repeat bottom center;
+            background-size: 100% auto;
+            flex-shrink: 0;
+            margin-bottom: 80px; /* Місце під кнопку */
         }
 
-        .fixed-footer {
+        .footer-fixed {
             position: fixed;
-            bottom: 25px;
+            bottom: 20px;
             left: 0;
             width: 100%;
             display: flex;
@@ -63,37 +69,48 @@
             z-index: 100;
         }
 
-        .btn-disconnect {
-            background: rgba(0, 0, 0, 0.85);
+        .btn {
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #bc13fe;
             color: #bc13fe;
-            padding: 12px 45px;
+            padding: 12px 40px;
             font-weight: bold;
             text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.5);
+            box-shadow: 0 0 15px #bc13fe;
             cursor: pointer;
             backdrop-filter: blur(5px);
+        }
+
+        /* Стиль для заголовка, щоб виглядав як у терміналі */
+        .status-line {
+            color: #05d9e8;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <div class="cyber-container">
-        <div class="content-area">
-            <div class="status-header">>> SYSTEM_READY</div>
+    <div class="main-wrapper">
+        <div class="top-bull"></div>
+
+        <div class="rubber-center">
+            <span class="status-line">>> SYSTEM_CHECK: TEXT_POSITION_OK</span>
             
-            <p>Тут починається твій довгий текст.</p>
-            <p>Зараз ми перевіряємо, як тягнеться гума...</p>
+            <p>Тепер текст починається чітко під картинкою бика.</p>
+            <p>Він не заважає логотипу і не перекриває морду.</p>
             
-            <br><br><br><br><br><br><br><br><br><br><br><br>
-            
-            <p>Як бачиш, бик зверху, а схеми знизу — і все це одна картинка.</p>
-            <p>Дизайн тепер цілісний і без помилок.</p>
+            <br><br><br><br><br><br><br><br><br><br>
+            <p>Гортай нижче, щоб побачити схеми.</p>
+            <br><br><br><br><br><br><br><br><br><br>
         </div>
+
+        <div class="bottom-schemes"></div>
     </div>
 
-    <div class="fixed-footer">
-        <button class="btn-disconnect" onclick="Telegram.WebApp.close()">DISCONNECT</button>
+    <div class="footer-fixed">
+        <button class="btn" onclick="Telegram.WebApp.close()">DISCONNECT</button>
     </div>
 
     <script>
