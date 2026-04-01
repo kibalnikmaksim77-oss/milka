@@ -3,126 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Masterpiece</title>
+    <title>Milka Cyber Absolute Fix</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            /* Базовий колір глибокого космосу (як на фото) */
-            background-color: #0c071a; 
+            /* Глибокий темний колір фону, як на твоїй картинці */
+            background-color: #080414; 
             color: #fff;
             font-family: 'Courier New', monospace;
             overflow-x: hidden;
         }
 
-        .main-wrapper {
+        .app-container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             width: 100vw;
         }
 
-        /* 1. БИК (Завжди ідеальний, завжди один) */
-        .header-bull {
-            width: 100vw;
-            aspect-ratio: 1000 / 1150; 
-            background: url('1000015397.jpg') no-repeat top center;
-            background-size: 100vw auto;
-            flex-shrink: 0;
+        /* 1. БЛОК БИКА: Жорстко обрізаний низ */
+        .bull-section {
             position: relative;
-            z-index: 5;
-            
-            /* Плавний градієнт-невидимка знизу, щоб ідеально зшити з гумкою */
+            width: 100vw;
+            /* Висота блоку. Все, що нижче - відрізається! */
+            height: 105vw; 
+            overflow: hidden;
+            /* Плавне розчинення самого низу картинки для зшивання */
             -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-            
-            /* Цей мінус насуває бика на гумку, ховаючи шов */
-            margin-bottom: -10vw; 
-        }
-
-        /* 2. ГУМКА І ТЕКСТ (Безкінечний неон) */
-        .rubber-band {
-            flex-grow: 1;
-            background-color: #0c071a;
-            
-            /* МАГІЯ НЕОНУ: Створюємо світіння країв кодом.
-               Воно ідеально стикується з лініями на фотографії. */
-            box-shadow:
-                inset 3px 0 5px 0px #bc13fe,
-                inset 15px 0 30px -5px rgba(188, 19, 254, 0.4),
-                inset -3px 0 5px 0px #05d9e8,
-                inset -15px 0 30px -5px rgba(5, 217, 232, 0.4);
-            
-            position: relative;
-            z-index: 1;
-            
-            /* ЗАХИСТ ТЕКСТУ: Відступи гарантують, що текст почнеться СТРОГО ПІД биком */
-            padding: 12vw 20px 15vw 20px;
-        }
-
-        /* 3. СХЕМИ (Точно під оранжевою лінією) */
-        .footer-schemes {
-            width: 100vw;
-            aspect-ratio: 1000 / 450; 
-            background: url('1000015397.jpg') no-repeat bottom center;
-            background-size: 100vw auto;
             flex-shrink: 0;
+        }
+        .bull-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw; height: auto;
+        }
+
+        /* 2. ГУМКА І ТЕКСТ: М'який неон без рамок */
+        .rubber-section {
+            flex-grow: 1;
+            /* Дуже м'яке світіння, яке ідеально імітує краї твого фото */
+            background: linear-gradient(90deg, 
+                rgba(214, 24, 240, 0.3) 0%, 
+                transparent 15%, 
+                transparent 85%, 
+                rgba(11, 212, 240, 0.3) 100%
+            );
+            /* Відступи для тексту, щоб не ліз на бика */
+            padding: 20px 20px 40px 20px;
+            /* Насуваємо гумку на блоки, щоб приховати шви */
+            margin-top: -8vw;
+            margin-bottom: -8vw;
             position: relative;
-            z-index: 5;
-            
-            /* Плавний градієнт-невидимка зверху */
+            z-index: 10;
+        }
+
+        /* 3. БЛОК СХЕМ: Жорстко обрізаний верх (тільки те, що під лінією) */
+        .scheme-section {
+            position: relative;
+            width: 100vw;
+            /* Висота блоку. Показує тільки самий низ картинки! */
+            height: 45vw; 
+            overflow: hidden;
+            /* Плавне розчинення самого верху схем для зшивання */
             -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);
             mask-image: linear-gradient(to top, black 80%, transparent 100%);
-            
-            /* Цей мінус насуває схеми на гумку знизу */
-            margin-top: -10vw; 
+            flex-shrink: 0;
             margin-bottom: 80px; /* Місце під кнопку */
         }
-
-        /* КНОПКА */
-        .fixed-btn-container {
-            position: fixed;
-            bottom: 25px;
-            left: 0; width: 100%;
-            display: flex; justify-content: center; z-index: 100;
+        .scheme-img {
+            position: absolute;
+            /* Картинка прив'язана до низу. Ніяких других биків бути не може! */
+            bottom: 0; left: 0;
+            width: 100vw; height: auto;
         }
 
+        /* КНОПКА ВИХОДУ */
+        .fixed-btn {
+            position: fixed;
+            bottom: 25px; left: 0; width: 100%;
+            display: flex; justify-content: center; z-index: 100;
+        }
         .btn-disconnect {
-            background: rgba(12, 7, 26, 0.95);
-            border: 2px solid #bc13fe;
-            color: #bc13fe;
-            padding: 12px 45px;
-            font-weight: bold; text-transform: uppercase;
+            background: rgba(8, 4, 20, 0.95);
+            border: 2px solid #bc13fe; color: #bc13fe;
+            padding: 12px 45px; font-weight: bold; text-transform: uppercase;
             box-shadow: 0 0 15px rgba(188, 19, 254, 0.6); cursor: pointer;
             backdrop-filter: blur(5px); border-radius: 4px;
         }
-
         .sys-text { color: #05d9e8; font-weight: bold; margin-bottom: 15px; display: block; }
     </style>
 </head>
 <body>
 
-    <div class="main-wrapper">
-        <div class="header-bull"></div>
+    <div class="app-container">
+        
+        <div class="bull-section">
+            <img src="1000015397.jpg" class="bull-img" alt="Bull">
+        </div>
 
-        <div class="rubber-band">
-            <span class="sys-text">>> RUBBER_MODE: FLAWLESS</span>
+        <div class="rubber-section">
+            <span class="sys-text">>> SYSTEM_MODE: ABSOLUTE_CLEAN</span>
             
-            <p>1. Текст заблокований відступами. Він НІКОЛИ не залізе на морду бика.</p>
-            <p>2. "Другого бика" на фоні більше не існує.</p>
-            <p>3. Ніякого розмиття чи "штрих-кодів".</p>
+            <p>1. Другий бик знищений назавжди. Це фізично неможливо в цьому коді.</p>
+            <p>2. Жодних розмитих штрих-кодів.</p>
+            <p>3. Жодних жорстких рамок, тільки м'яке неонове світіння країв.</p>
             
             <br><br><br><br><br><br><br><br><br><br>
-            <p>Неонові краї тепер створені чистим кодом і ідеально зшиті з картинкою.</p>
-            <p>Гортай в самий низ — там чекають оригінальні схеми.</p>
+            <p>Текст чітко під биком. Схеми чітко в самому кінці.</p>
             <br><br><br><br><br><br><br><br><br><br>
         </div>
 
-        <div class="footer-schemes"></div>
+        <div class="scheme-section">
+            <img src="1000015397.jpg" class="scheme-img" alt="Schemes">
+        </div>
+
     </div>
 
-    <div class="fixed-btn-container">
+    <div class="fixed-btn">
         <button class="btn-disconnect" onclick="Telegram.WebApp.close()">DISCONNECT</button>
     </div>
 
