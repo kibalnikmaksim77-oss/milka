@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Infinite Photo</title>
+    <title>Milka Cyber Rubber</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         /* ПОВНІСТЮ ЧИСТИЙ ЕКРАН - ЖОДНИХ РАМОК */
@@ -11,19 +11,32 @@
             margin: 0;
             padding: 0;
             
-            /* Робимо сторінку дуже довгою для гортання */
-            min-height: 300vh; 
+            /* Сторінка займає рівно 1 екран. Скрол з'явиться ТІЛЬКИ якщо буде багато тексту */
+            min-height: 100vh; 
             
-            /* МАГІЯ БЕЗКІНЕЧНОГО ФОТО: беремо твій файл і повторюємо його вниз */
+            /* МАГІЯ РЕЗИНИ: 
+               1. no-repeat - бик більше ніколи не повториться.
+               2. Колір #0d1128 - це темний космічний колір, який продовжує низ твоєї фотки */
+            background-color: #0d1128; 
             background-image: url('1000015397.jpg');
-            background-size: 100vw auto; /* Ширина на весь екран */
-            background-repeat: repeat-y; /* Повторення тільки вниз (безкінечно) */
-            background-color: #000;
+            background-size: 100vw auto; /* Картинка чітко на всю ширину */
+            background-position: top center; /* Бик намертво прикріплений до самого верху */
+            background-repeat: no-repeat; /* ЗАБОРОНА ПОВТОРЕННЯ */
             
             overflow-x: hidden; /* Заборона гортати вбік */
+            font-family: 'Courier New', monospace;
+            color: #fff;
         }
 
-        /* Кнопка виходу завжди висить знизу */
+        /* Контейнер для твого майбутнього тексту */
+        .content-area {
+            padding: 20px;
+            /* Відступ зверху, щоб текст починався нижче бика (можеш міняти цифру) */
+            margin-top: 350px; 
+            padding-bottom: 100px; /* Місце знизу, щоб кнопка не перекривала текст */
+        }
+
+        /* Кнопка виходу завжди висить знизу екрану телефону */
         .fixed-bottom-bar {
             position: fixed;
             bottom: 30px;
@@ -51,6 +64,9 @@
     </style>
 </head>
 <body>
+
+    <div class="content-area">
+        </div>
 
     <div class="fixed-bottom-bar">
         <button class="btn-exit" onclick="Telegram.WebApp.close()">DISCONNECT</button>
