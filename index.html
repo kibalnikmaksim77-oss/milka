@@ -3,42 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Scroll</title>
+    <title>Milka Cyber Infinite Photo</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Обнуляємо все, прибираємо БУДЬ-ЯКІ рамки по боках */
         html, body {
             margin: 0;
             padding: 0;
-            /* Глибокий темний колір під неон, у який перейде картинка */
-            background-color: #050010; 
-            min-height: 200vh; /* Дає можливість гортати у безкінечність */
-            
-            /* Безкінечні неонові лінії по боках, які тягнуться вниз */
-            border-left: 3px solid #bc13fe;
-            border-right: 3px solid #bc13fe;
-            box-shadow: inset 0 0 20px rgba(188, 19, 254, 0.6);
-            box-sizing: border-box;
-            overflow-x: hidden;
+            background-color: #000; 
+            overflow-x: hidden; /* Забороняє гортати вбік */
         }
 
-        /* Бик більше не прибитий цвяхами. Він зверху, і ти можеш його прогортати */
-        .bg-bull {
-            width: 100vw; /* На всю ширину екрану */
-            display: block;
-            
-            /* ОСЬ ЦЕ CSS-МАГІЯ: плавно розчиняє низ картинки в прозорість */
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%);
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%);
+        /* Контейнер для безкінечного скролу */
+        .scroll-container {
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Неонове світіння, яке продовжує картинку вниз */
-        .neon-abyss {
-            width: 100%;
-            height: 100vh;
-            background: linear-gradient(to bottom, rgba(188, 19, 254, 0.15), transparent);
+        /* Твоя фотографія. Вона стоїть зверху і буде гортатися вгору (бик іде вгору) */
+        .cyber-bull {
+            width: 100vw;
+            height: auto;
+            display: block; /* Прибирає будь-які щілини під фото */
         }
 
-        /* Кнопка виходу завжди висить знизу, хоч скільки гортай */
+        /* Це "безкінечне" продовження фотографії вниз */
+        .infinite-bottom {
+            width: 100vw;
+            min-height: 200vh; /* Штучно робить сторінку дуже довгою */
+            /* Плавний градієнт, який імітує продовження твого неонового фону */
+            background: linear-gradient(to bottom, #100020, #000000);
+        }
+
+        /* Кнопка виходу завжди висить знизу на екрані телефону */
         .fixed-bottom-bar {
             position: fixed;
             bottom: 30px;
@@ -61,14 +59,17 @@
             box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
             backdrop-filter: blur(5px);
             cursor: pointer;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <img src="1000015397.jpg" class="bg-bull">
-
-    <div class="neon-abyss"></div>
+    <div class="scroll-container">
+        <img src="1000015397.jpg" class="cyber-bull">
+        
+        <div class="infinite-bottom"></div>
+    </div>
 
     <div class="fixed-bottom-bar">
         <button class="btn-exit" onclick="Telegram.WebApp.close()">DISCONNECT</button>
