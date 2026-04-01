@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Seamless</title>
+    <title>Milka Bot Seamless</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Обнулення стандартних відступів */
-        html, body {
+        * {
             margin: 0;
             padding: 0;
-            /* ОСЬ ТУТ МАГІЯ: Градієнт замість чорного фону. 
-               Він імітує твою картинку, тому перехід буде невидимим */
+            box-sizing: border-box;
+        }
+
+        body {
+            /* ОСЬ ТУТ ГУМКА: градієнт, що зливається з твоєю картинкою */
             background: linear-gradient(180deg, #1d0a3d 0%, #0d1233 50%, #150a2e 100%);
             background-attachment: fixed;
             color: #fff;
             font-family: 'Courier New', monospace;
-            min-height: 100vh;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
         .main-wrapper {
@@ -25,48 +27,43 @@
             flex-direction: column;
             min-height: 100vh;
             width: 100vw;
-            position: relative;
         }
 
-        /* ВЕРХНЯ ЧАСТИНА: БИК (завжди зверху, оригінальний вигляд) */
-        .top-bull {
-            width: 100vw;
-            /* Пропорція картинки, щоб не тягнуло морду бика */
-            aspect-ratio: 1000 / 1100; 
+        /* 1. ВЕРХ: БИК ТА ЛОГО (оригінал, не тягнеться) */
+        .header-bull {
+            width: 100%;
+            /* Пропорція верху картинки до лінії гумки */
+            aspect-ratio: 1000 / 1150; 
             background: url('1000015397.jpg') no-repeat top center;
             background-size: 100% auto;
             flex-shrink: 0;
             z-index: 1;
         }
 
-        /* СЕРЕДНЯ ЧАСТИНА: ТЕКСТ (Гумова зона) */
-        .rubber-center {
-            flex-grow: 1;
-            padding: 0 20px;
-            /* Відступ, щоб текст починався ЧІТКО ПІД БИКОМ */
-            padding-top: 20px; 
+        /* 2. ЦЕНТР: ТЕКСТ (тут працює гумка фону) */
+        .content-rubber {
+            flex-grow: 1; /* Розтягує фон, якщо тексту багато */
+            padding: 20px;
             position: relative;
             z-index: 2;
-            /* Невеликий наплив тіні для ідеальної безшовності */
-            margin-top: -2px;
+            /* Текст автоматично починається ПІД биком */
         }
 
-        /* НИЖНЯ ЧАСТИНА: СХЕМИ (те, що під помаранчевою лінією) */
-        .bottom-schemes {
-            width: 100vw;
-            /* Фіксована пропорція низу картинки */
-            aspect-ratio: 1000 / 450;
+        /* 3. НИЗ: СХЕМИ (тільки те, що нижче твоєї оранжевої лінії) */
+        .footer-schemes {
+            width: 100%;
+            /* Точний оригінальний розмір схем знизу */
+            aspect-ratio: 1000 / 530; 
             background: url('1000015397.jpg') no-repeat bottom center;
             background-size: 100% auto;
             flex-shrink: 0;
-            margin-bottom: 80px; /* Місце для кнопки DISCONNECT */
-            z-index: 1;
+            margin-bottom: 80px; /* Місце для кнопки */
         }
 
-        /* Кнопка виходу */
-        .footer-fixed {
+        /* Кнопка DISCONNECT */
+        .fixed-btn-container {
             position: fixed;
-            bottom: 20px;
+            bottom: 25px;
             left: 0;
             width: 100%;
             display: flex;
@@ -74,24 +71,24 @@
             z-index: 100;
         }
 
-        .btn {
-            background: rgba(10, 5, 30, 0.9);
+        .btn-disconnect {
+            background: rgba(10, 5, 30, 0.85);
             border: 2px solid #bc13fe;
             color: #bc13fe;
-            padding: 12px 40px;
+            padding: 12px 45px;
             font-weight: bold;
             text-transform: uppercase;
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.5);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.6);
             cursor: pointer;
             backdrop-filter: blur(8px);
             border-radius: 4px;
         }
 
-        .status-text {
+        .status-line {
             color: #05d9e8;
             font-weight: bold;
             text-shadow: 0 0 8px #05d9e8;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: block;
         }
     </style>
@@ -99,24 +96,24 @@
 <body>
 
     <div class="main-wrapper">
-        <div class="top-bull"></div>
+        <div class="header-bull"></div>
 
-        <div class="rubber-center">
-            <span class="status-text">>> SYSTEM_CHECK: STABLE</span>
+        <div class="content-rubber">
+            <span class="status-line">>> SYSTEM_CHECK: STABLE</span>
             
-            <p>Тепер фон не обривається чорним кольором.</p>
-            <p>Він плавно перетікає від бика до схем знизу.</p>
+            <p>Тут твій текст. Він розсовує верх і низ.</p>
+            <p>Тепер фонова "гумка" підлаштовується під довжину тексту без чорних розривів.</p>
             
             <br><br><br><br><br><br><br><br><br><br>
-            <p>Гортай далі, схеми будуть у самому кінці...</p>
+            <p>Схеми знизу завжди будуть в кінці інформації, як в оригіналі.</p>
             <br><br><br><br><br><br><br><br><br><br>
         </div>
 
-        <div class="bottom-schemes"></div>
+        <div class="footer-schemes"></div>
     </div>
 
-    <div class="footer-fixed">
-        <button class="btn" onclick="Telegram.WebApp.close()">DISCONNECT</button>
+    <div class="fixed-btn-container">
+        <button class="btn-disconnect" onclick="Telegram.WebApp.close()">DISCONNECT</button>
     </div>
 
     <script>
