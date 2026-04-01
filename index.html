@@ -1,175 +1,70 @@
-<!DOCTYPE html>
+            <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Milka Cyber Terminal</title>
+    <title>Milka Cyber Bull</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --cyber-purple: #bc13fe;
-            --cyber-blue: #05d9e8;
-            --dark-space: #010101;
-        }
-
         body {
-            background-color: var(--dark-space);
-            color: #fff;
+            background-color: #050505;
+            color: #bc13fe;
             font-family: 'Courier New', monospace;
             margin: 0;
-            padding: 15px;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             height: 100vh;
             overflow: hidden;
-            box-sizing: border-box;
         }
 
-        /* Ефект старого монітора (скан-лінії) */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-
-        .header {
-            border: 1px solid var(--cyber-purple);
-            padding: 10px;
-            text-align: center;
-            box-shadow: 0 0 10px var(--cyber-purple);
-            margin-bottom: 20px;
-            background: rgba(188, 19, 254, 0.1);
-        }
-
-        .glitch {
-            font-size: 1.4rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            color: var(--cyber-purple);
-            text-shadow: 2px 2px var(--cyber-blue);
-        }
-
-        .user-box {
-            border: 1px solid var(--cyber-blue);
-            padding: 15px;
-            background: rgba(5, 217, 232, 0.05);
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .user-box span { color: var(--cyber-blue); }
-
-        /* Анімований статус-бар */
-        .loading-bar {
-            width: 100%;
-            height: 4px;
-            background: #222;
-            margin: 10px 0;
-            position: relative;
-            overflow: hidden;
-        }
-        .loading-bar::after {
-            content: "";
-            position: absolute;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--cyber-purple);
-            animation: loading 2s infinite linear;
-        }
-
-        @keyframes loading {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            flex-grow: 1;
-        }
-
-        .grid-item {
-            border: 1px solid #333;
-            padding: 10px;
-            font-size: 0.8rem;
+        .bull-container {
+            width: 300px;
+            height: 300px;
+            border: 2px solid #bc13fe;
+            box-shadow: 0 0 20px #bc13fe, inset 0 0 10px #bc13fe;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            background: rgba(188, 19, 254, 0.05);
+            border-radius: 15px;
         }
 
-        .value { color: var(--cyber-purple); font-size: 1.1rem; font-weight: bold; }
+        .bull-container img {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 10px;
+            filter: drop-shadow(0 0 10px #bc13fe);
+        }
 
-        .footer-btn {
-            background: none;
-            border: 1px solid var(--cyber-purple);
-            color: var(--cyber-purple);
-            padding: 15px;
-            margin-top: 20px;
-            font-family: inherit;
-            font-weight: bold;
+        .status-text {
+            margin-top: 25px;
+            font-size: 16px;
             text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.3s;
-            z-index: 3;
-        }
-
-        .footer-btn:active {
-            background: var(--cyber-purple);
-            color: #000;
-            box-shadow: 0 0 20px var(--cyber-purple);
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #bc13fe;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="glitch">MILKA-CYBER</div>
+    <div class="bull-container">
+        <img src="1000015397.jpg" alt="CYBER BULL">
     </div>
 
-    <div class="user-box">
-        <div>> АВТОРИЗАЦІЯ: <span id="u-name">Завантаження...</span></div>
-        <div>> ID_DATA: <span id="u-id">00000000</span></div>
-        <div class="loading-bar"></div>
-        <div style="font-size: 10px; color: #555;">STATUS: ENCRYPTED_CONNECTION_STABLE</div>
-    </div>
-
-    <div class="grid">
-        <div class="grid-item">
-            <span>CORE_VER</span>
-            <span class="value">2.0.4-β</span>
-        </div>
-        <div class="grid-item">
-            <span>RAM_USAGE</span>
-            <span class="value">34%</span>
-        </div>
-        <div class="grid-item" style="grid-column: span 2;">
-            <span>SYSTEM_LOG</span>
-            <span class="value" style="font-size: 0.7rem; color: #22c55e;">● Пряме підключення до нейромережі встановлено</span>
-        </div>
-    </div>
-
-    <button class="footer-btn" onclick="tg.close()">Відключитись</button>
+    <div class="status-text">SYSTEM: ONLINE | <span id="user">LOADING...</span></div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        tg.HapticFeedback.impactOccurred('heavy'); // Сильна вібрація при вході
-
+        
         const user = tg.initDataUnsafe?.user;
         if (user) {
-            document.getElementById('u-name').innerText = user.first_name.toUpperCase();
-            document.getElementById('u-id').innerText = user.id;
+            document.getElementById('user').innerText = user.first_name.toUpperCase();
         }
+        tg.HapticFeedback.impactOccurred('heavy');
     </script>
 </body>
 </html>
