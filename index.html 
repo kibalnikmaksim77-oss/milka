@@ -1,0 +1,25 @@
+from aiogram import types, F
+from aiogram.filters import Command
+from aiogram.types import WebAppInfo
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+# Припускаю, що твій роутер/диспетчер називається dp або router
+@dp.message(Command("app"))
+async def open_milka_app(message: types.Message):
+    # Створюємо клавіатуру
+    builder = InlineKeyboardBuilder()
+    
+    # СЮДИ ТРЕБА БУДЕ ВСТАВИТИ ПОСИЛАННЯ НА ТВІЙ САЙТ
+    web_app_url = "https://твоє-посилання-на-сайт.com/index.html"
+    
+    # Додаємо кнопку з Web App
+    builder.button(
+        text="⚡️ Відкрити Milka Terminal",
+        web_app=WebAppInfo(url=web_app_url)
+    )
+    
+    # Відправляємо повідомлення
+    await message.answer(
+        "Доступ до закритої зони відкрито. Запускаю термінал...",
+        reply_markup=builder.as_markup()
+    )
