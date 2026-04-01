@@ -3,31 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Absolute Perfect</title>
+    <title>Milka Cyber Perfect Original</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            /* ========================================================= */
-            /* 🛠 НАЛАШТУВАННЯ ІДЕАЛЬНОЇ ОБРІЗКИ (МОЖЕШ МІНЯТИ) 🛠 */
-            /* ========================================================= */
-            
-            /* 1. РОЗМІР ВЕРХУ ТА НИЗУ НА ЕКРАНІ */
-            --bull-height: 115vw;    /* Висота верхнього блоку з биком */
-            --schemes-height: 45vw;  /* Висота нижнього блоку зі схемами */
-
-            /* 2. ЛІНІЯ ЗРІЗУ ГУМКИ (ВІДСОТКИ ВІД ОРИГІНАЛЬНОГО ФОТО) */
-            --slice-top: 83%;        /* Ріжемо верхні 83% фото (все що над гумкою) */
-            --slice-bottom: 15%;     /* Ріжемо нижні 15% фото (схеми під лінією) */
-            /* Ті 2% пікселів, що залишилися посередині — це і є чиста гумка! */
-            /* ========================================================= */
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: #000;
             color: #fff;
             font-family: 'Courier New', monospace;
+            min-height: 100vh;
             overflow-x: hidden;
         }
 
@@ -36,65 +21,41 @@
             flex-direction: column;
             min-height: 100vh;
             width: 100vw;
-        }
-
-        /* ==========================================
-           БЛОК 1: ВЕРХ (ТІЛЬКИ БИК, 100% ОРИГІНАЛ) 
-           ========================================== */
-        .top-bull {
-            width: 100vw;
-            height: var(--bull-height);
-            /* Беремо фото, ставимо його по верхньому краю. Воно не плющиться! */
-            background: url('1000015397.jpg') no-repeat top center;
-            background-size: 100vw auto; 
-            flex-shrink: 0;
-            z-index: 5;
-        }
-
-        /* ==========================================
-           БЛОК 2: СЕРЕДИНА (ЧИСТА ГУМКА З ФОТО + ТЕКСТ)
-           ========================================== */
-        .middle-rubber {
-            flex-grow: 1;
-            position: relative;
             
-            /* МАГІЯ: Цей код вирізає з фотки міліметрову смужку над лінією і тягне ТІЛЬКИ ЇЇ. */
+            /* БЕРЕМО ТВОЮ ОРИГІНАЛЬНУ ФОТОГРАФІЮ */
             border-style: solid;
-            border-width: 0; /* ВАЖЛИВО: 0 рамок = 0 дублікатів бика! */
             border-color: transparent;
             border-image-source: url('1000015397.jpg');
-            border-image-slice: var(--slice-top) 0 var(--slice-bottom) 0 fill;
+            
+            /* МАГІЯ ІДЕАЛЬНОЇ НАРІЗКИ:
+               58% - від верху до копит бика.
+               40% - від схем до самого низу.
+               fill - тягне чистий космос між ними. */
+            border-image-slice: 58% 0 40% 0 fill;
+            
+            /* МАТЕМАТИЧНО ТОЧНІ ПРОПОРЦІЇ ДЛЯ ЕКРАНУ:
+               Щоб бик не був товстим, а схеми не були сплющеними. */
+            border-width: 66vw 0 46vw 0;
+            
+            /* ВМИКАЄМО ГУМКУ ТІЛЬКИ ДЛЯ ЦЕНТРУ */
             border-image-repeat: stretch;
-            
-            /* Відступи, щоб текст не прилипав до країв і бика */
-            padding: 10px 20px;
-            
-            /* Насуваємо на 1px, щоб прибрати мікро-щілини між блоками */
-            margin-top: -1px;
-            margin-bottom: -1px;
-            z-index: 2;
         }
 
-        /* ==========================================
-           БЛОК 3: НИЗ (ТІЛЬКИ СХЕМИ ПІД ЛІНІЄЮ)
-           ========================================== */
-        .bottom-schemes {
-            width: 100vw;
-            height: var(--schemes-height);
-            /* Беремо фото, ставимо його по нижньому краю. */
-            background: url('1000015397.jpg') no-repeat bottom center;
-            background-size: 100vw auto;
-            flex-shrink: 0;
-            margin-bottom: 80px; /* Місце під кнопку */
-            z-index: 5;
+        .content-area {
+            flex-grow: 1;
+            /* Відступи захищають морду бика і схеми від тексту */
+            padding: 10px 20px 80px 20px;
+            position: relative;
+            z-index: 10;
         }
 
-        /* КНОПКА */
+        /* КНОПКА ВИХОДУ */
         .fixed-btn-container {
             position: fixed;
             bottom: 25px; left: 0; width: 100%;
             display: flex; justify-content: center; z-index: 100;
         }
+
         .btn-disconnect {
             background: rgba(0, 0, 0, 0.9);
             border: 2px solid #bc13fe; color: #bc13fe;
@@ -102,26 +63,25 @@
             box-shadow: 0 0 15px #bc13fe; cursor: pointer;
             backdrop-filter: blur(5px); border-radius: 4px;
         }
+
         .sys-text { color: #05d9e8; font-weight: bold; margin-bottom: 15px; display: block; }
     </style>
 </head>
 <body>
 
     <div class="main-container">
-        <div class="top-bull"></div>
-        
-        <div class="middle-rubber">
-            <span class="sys-text">>> SYSTEM_MODE: FLAWLESS_CUT</span>
+        <div class="content-area">
+            <span class="sys-text">>> SYSTEM_MODE: ORIGINAL_PHOTO_RUBBER</span>
             
-            <p>1. Жодних фейкових рамок. Тягнеться тільки твоя оригінальна фотографія.</p>
-            <p>2. Жодних дублікатів бика знизу. Код border-width: 0 назавжди вбив "другого бика".</p>
-            <p>3. Текст 100% заблокований у своїй зоні і не лізе на картинки.</p>
+            <p>1. Тягнеться тільки твоє оригінальне фото.</p>
+            <p>2. Жодних фейкових рамок чи CSS-градієнтів.</p>
+            <p>3. Штрих-кодів більше немає, бо ми тягнемо чисте місце на фотці.</p>
             
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-            <p>Схеми знизу намертво зафіксовані.</p>
+            <br><br><br><br><br><br><br><br><br><br><br><br>
+            <p>Текст чітко у своїй зоні.</p>
+            <p>А схеми надійно чекають тебе в самому низу.</p>
+            <br><br><br><br><br><br><br><br><br><br>
         </div>
-
-        <div class="bottom-schemes"></div>
     </div>
 
     <div class="fixed-btn-container">
