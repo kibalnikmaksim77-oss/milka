@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Bot Seamless</title>
+    <title>Milka Cyber Seamless Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -13,8 +13,11 @@
         }
 
         body {
-            /* ОСЬ ТУТ ГУМКА: градієнт, що зливається з твоєю картинкою */
-            background: linear-gradient(180deg, #1d0a3d 0%, #0d1233 50%, #150a2e 100%);
+            /* ГОЛОВНЕ ВИПРАВЛЕННЯ: 
+               Ми робимо горизонтальний градієнт, який імітує краї твого фото.
+               Фіолетовий зліва (#320b4a), чорний центр, синій справа (#032d42).
+               Це і є твоя "нескінченна гумка". */
+            background: #000 linear-gradient(90deg, #320b4a 0%, #000 15%, #000 85%, #032d42 100%);
             background-attachment: fixed;
             color: #fff;
             font-family: 'Courier New', monospace;
@@ -29,10 +32,9 @@
             width: 100vw;
         }
 
-        /* 1. ВЕРХ: БИК ТА ЛОГО (оригінал, не тягнеться) */
+        /* 1. ВЕРХ: БИК ТА ЛОГО (Оригінальний розмір, без деформації) */
         .header-bull {
             width: 100%;
-            /* Пропорція верху картинки до лінії гумки */
             aspect-ratio: 1000 / 1150; 
             background: url('1000015397.jpg') no-repeat top center;
             background-size: 100% auto;
@@ -40,24 +42,24 @@
             z-index: 1;
         }
 
-        /* 2. ЦЕНТР: ТЕКСТ (тут працює гумка фону) */
+        /* 2. ЦЕНТР: ТЕКСТ (Тут працює гумка) */
         .content-rubber {
-            flex-grow: 1; /* Розтягує фон, якщо тексту багато */
+            flex-grow: 1;
             padding: 20px;
             position: relative;
             z-index: 2;
-            /* Текст автоматично починається ПІД биком */
+            /* Текст плавно витікає з-під бика */
         }
 
-        /* 3. НИЗ: СХЕМИ (тільки те, що нижче твоєї оранжевої лінії) */
+        /* 3. НИЗ: СХЕМИ (Точно під оранжевою лінією, оригінальний розмір) */
         .footer-schemes {
             width: 100%;
-            /* Точний оригінальний розмір схем знизу */
             aspect-ratio: 1000 / 530; 
             background: url('1000015397.jpg') no-repeat bottom center;
             background-size: 100% auto;
             flex-shrink: 0;
-            margin-bottom: 80px; /* Місце для кнопки */
+            margin-bottom: 80px; 
+            z-index: 1;
         }
 
         /* Кнопка DISCONNECT */
@@ -72,7 +74,7 @@
         }
 
         .btn-disconnect {
-            background: rgba(10, 5, 30, 0.85);
+            background: rgba(0, 0, 0, 0.85);
             border: 2px solid #bc13fe;
             color: #bc13fe;
             padding: 12px 45px;
@@ -80,7 +82,7 @@
             text-transform: uppercase;
             box-shadow: 0 0 20px rgba(188, 19, 254, 0.6);
             cursor: pointer;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             border-radius: 4px;
         }
 
@@ -99,13 +101,13 @@
         <div class="header-bull"></div>
 
         <div class="content-rubber">
-            <span class="status-line">>> SYSTEM_CHECK: STABLE</span>
+            <span class="status-line">>> SYSTEM_CHECK: STABLE_V2</span>
             
-            <p>Тут твій текст. Він розсовує верх і низ.</p>
-            <p>Тепер фонова "гумка" підлаштовується під довжину тексту без чорних розривів.</p>
+            <p>Тут твій довгий текст.</p>
+            <p>Завдяки горизонтальному градієнту, неонові боки тепер тягнуться безкінечно.</p>
             
-            <br><br><br><br><br><br><br><br><br><br>
-            <p>Схеми знизу завжди будуть в кінці інформації, як в оригіналі.</p>
+            <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <p>Схеми нижче завжди будуть в кінці інформації.</p>
             <br><br><br><br><br><br><br><br><br><br>
         </div>
 
