@@ -4,13 +4,11 @@ tg.expand();
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 
-// Перевірка: якщо Максим — показуємо Milka Bot, інакше — текст про розробку
 if (access === 'admin_king') {
     document.getElementById('admin-view').classList.remove('hidden');
     document.getElementById('user-view').classList.add('hidden');
 }
 
-// ФУНКЦІЯ МЕНЮ (Тепер точно працює)
 function toggleMenu() {
     const menu = document.getElementById('side-menu');
     menu.classList.toggle('active');
@@ -18,7 +16,6 @@ function toggleMenu() {
 
 function closeApp() { tg.close(); }
 
-// ЧАТ
 function openChat() {
     toggleMenu();
     document.getElementById('chat-modal').classList.remove('hidden');
@@ -40,11 +37,11 @@ function sendMessage() {
     setTimeout(() => {
         if (text.toLowerCase() === 'кабінет') {
             appendMsg('bot', '✅ Доступ підтверджено. Інтерфейс власника активовано.');
-            // Тут буде логіка появи кнопок керування
+            // Тут скоро будемо писати логіку перебудови кабінету!
         } else {
             appendMsg('bot', '❌ Невідома команда.');
         }
-    }, 500);
+    }, 600); // Зробив затримку трохи довшою (600мс) для реалістичності
 }
 
 function appendMsg(sender, text) {
