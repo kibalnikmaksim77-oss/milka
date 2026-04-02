@@ -1,121 +1,140 @@
 body {
-    margin: 0; padding: 0; background-color: #050505; /* Глибокий чорний */
+    margin: 0; padding: 0; background-color: #050505; /* Глибокий чорний фон */
     color: #fff; font-family: 'Segoe UI', sans-serif;
     overflow: hidden; width: 100vw; height: 100vh;
 }
 
 /* =========================================
-   АГРЕСИВНА ЗАГРУЗКА (ЗБІРКА БИКА)
+   КРАСИВА ЗАГРУЗКА (БЕЗ БАГІВ ТА ЦИФР)
 ========================================= */
 #loading-screen {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: #020202; z-index: 9999; 
     display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.6s ease-out; /* Плавне згасання */
 }
 
-/* Імітація павутини/нейромережі на фоні */
+/* Фон нейромережі */
 .cyber-network-bg {
     position: absolute; width: 100%; height: 100%;
     background-image: 
-        linear-gradient(rgba(188, 19, 254, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(188, 19, 254, 0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
-    z-index: 1;
+        radial-gradient(circle at center, transparent 0%, #020202 100%),
+        linear-gradient(rgba(188, 19, 254, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(188, 19, 254, 0.1) 1px, transparent 1px);
+    background-size: 100% 100%, 30px 30px, 30px 30px;
+    opacity: 0.7; z-index: 1;
 }
 
 .bull-assembly-container {
-    position: relative; width: 140px; height: 140px; z-index: 5;
+    position: relative; width: 160px; height: 160px; z-index: 5;
 }
 
-/* Базове зображення бика (потрібно щоб файл assets/boot_logo.jpg був у папці) */
+/* БИКУ ПОТРІБНЕ ФОТО: переконайся, що шлях вірний */
 .bull-wireframe, .bull-neon {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background-image: url('assets/boot_logo.jpg'); /* Твій логотип */
+    background-image: url('assets/boot_logo.jpg'); 
     background-size: contain; background-position: center; background-repeat: no-repeat;
 }
 
 /* Тьмяний каркас */
 .bull-wireframe {
-    filter: grayscale(100%) brightness(0.2) drop-shadow(0 0 2px rgba(255,255,255,0.2));
+    filter: grayscale(100%) brightness(0.2);
 }
 
-/* Яскравий неон (Анімація появи зверху вниз) */
+/* Неоновий бик (з'являється під лазером) */
 .bull-neon {
-    filter: grayscale(0%) brightness(1.2) drop-shadow(0 0 15px #bc13fe);
-    /* inset(top right bottom left) - ховаємо нижню частину, відкриваємо зверху */
-    animation: assembleBull 3s ease-in-out forwards;
+    filter: grayscale(0%) brightness(1.3) drop-shadow(0 0 15px #bc13fe);
+    /* clip-path ховає нижню частину, відкриваючи її поступово */
+    clip-path: inset(100% 0 0 0);
+    animation: revealBull 3s linear forwards;
 }
 
-/* Бірюзовий сканер */
+/* Синій сканер (як на твоєму відео) */
 .scanner-laser {
-    position: absolute; left: -20%; width: 140%; height: 4px;
-    background: #00ffff; box-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff;
-    border-radius: 50%;
-    animation: scanDown 3s ease-in-out forwards;
+    position: absolute; left: -10%; width: 120%; height: 3px;
+    background: #00e5ff; box-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff;
+    top: 0;
+    animation: scanDown 3s linear forwards;
 }
 
-@keyframes assembleBull {
-    0% { clip-path: inset(100% 0 0 0); } /* Повністю схований */
-    100% { clip-path: inset(0 0 0 0); }  /* Повністю відкритий (зібраний) */
+/* Анімації завантаження (рівно 3 секунди) */
+@keyframes revealBull {
+    0% { clip-path: inset(100% 0 0 0); }
+    100% { clip-path: inset(0 0 0 0); }
 }
 
 @keyframes scanDown {
     0% { top: 0%; opacity: 0; }
-    10% { opacity: 1; }
-    90% { top: 100%; opacity: 1; }
-    100% { top: 100%; opacity: 0; box-shadow: 0 0 50px #bc13fe; } /* Спалах в кінці */
+    5% { opacity: 1; }
+    95% { top: 100%; opacity: 1; }
+    100% { top: 100%; opacity: 0; }
 }
 
 /* =========================================
-   ГОЛОВНИЙ ЕКРАН (ТОЧНО ЯК НА 4 ФОТО)
+   ГОЛОВНИЙ ЕКРАН ТА МЕНЮ (ТВІЙ ОРИГІНАЛ)
 ========================================= */
 #app-container {
     width: 100%; height: 100%; display: flex; flex-direction: column;
-    justify-content: flex-end; align-items: center; padding-bottom: 40px; box-sizing: border-box;
+    justify-content: space-between; align-items: center; 
+    padding-top: 25px; padding-bottom: 40px; box-sizing: border-box;
 }
 
-/* Фіолетові риски меню */
-#burger-btn { position: absolute; top: 25px; left: 20px; cursor: pointer; z-index: 50; padding: 10px; }
+/* Бургер-меню */
+#burger-btn { position: absolute; top: 25px; left: 25px; cursor: pointer; z-index: 50; }
 #burger-btn span {
-    display: block; width: 25px; height: 3px; background: #bc13fe; margin: 5px 0;
-    box-shadow: 0 0 8px #bc13fe; border-radius: 2px;
+    display: block; width: 28px; height: 3px; background: #bc13fe; margin: 6px 0;
+    box-shadow: 0 0 10px #bc13fe; border-radius: 2px;
 }
 
 /* Кнопка КІБЕРГ-СОН */
 #exit-btn {
-    background: #050505; border: 1.5px solid #bc13fe; color: #fff; 
+    background: #050505; border: 2px solid #bc13fe; color: #fff; 
     padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 14px;
-    box-shadow: 0 0 15px rgba(188, 19, 254, 0.4); letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.3); margin-top: auto;
 }
 
-/* =========================================
-   ТВОЄ ОРИГІНАЛЬНЕ МЕНЮ ТА ЧАТ
-========================================= */
+/* Виїзне меню */
 #side-menu {
-    position: fixed; top: 0; left: 0; width: 65%; max-width: 260px; height: 100%; 
-    background: #0a0a0a; border-right: 1px solid #bc13fe; z-index: 100; 
-    transition: 0.3s ease; transform: translateX(-100%);
+    position: fixed; top: 0; left: 0; width: 65%; max-width: 280px; height: 100%; 
+    background: #0d0d0d; border-right: 2px solid #bc13fe; z-index: 100; 
+    transition: transform 0.3s ease; transform: translateX(-100%);
+    box-shadow: 10px 0 20px rgba(0,0,0,0.8);
 }
 #side-menu.active { transform: translateX(0); }
 
-.menu-header { padding: 20px 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; color: #bc13fe; font-weight: bold; }
-.menu-content { padding: 15px; }
-.dev-text { color: #555; font-size: 13px; text-align: center; margin-top: 30px; border-bottom: 1px solid #222; padding-bottom: 20px;}
-.secret-btn { border-color: #bc13fe; color: #e0b0ff; text-shadow: 0 0 5px #bc13fe; background: transparent;}
-.menu-item { width: 100%; padding: 12px; background: #111; border: 1px solid #bc13fe; color: #bc13fe; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px;}
+.menu-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(188, 19, 254, 0.2); }
+.menu-title { color: #bc13fe; font-weight: bold; font-size: 16px; text-shadow: 0 0 5px #bc13fe; }
+.close-btn { background: none; border: none; color: #ff3333; font-size: 20px; font-weight: bold; text-shadow: 0 0 8px #ff3333; cursor: pointer; }
 
+.menu-content { padding: 20px; }
+.dev-text { color: #666; font-size: 13px; text-align: left; line-height: 1.5; }
+.divider { height: 1px; background: rgba(188, 19, 254, 0.2); margin: 20px 0; }
+
+.secret-btn {
+    width: 100%; background: transparent; border: 1px solid #bc13fe; 
+    color: #e0b0ff; padding: 12px; border-radius: 8px; font-weight: bold; 
+    text-shadow: 0 0 5px #bc13fe; box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+    cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
+}
+
+/* =========================================
+   ЧАТ (ТВІЙ ОРИГІНАЛ)
+========================================= */
 #chat-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 200; display: flex; flex-direction: column; }
-.chat-header { padding: 15px 20px; background: #0a0a0a; border-bottom: 1px solid #bc13fe; display: flex; justify-content: space-between; align-items: center; }
-.neon-title { font-weight: bold; color: #fff; text-shadow: 0 0 8px #bc13fe; }
-.neon-bot { font-size: 18px; }
-#chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.chat-header { padding: 15px 20px; background: #0a0a0a; border-bottom: 1px solid #bc13fe; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(188, 19, 254, 0.2); }
+.neon-title { font-weight: bold; color: #fff; text-shadow: 0 0 8px #bc13fe; display: flex; align-items: center; gap: 8px; }
+.neon-bot { filter: drop-shadow(0 0 5px #00ffff); }
+
+#chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+
+/* Бульбашки повідомлень */
 .msg { padding: 12px 16px; border-radius: 12px; max-width: 80%; font-size: 14px; line-height: 1.4; border: 1px solid transparent; }
 .msg.bot { background: transparent; border-color: #bc13fe; color: #e0b0ff; align-self: flex-start; }
-.msg.user { background: #bc13fe; color: #fff; align-self: flex-end; box-shadow: 0 0 12px #bc13fe; border-color: #bc13fe;}
-.chat-input-area { padding: 15px; display: flex; gap: 10px; background: #0a0a0a; border-top: 1px solid #bc13fe; }
+.msg.user { background: #bc13fe; color: #fff; border-color: #bc13fe; align-self: flex-end; box-shadow: 0 0 10px #bc13fe; }
+
+.chat-input-area { padding: 15px; display: flex; gap: 10px; background: #0a0a0a; border-top: 1px solid rgba(188, 19, 254, 0.3); }
 #chat-input { flex-grow: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #333; background: #111; color: #fff; outline: none; }
-.send-btn { background: #bc13fe; border: none; width: 45px; height: 45px; border-radius: 50%; color: #fff; cursor: pointer; }
-.close-btn { background: none; border: none; color: #ff3333; font-size: 20px; font-weight: bold; cursor: pointer; text-shadow: 0 0 8px #ff3333;}
+#chat-input:focus { border-color: #bc13fe; }
+.send-btn { background: #bc13fe; border: none; width: 45px; height: 45px; border-radius: 50%; color: #fff; cursor: pointer; box-shadow: 0 0 8px #bc13fe; display: flex; justify-content: center; align-items: center; }
 .hidden { display: none !important; }
     
