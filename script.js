@@ -1,10 +1,10 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
+tg.hideHeader(); 
 
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 
-// Логіка доступу
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     const userSection = document.getElementById('user-view');
@@ -12,29 +12,40 @@ if (access === 'admin_king') {
     if (userSection) userSection.classList.add('hidden');
 }
 
-// --- ІДЕАЛЬНА ЗАГРУЗКА БЕЗ БАГІВ ---
-window.addEventListener('load', () => {
-    const loader = document.getElementById('loading-screen');
-    const app = document.getElementById('app-container');
-    
-    // Ховаємо верхню панель Telegram
-    tg.hideHeader();
+// --- ЛОГІКА ВІДЕО-ЗАГРУЗКИ ---
+const introVideo = document.getElementById('intro-video');
+const appContainer = document.getElementById('app-container');
+const logoPatch = document.getElementById('logo-patch');
 
-    // CSS анімація збірки бика і лазера триває 3000 мс (3 сек).
-    // Ставимо таймаут на 3.1 сек, щоб плавно приховати лоадер.
-    setTimeout(() => {
-        loader.style.opacity = '0'; // Запускаємо затухання
-        
-        setTimeout(() => {
-            loader.style.display = 'none'; // Видаляємо блок
-            app.classList.remove('hidden'); // Показуємо чорний екран і меню
-            tg.showHeader(); // Повертаємо панель Telegram
-        }, 600); // Чекаємо поки прозорість стане 0
-        
-    }, 3100); 
-});
+// Прискорення відео (1.5 = на 50% швидше)
+introVideo.playbackRate = 1.5;
 
-// --- ТВОЄ ОРИГІНАЛЬНЕ МЕНЮ ---
+// Перехід рівно по закінченню відео
+introVideo.onended = () => {
+    introVideo.style.display = 'none';
+    if (logoPatch) logoPatch.style.display = 'none'; // Ховаємо латку теж
+    appContainer.classList.remove('hidden');
+    tg.showHeader();
+};
+
+// Захист від помилок завантаження
+introVideo.onerror = () => {
+    introVideo.style.display = 'none';
+    if (logoPatch) logoPatch.style.display = 'none';
+    appContainer.classList.remove('hidden');
+    tg.showHeader();
+};
+
+// Запасний варіант, якщо відео зависне (через 5 сек)
+setTimeout(() => {
+    if (!appContainer.classList.contains('hidden')) return;
+    introVideo.style.display = 'none';
+    if (logoPatch) logoPatch.style.display = 'none';
+    appContainer.classList.remove('hidden');
+    tg.showHeader();
+}, 5000);
+
+// --- ЛОГІКА ІНТЕРФЕЙСУ ---
 function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
 function closeApp() { tg.close(); }
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
@@ -45,13 +56,12 @@ function openChat() {
     loadChatHistory();
 }
 
-// --- ЧАТ (Зберігаємо перше повідомлення) ---
+// --- ЧАТ ---
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
     let history = JSON.parse(localStorage.getItem('milka_chat')) || [];
     
-    // Якщо чат пустий, бот пише першим (як в оригіналі)
     if (history.length === 0) {
         appendMsgDOM('bot', 'Система активна. Чекаю на команду, Максиме.');
     } else {
@@ -70,7 +80,6 @@ function appendMsgDOM(sender, text) {
     const div = document.createElement('div');
     div.classList.add('msg', sender);
     
-    // Якщо це системне повідомлення з галочкою
     if (text.includes('Доступ підтверджено')) {
         div.innerHTML = '✅ ' + text.replace('✅ ', '');
     } else {
@@ -86,7 +95,6 @@ function appendMsg(sender, text) {
     saveMsgToHistory(sender, text);
 }
 
-// Відправка
 function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
