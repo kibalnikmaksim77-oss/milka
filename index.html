@@ -3,26 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Milka App</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div id="loading-screen">
-        <div class="cyber-network-bg"></div>
-        
-        <div class="bull-assembly-container">
-            <div class="bull-wireframe"></div>
-            <div class="bull-neon"></div>
-            <div class="scanner-laser"></div>
-        </div>
-    </div>
+    <video id="intro-video" src="33ee3aaa-dd80-43e5-b435-f07bb9c6f236.mp4" autoplay muted playsinline></video>
+    
+    <div id="logo-patch"></div>
 
     <div id="app-container" class="hidden">
         <div id="burger-btn" onclick="toggleMenu()">
             <span></span><span></span><span></span>
         </div>
-
         <button id="exit-btn" onclick="closeApp()">КІБЕРГ-СОН 💤</button>
     </div>
 
