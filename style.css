@@ -4,25 +4,6 @@ body {
     overflow: hidden; width: 100vw; height: 100vh;
 }
 
-/* --- ВІДЕО ЗАГРУЗКА --- */
-#intro-video {
-    position: fixed; top: 0; left: 0; 
-    width: 100vw; height: 100vh; 
-    object-fit: cover; 
-    z-index: 9998; background: #000;
-}
-
-/* --- ЗАКРАСКА ЛОГОТИПУ VEO --- */
-#logo-patch {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 70px;  /* Ширина латки */
-    height: 50px; /* Висота латки */
-    background-color: #000; /* Ідеально чорний колір */
-    z-index: 9999; /* Поверх відео */
-}
-
 /* --- ГОЛОВНИЙ ЕКРАН --- */
 #app-container {
     width: 100%; height: 100%; display: flex; flex-direction: column;
