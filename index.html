@@ -13,6 +13,17 @@
             <span></span><span></span><span></span>
         </div>
 
+        <div id="settings-btn" class="hidden" onclick="toggleSettings()">⋮</div>
+
+        <div id="settings-menu" class="hidden">
+            <button class="settings-item" onclick="triggerBgUpload()">🖼 Встановити фон</button>
+            <button class="settings-item" onclick="resetBackground()">🗑 Скинути фон</button>
+            <input type="file" id="bg-upload" accept="image/*" class="hidden" onchange="changeBackground(event)">
+        </div>
+
+        <div id="user-commands-safe-zone">
+            </div>
+
         <button id="exit-btn" onclick="closeApp()">КІБЕРГ-СОН 💤</button>
     </div>
 
