@@ -1,61 +1,87 @@
-body {
-    margin: 0; padding: 0; background-color: #050505;
-    color: #fff; font-family: 'Segoe UI', sans-serif;
-    overflow: hidden; width: 100vw; height: 100vh;
+const tg = window.Telegram.WebApp;
+tg.expand();
+tg.showHeader(); // Відразу показуємо шапку Telegram
+
+const urlParams = new URLSearchParams(window.location.search);
+const access = urlParams.get('access');
+
+if (access === 'admin_king') {
+    const adminSection = document.getElementById('admin-view');
+    const userSection = document.getElementById('user-view');
+    if (adminSection) adminSection.classList.remove('hidden');
+    if (userSection) userSection.classList.add('hidden');
 }
 
-/* --- ГОЛОВНИЙ ЕКРАН --- */
-#app-container {
-    width: 100%; height: 100%; display: flex; flex-direction: column;
-    justify-content: space-between; align-items: center; 
-    padding-top: 25px; padding-bottom: 40px; box-sizing: border-box;
+// --- ЛОГІКА ІНТЕРФЕЙСУ ---
+function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
+function closeApp() { tg.close(); }
+function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
+
+function openChat() {
+    toggleMenu(); 
+    document.getElementById('chat-modal').classList.remove('hidden');
+    loadChatHistory();
 }
 
-#burger-btn { position: absolute; top: 25px; left: 25px; cursor: pointer; z-index: 50; }
-#burger-btn span {
-    display: block; width: 28px; height: 3px; background: #bc13fe; margin: 6px 0;
-    box-shadow: 0 0 10px #bc13fe; border-radius: 2px;
+// --- ЧАТ ---
+function loadChatHistory() {
+    const box = document.getElementById('chat-messages');
+    box.innerHTML = ''; 
+    let history = JSON.parse(localStorage.getItem('milka_chat')) || [];
+    
+    if (history.length === 0) {
+        appendMsgDOM('bot', 'Система активна. Чекаю на команду, Максиме.');
+    } else {
+        history.forEach(item => appendMsgDOM(item.sender, item.text));
+    }
 }
 
-#exit-btn {
-    background: #050505; border: 2px solid #bc13fe; color: #fff; 
-    padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 14px;
-    box-shadow: 0 0 10px rgba(188, 19, 254, 0.3); margin-top: auto;
+function saveMsgToHistory(sender, text) {
+    let history = JSON.parse(localStorage.getItem('milka_chat')) || [];
+    history.push({ sender: sender, text: text });
+    localStorage.setItem('milka_chat', JSON.stringify(history));
 }
 
-/* --- МЕНЮ ТА ЧАТ --- */
-#side-menu {
-    position: fixed; top: 0; left: 0; width: 65%; max-width: 280px; height: 100%; 
-    background: #0a0a0a; border-right: 2px solid #bc13fe; z-index: 100; 
-    transition: transform 0.3s ease; transform: translateX(-100%);
-}
-#side-menu.active { transform: translateX(0); }
-
-.menu-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(188, 19, 254, 0.2); }
-.menu-title { color: #bc13fe; font-weight: bold; font-size: 16px; text-shadow: 0 0 5px #bc13fe; }
-.close-btn { background: none; border: none; color: #ff3333; font-size: 20px; font-weight: bold; text-shadow: 0 0 8px #ff3333; cursor: pointer; }
-
-.menu-content { padding: 20px; }
-.dev-text { color: #666; font-size: 13px; text-align: left; line-height: 1.5; }
-.divider { height: 1px; background: rgba(188, 19, 254, 0.2); margin: 20px 0; }
-
-.secret-btn {
-    width: 100%; background: transparent; border: 1px solid #bc13fe; 
-    color: #e0b0ff; padding: 12px; border-radius: 8px; font-weight: bold; 
-    text-shadow: 0 0 5px #bc13fe; cursor: pointer; display: block; text-align: center;
+function appendMsgDOM(sender, text) {
+    const box = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.classList.add('msg', sender);
+    
+    if (text.includes('Доступ підтверджено')) {
+        div.innerHTML = '✅ ' + text.replace('✅ ', '');
+    } else {
+        div.innerText = text;
+    }
+    
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
 }
 
-#chat-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 200; display: flex; flex-direction: column; }
-.chat-header { padding: 15px 20px; background: #0a0a0a; border-bottom: 1px solid #bc13fe; display: flex; justify-content: space-between; align-items: center; }
-.neon-title { font-weight: bold; color: #fff; text-shadow: 0 0 8px #bc13fe; }
+function appendMsg(sender, text) {
+    appendMsgDOM(sender, text);
+    saveMsgToHistory(sender, text);
+}
 
-#chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-.msg { padding: 12px 16px; border-radius: 12px; max-width: 80%; font-size: 14px; line-height: 1.4; }
-.msg.bot { background: transparent; border: 1px solid #bc13fe; color: #e0b0ff; align-self: flex-start; }
-.msg.user { background: #bc13fe; color: #fff; border: 1px solid #bc13fe; align-self: flex-end; box-shadow: 0 0 10px #bc13fe; }
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
 
-.chat-input-area { padding: 15px; display: flex; gap: 10px; background: #0a0a0a; border-top: 1px solid rgba(188, 19, 254, 0.3); }
-#chat-input { flex-grow: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #333; background: #111; color: #fff; outline: none; }
-#chat-input:focus { border-color: #bc13fe; }
-.send-btn { background: #bc13fe; border: none; width: 45px; height: 45px; border-radius: 50%; color: #fff; cursor: pointer; box-shadow: 0 0 8px #bc13fe; }
-.hidden { display: none !important; }
+    appendMsg('user', text);
+    input.value = '';
+
+    setTimeout(() => {
+        if (text.toLowerCase() === 'кабінет') {
+            appendMsg('bot', '✅ Доступ підтверджено. Інтерфейс власника активовано.');
+            localStorage.setItem('cabinet_active', 'true');
+        } else if (text.toLowerCase() === 'очистити') {
+            localStorage.removeItem('milka_chat');
+            localStorage.removeItem('cabinet_active');
+            document.getElementById('chat-messages').innerHTML = '';
+            appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.');
+        } else {
+            appendMsg('bot', '❌ Команду не розпізнано.');
+        }
+    }, 600);
+                     }
+    
