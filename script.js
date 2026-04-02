@@ -4,7 +4,7 @@ tg.expand();
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 
-// Логіка доступу (Юзер або Адмін)
+// Логіка доступу
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     const userSection = document.getElementById('user-view');
@@ -12,29 +12,29 @@ if (access === 'admin_king') {
     if (userSection) userSection.classList.add('hidden');
 }
 
-// --- ЛОГІКА ХАКЕРСЬКОГО ЗАВАНТАЖЕННЯ (БЕЗ ЦИФР, ТІЛЬКИ АНІМАЦІЯ) ---
-// Використовуємо window.onload, щоб дочекатися підгрузки фотографії бика
+// --- ІДЕАЛЬНА ЗАГРУЗКА БЕЗ БАГІВ ---
 window.addEventListener('load', () => {
     const loader = document.getElementById('loading-screen');
     const app = document.getElementById('app-container');
     
+    // Ховаємо верхню панель Telegram
     tg.hideHeader();
 
-    // Анімація в CSS триває рівно 3 секунди (3000 мс). 
-    // Даємо ще 200 мс на фінальний спалах, і ховаємо лоадер.
+    // CSS анімація збірки бика і лазера триває 3000 мс (3 сек).
+    // Ставимо таймаут на 3.1 сек, щоб плавно приховати лоадер.
     setTimeout(() => {
-        loader.style.opacity = '0'; // Плавно гасне
+        loader.style.opacity = '0'; // Запускаємо затухання
         
         setTimeout(() => {
-            loader.style.display = 'none'; // Видаляємо лоадер
-            app.classList.remove('hidden'); // Показуємо чорний екран з меню
-            tg.showHeader(); // Повертаємо шапку Telegram
-        }, 500); // Час на затухання
+            loader.style.display = 'none'; // Видаляємо блок
+            app.classList.remove('hidden'); // Показуємо чорний екран і меню
+            tg.showHeader(); // Повертаємо панель Telegram
+        }, 600); // Чекаємо поки прозорість стане 0
         
-    }, 3200); 
+    }, 3100); 
 });
 
-// --- ТВОЯ ОРИГІНАЛЬНА ЛОГІКА ІНТЕРФЕЙСУ ---
+// --- ТВОЄ ОРИГІНАЛЬНЕ МЕНЮ ---
 function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
 function closeApp() { tg.close(); }
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
@@ -45,11 +45,13 @@ function openChat() {
     loadChatHistory();
 }
 
-// Історія чату
+// --- ЧАТ (Зберігаємо перше повідомлення) ---
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
     let history = JSON.parse(localStorage.getItem('milka_chat')) || [];
+    
+    // Якщо чат пустий, бот пише першим (як в оригіналі)
     if (history.length === 0) {
         appendMsgDOM('bot', 'Система активна. Чекаю на команду, Максиме.');
     } else {
@@ -67,7 +69,14 @@ function appendMsgDOM(sender, text) {
     const box = document.getElementById('chat-messages');
     const div = document.createElement('div');
     div.classList.add('msg', sender);
-    div.innerText = text;
+    
+    // Якщо це системне повідомлення з галочкою
+    if (text.includes('Доступ підтверджено')) {
+        div.innerHTML = '✅ ' + text.replace('✅ ', '');
+    } else {
+        div.innerText = text;
+    }
+    
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
@@ -77,7 +86,7 @@ function appendMsg(sender, text) {
     saveMsgToHistory(sender, text);
 }
 
-// Відправка повідомлень
+// Відправка
 function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
@@ -94,7 +103,7 @@ function sendMessage() {
             localStorage.removeItem('milka_chat');
             localStorage.removeItem('cabinet_active');
             document.getElementById('chat-messages').innerHTML = '';
-            appendMsg('bot', '🧹 Пам\'ять терміналу очищено.');
+            appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.');
         } else {
             appendMsg('bot', '❌ Команду не розпізнано.');
         }
