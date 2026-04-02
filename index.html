@@ -13,38 +13,34 @@
             <span></span><span></span><span></span>
         </div>
 
-        <div id="main-content">
-            </div>
-
         <button id="exit-btn" onclick="closeApp()">КІБЕРГ-СОН 💤</button>
     </div>
 
-    <div id="side-menu" class="hidden">
+    <div id="side-menu">
         <div class="menu-header">
-            <h2 style="margin: 0; color: #fff;">МЕНЮ</h2>
+            <span>МЕНЮ</span>
             <button onclick="toggleMenu()" class="close-btn">❌</button>
         </div>
         
-        <button class="menu-item">ℹ️ Інформація</button>
-        <button class="menu-item">🌐 Наш канал</button>
+        <div class="menu-content">
+            <div id="user-view" class="view-section">
+                <p class="dev-text">Система в стадії розробки. Зайдіть пізніше для активації кібер-функцій.</p>
+            </div>
 
-        <div id="admin-zone" class="hidden">
-            <div class="divider"></div>
-            <button class="menu-item secret-btn" onclick="openChat()">⚡ Milka Bot</button>
+            <div id="admin-view" class="view-section hidden">
+                <button class="menu-item secret-btn" onclick="openChat()">⚡ Milka Bot</button>
+            </div>
         </div>
     </div>
 
     <div id="chat-modal" class="hidden">
         <div class="chat-header">
-            <span>🤖 Milka System Bot</span>
+            <span>🤖 Milka System</span>
             <button onclick="closeChat()" class="close-btn">❌</button>
         </div>
-        
-        <div id="chat-messages">
-            </div>
-        
+        <div id="chat-messages"></div>
         <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Команда системі...">
+            <input type="text" id="chat-input" placeholder="Команда...">
             <button onclick="sendMessage()" class="send-btn">➤</button>
         </div>
     </div>
