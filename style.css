@@ -4,84 +4,108 @@ body {
     overflow: hidden; width: 100vw; height: 100vh;
 }
 
+/* =========================================
+   Анімований екран завантаження
+========================================= */
+#loading-screen {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #050505; z-index: 9999; 
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.6s ease; overflow: hidden;
+}
+
+/* Імітація нейромережі (крапки на фоні) */
+.neural-net-bg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: radial-gradient(rgba(188, 19, 254, 0.15) 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0.5; z-index: 1;
+}
+
+/* Лінія сканера */
+.scanner-line {
+    position: absolute; top: -50px; left: 0; width: 100%; height: 30px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 255, 255, 0.4), transparent);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    z-index: 3; animation: scanDown 2.5s infinite linear;
+}
+
+@keyframes scanDown {
+    0% { top: -50px; }
+    100% { top: 120%; }
+}
+
+.loader-content {
+    position: relative; z-index: 5; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+
+/* Бик (спочатку тьмяний каркас) */
+#cyber-bull-logo {
+    width: 80px; height: 80px;
+    background-image: url('assets/boot_logo.jpg'); /* Твоє фото */
+    background-size: cover; background-position: center;
+    border-radius: 50%;
+    /* Тьмяний ефект wireframe */
+    filter: grayscale(100%) brightness(0.4);
+    box-shadow: none;
+    transition: all 0.5s ease;
+}
+
+/* Бик (зібраний, 100%) */
+#cyber-bull-logo.fully-loaded {
+    filter: grayscale(0%) brightness(1.2);
+    box-shadow: 0 0 20px #bc13fe, 0 0 40px rgba(188, 19, 254, 0.6);
+    border: 2px solid #bc13fe;
+}
+
+.loading-text {
+    font-family: monospace; color: #00ffff; font-size: 14px;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.8); letter-spacing: 2px;
+}
+
+/* =========================================
+   Твій оригінальний інтерфейс
+========================================= */
 #app-container {
-    width: 100%; height: 100%;
-    display: flex; flex-direction: column;
-    justify-content: flex-end; align-items: center;
-    padding-bottom: 25px; box-sizing: border-box;
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    justify-content: flex-end; align-items: center; padding-bottom: 30px; box-sizing: border-box;
 }
-
-#burger-btn {
-    position: absolute; top: 20px; left: 20px;
-    cursor: pointer; z-index: 50; padding: 5px;
-}
+#burger-btn { position: absolute; top: 25px; left: 25px; cursor: pointer; z-index: 50; padding: 10px; }
 #burger-btn span {
-    display: block; width: 24px; height: 2px;
-    background: #bc13fe; margin: 5px 0;
-    box-shadow: 0 0 10px #bc13fe;
+    display: block; width: 28px; height: 3px; background: #bc13fe; margin: 6px 0;
+    box-shadow: 0 0 10px #bc13fe; border-radius: 2px;
 }
-
-/* 1. ЗМЕНШЕНА КНОПКА */
 #exit-btn {
-    background: transparent; border: 1.5px solid #bc13fe;
-    color: #fff; padding: 8px 18px; border-radius: 20px;
-    font-weight: bold; font-size: 11px;
-    box-shadow: 0 0 8px rgba(188, 19, 254, 0.4);
-    cursor: pointer;
+    background: transparent; border: 2px solid #bc13fe; color: #fff; padding: 10px 25px; 
+    border-radius: 30px; font-weight: bold; font-size: 13px;
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.4); letter-spacing: 1px;
 }
 
-/* 2. ВУЗЬКЕ МЕНЮ (Чверть екрана) */
 #side-menu {
-    position: fixed; top: 0; left: 0; 
-    width: 170px; height: 100%; /* Вузьке */
-    background: #0f0f0f; border-right: 1px solid #bc13fe;
-    z-index: 100; transition: 0.4s ease;
-    transform: translateX(-100%);
+    position: fixed; top: 0; left: 0; width: 60%; max-width: 250px; height: 100%; 
+    background: rgba(10, 10, 10, 0.98); border-right: 1px solid #bc13fe;
+    box-shadow: 5px 0 15px rgba(188, 19, 254, 0.1); z-index: 100; transition: 0.4s ease; transform: translateX(-100%);
 }
 #side-menu.active { transform: translateX(0); }
+.menu-header { padding: 20px 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; color: #bc13fe; font-weight: bold; font-size: 14px; }
+.menu-content { padding: 15px; }
+.dev-text { color: #888; font-size: 14px; text-align: center; margin-top: 30px; line-height: 1.5; }
+.neon-text-glow { text-shadow: 0 0 5px #bc13fe; color: #bc13fe; font-weight: bold; }
+.secret-btn { border-color: #bc13fe; box-shadow: 0 0 10px rgba(188, 19, 254, 0.3); color: #bc13fe; font-weight: bold; text-shadow: 0 0 10px #bc13fe; }
+.menu-item { width: 100%; padding: 12px; background: #151515; border: 1px solid #bc13fe; color: #bc13fe; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; }
 
-.menu-header {
-    padding: 15px; border-bottom: 1px solid #222;
-    display: flex; justify-content: space-between; align-items: center;
-    color: #bc13fe; font-size: 12px; font-weight: bold;
-}
-.menu-content { padding: 10px; }
-.dev-text { color: #444; font-size: 10px; text-align: center; }
-.menu-item {
-    width: 100%; padding: 10px; background: #151515;
-    border: 1px solid #bc13fe; color: #bc13fe;
-    border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer;
-}
-.divider { height: 1px; background: #222; margin: 15px 0; }
-
-/* 3. НЕОНОВИЙ ЧАТ */
-#chat-modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: #050505; z-index: 200; display: flex; flex-direction: column;
-}
-.chat-header { 
-    padding: 15px 20px; background: #0a0a0a; border-bottom: 2px solid #bc13fe; 
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 5px 15px rgba(188, 19, 254, 0.2);
-}
-.neon-title { text-shadow: 0 0 10px #bc13fe; font-weight: bold; }
-.neon-bot { text-shadow: 0 0 20px #00ffff, 0 0 10px #bc13fe; font-size: 20px; }
-
-#chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-
-.msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; }
-.msg.bot { 
-    background: rgba(188, 19, 254, 0.05); border: 1px solid #bc13fe; 
-    box-shadow: 0 0 8px rgba(188, 19, 254, 0.3); align-self: flex-start; 
-}
-.msg.user { 
-    background: #bc13fe; color: #fff; align-self: flex-end; 
-    box-shadow: 0 0 12px #bc13fe; 
-}
-
-.chat-input-area { padding: 15px; display: flex; gap: 8px; background: #0a0a0a; border-top: 1px solid #222; }
-#chat-input { flex-grow: 1; padding: 10px; border-radius: 20px; border: none; background: #222; color: #fff; outline: none; }
-.send-btn { background: #bc13fe; border: none; width: 40px; height: 40px; border-radius: 50%; color: #fff; box-shadow: 0 0 10px #bc13fe; }
-
+#chat-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 200; display: flex; flex-direction: column; }
+.chat-header { padding: 15px 20px; background: #0a0a0a; border-bottom: 2px solid #bc13fe; box-shadow: 0 0 15px rgba(188, 19, 254, 0.3); display: flex; justify-content: space-between; align-items: center; }
+.neon-title { font-weight: bold; color: #fff; text-shadow: 0 0 8px #bc13fe; font-size: 16px; }
+.neon-bot { text-shadow: 0 0 15px #00ffff, 0 0 20px #bc13fe; font-size: 20px; }
+#chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.msg { padding: 12px 16px; border-radius: 12px; max-width: 80%; font-size: 14px; line-height: 1.4; }
+.msg.bot { background: rgba(188, 19, 254, 0.05); border: 1px solid rgba(188, 19, 254, 0.5); color: #e0b0ff; box-shadow: inset 0 0 10px rgba(188, 19, 254, 0.1); align-self: flex-start; border-bottom-left-radius: 2px; }
+.msg.user { background: #bc13fe; color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 0 12px #bc13fe; }
+.chat-input-area { padding: 15px; display: flex; gap: 10px; background: #0a0a0a; border-top: 1px solid rgba(188, 19, 254, 0.5); }
+#chat-input { flex-grow: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #333; background: #111; color: #fff; outline: none; transition: 0.3s; }
+#chat-input:focus { border-color: #bc13fe; box-shadow: 0 0 8px rgba(188, 19, 254, 0.5); }
+.send-btn { background: #bc13fe; border: none; width: 45px; height: 45px; border-radius: 50%; color: #fff; box-shadow: 0 0 10px #bc13fe; cursor: pointer; }
+.close-btn { background: none; border: none; color: #bc13fe; font-size: 22px; font-weight: bold; cursor: pointer; text-shadow: 0 0 5px #bc13fe; }
 .hidden { display: none !important; }
-.close-btn { background: none; border: none; color: #fff; cursor: pointer; }
