@@ -2,6 +2,12 @@ body {
     margin: 0; padding: 0; background-color: #080808;
     color: #fff; font-family: 'Segoe UI', sans-serif;
     overflow: hidden; width: 100vw; height: 100vh;
+    
+    /* НАЛАШТУВАННЯ ДЛЯ ФОТО З БИКОМ */
+    background-size: cover; 
+    background-position: top center; /* Притискає фото до верху */
+    background-repeat: no-repeat;
+    transition: background-image 0.5s ease;
 }
 
 #app-container {
@@ -9,6 +15,21 @@ body {
     display: flex; flex-direction: column;
     justify-content: flex-end; align-items: center;
     padding-bottom: 25px; box-sizing: border-box;
+    position: relative;
+}
+
+/* --- БЕЗПЕЧНА ЗОНА (ЗАХИСТ БИКА ВІД ПЕРЕКРИТТЯ) --- */
+#user-commands-safe-zone {
+    position: absolute;
+    top: 50%; /* Починається рівно під копитами бика */
+    width: 90%;
+    height: 38%; /* Місце до кнопки КІБЕРГ-СОН */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px; 
+    overflow-y: auto; 
 }
 
 #burger-btn {
@@ -21,19 +42,46 @@ body {
     box-shadow: 0 0 10px #bc13fe;
 }
 
-/* 1. ЗМЕНШЕНА КНОПКА */
+/* 3 КРАПКИ ТА МЕНЮ */
+#settings-btn {
+    position: absolute; top: 12px; right: 20px;
+    cursor: pointer; z-index: 50; padding: 5px 10px;
+    color: #bc13fe; font-size: 24px; font-weight: bold;
+    text-shadow: 0 0 10px #bc13fe; user-select: none;
+}
+
+#settings-menu {
+    position: absolute; top: 55px; right: 20px;
+    background: rgba(15, 15, 15, 0.95); border: 1px solid #bc13fe;
+    border-radius: 8px; z-index: 101;
+    box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
+    display: flex; flex-direction: column; overflow: hidden;
+}
+
+.settings-item {
+    background: transparent; border: none; color: #bc13fe;
+    padding: 12px 15px; font-size: 12px; font-weight: bold;
+    cursor: pointer; text-align: left; border-bottom: 1px solid #222;
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-item:hover { background: rgba(188, 19, 254, 0.1); }
+
+/* ЗМЕНШЕНА КНОПКА З РОЗМИТТЯМ */
 #exit-btn {
-    background: transparent; border: 1.5px solid #bc13fe;
+    background: rgba(5, 5, 5, 0.7); 
+    border: 1.5px solid #bc13fe;
     color: #fff; padding: 8px 18px; border-radius: 20px;
     font-weight: bold; font-size: 11px;
     box-shadow: 0 0 8px rgba(188, 19, 254, 0.4);
     cursor: pointer;
+    backdrop-filter: blur(5px); /* Щоб фон під кнопкою гарно читався */
+    z-index: 10;
 }
 
-/* 2. ВУЗЬКЕ МЕНЮ (Чверть екрана) */
+/* ВУЗЬКЕ МЕНЮ */
 #side-menu {
     position: fixed; top: 0; left: 0; 
-    width: 170px; height: 100%; /* Вузьке */
+    width: 170px; height: 100%; 
     background: #0f0f0f; border-right: 1px solid #bc13fe;
     z-index: 100; transition: 0.4s ease;
     transform: translateX(-100%);
@@ -54,7 +102,7 @@ body {
 }
 .divider { height: 1px; background: #222; margin: 15px 0; }
 
-/* 3. НЕОНОВИЙ ЧАТ */
+/* НЕОНОВИЙ ЧАТ */
 #chat-modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: #050505; z-index: 200; display: flex; flex-direction: column;
@@ -85,4 +133,3 @@ body {
 
 .hidden { display: none !important; }
 .close-btn { background: none; border: none; color: #fff; cursor: pointer; }
-      
