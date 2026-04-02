@@ -2,55 +2,33 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Milka Cyber Bull Relax</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Milka Cyber App</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background-color: #000000;
-            min-height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Кнопка виходу */
-        .fixed-btn-container {
-            position: fixed;
-            bottom: 25px; 
-            left: 0; 
-            width: 100%;
-            display: flex; 
-            justify-content: center; 
-            z-index: 100;
-        }
-
-        .btn-disconnect {
-            background: #000000;
-            border: 2px solid #bc13fe; 
-            color: #bc13fe;
-            padding: 12px 45px; 
-            font-weight: bold; 
-            text-transform: uppercase;
-            font-family: 'Courier New', monospace;
-            box-shadow: 0 0 10px rgba(188, 19, 254, 0.5); 
-            cursor: pointer;
-            border-radius: 4px;
-            letter-spacing: 1px;
-        }
-    </style>
 </head>
 <body>
+    <div id="app-container">
+        <div id="admin-menu-btn" class="hidden" onclick="toggleAdminPanel()">
+            <span></span><span></span><span></span>
+        </div>
 
-    <div class="fixed-btn-container">
-        <button class="btn-disconnect" onclick="Telegram.WebApp.close()">КІБЕРГ-СОН</button>
+        <div id="main-content">
+            <h1 id="welcome-text">MILKA SYSTEM</h1>
+            <div id="status-line">СТАТУС: ОЧІКУВАННЯ...</div>
+        </div>
+
+        <button id="exit-btn" onclick="closeApp()">КІБЕРГ-СОН 💤</button>
     </div>
 
-    <script>
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-    </script>
+    <div id="admin-panel" class="hidden">
+        <div class="panel-content">
+            <h3>ТЕРМІНАЛ ВЛАСНИКА</h3>
+            <input type="text" id="admin-input" placeholder="Введіть команду...">
+            <button onclick="sendAdminCmd()">ВИКОНАТИ</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
