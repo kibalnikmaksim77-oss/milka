@@ -3,29 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Milka Cyber App</title>
+    <title>Milka App</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div id="app-container">
-        <div id="admin-menu-btn" class="hidden" onclick="toggleAdminPanel()">
+        <div id="burger-btn" onclick="toggleMenu()">
             <span></span><span></span><span></span>
         </div>
 
         <div id="main-content">
-            <h1 id="welcome-text">MILKA SYSTEM</h1>
-            <div id="status-line">СТАТУС: ОЧІКУВАННЯ...</div>
-        </div>
+            </div>
 
         <button id="exit-btn" onclick="closeApp()">КІБЕРГ-СОН 💤</button>
     </div>
 
-    <div id="admin-panel" class="hidden">
-        <div class="panel-content">
-            <h3>ТЕРМІНАЛ ВЛАСНИКА</h3>
-            <input type="text" id="admin-input" placeholder="Введіть команду...">
-            <button onclick="sendAdminCmd()">ВИКОНАТИ</button>
+    <div id="side-menu" class="hidden">
+        <div class="menu-header">
+            <h2 style="margin: 0; color: #fff;">МЕНЮ</h2>
+            <button onclick="toggleMenu()" class="close-btn">❌</button>
+        </div>
+        
+        <button class="menu-item">ℹ️ Інформація</button>
+        <button class="menu-item">🌐 Наш канал</button>
+
+        <div id="admin-zone" class="hidden">
+            <div class="divider"></div>
+            <button class="menu-item secret-btn" onclick="openChat()">⚡ Milka Bot</button>
+        </div>
+    </div>
+
+    <div id="chat-modal" class="hidden">
+        <div class="chat-header">
+            <span>🤖 Milka System Bot</span>
+            <button onclick="closeChat()" class="close-btn">❌</button>
+        </div>
+        
+        <div id="chat-messages">
+            </div>
+        
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Команда системі...">
+            <button onclick="sendMessage()" class="send-btn">➤</button>
         </div>
     </div>
 
