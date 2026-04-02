@@ -12,42 +12,26 @@ if (access === 'admin_king') {
     if (userSection) userSection.classList.add('hidden');
 }
 
-// --- ЛОГІКА ХАКЕРСЬКОГО ЗАВАНТАЖЕННЯ ---
-window.addEventListener('DOMContentLoaded', () => {
+// --- ЛОГІКА ХАКЕРСЬКОГО ЗАВАНТАЖЕННЯ (БЕЗ ЦИФР, ТІЛЬКИ АНІМАЦІЯ) ---
+// Використовуємо window.onload, щоб дочекатися підгрузки фотографії бика
+window.addEventListener('load', () => {
     const loader = document.getElementById('loading-screen');
     const app = document.getElementById('app-container');
-    const percentText = document.getElementById('load-percent');
-    const bullLogo = document.getElementById('cyber-bull-logo');
     
     tg.hideHeader();
 
-    let percent = 0;
-    // Інтервал, який швидко накручує відсотки від 0 до 100
-    let loadingInterval = setInterval(() => {
-        // Додаємо випадкове число від 5 до 15
-        percent += Math.floor(Math.random() * 10) + 5; 
+    // Анімація в CSS триває рівно 3 секунди (3000 мс). 
+    // Даємо ще 200 мс на фінальний спалах, і ховаємо лоадер.
+    setTimeout(() => {
+        loader.style.opacity = '0'; // Плавно гасне
         
-        if (percent >= 100) {
-            percent = 100;
-            clearInterval(loadingInterval);
-            percentText.innerText = percent;
-            
-            // На 100% бик яскраво спалахує неоном
-            bullLogo.classList.add('fully-loaded');
-            
-            // Чекаємо півсекунди, щоб ти насолодився спалахом, і ховаємо екран
-            setTimeout(() => {
-                loader.style.opacity = '0';
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                    app.classList.remove('hidden');
-                    tg.showHeader();
-                }, 600); // Зникання екрану
-            }, 800); // Пауза на 100%
-        } else {
-            percentText.innerText = percent;
-        }
-    }, 150); // Швидкість зміни відсотків
+        setTimeout(() => {
+            loader.style.display = 'none'; // Видаляємо лоадер
+            app.classList.remove('hidden'); // Показуємо чорний екран з меню
+            tg.showHeader(); // Повертаємо шапку Telegram
+        }, 500); // Час на затухання
+        
+    }, 3200); 
 });
 
 // --- ТВОЯ ОРИГІНАЛЬНА ЛОГІКА ІНТЕРФЕЙСУ ---
@@ -115,4 +99,4 @@ function sendMessage() {
             appendMsg('bot', '❌ Команду не розпізнано.');
         }
     }, 600);
-    }
+}
