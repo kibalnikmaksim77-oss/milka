@@ -5,7 +5,7 @@ tg.showHeader();
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 
-// Логіка: Хто зайшов - Юзер чи Максим?
+// Розділення прав
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     const userSection = document.getElementById('user-view');
@@ -13,7 +13,6 @@ if (access === 'admin_king') {
     if (userSection) userSection.classList.add('hidden');
 }
 
-// Управління інтерфейсом
 function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
 function closeApp() { tg.close(); }
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
@@ -24,13 +23,11 @@ function openChat() {
     loadChatHistory();
 }
 
-// Завантаження чату з пам'яті
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
     let history = JSON.parse(localStorage.getItem('milka_chat')) || [];
     
-    // Якщо чат пустий, бот видає перше повідомлення (Фото 2)
     if (history.length === 0) {
         appendMsgDOM('bot', 'Система активна. Чекаю на команду, Максиме.');
     } else {
@@ -44,13 +41,11 @@ function saveMsgToHistory(sender, text) {
     localStorage.setItem('milka_chat', JSON.stringify(history));
 }
 
-// Малювання повідомлень на екрані
 function appendMsgDOM(sender, text) {
     const box = document.getElementById('chat-messages');
     const div = document.createElement('div');
     div.classList.add('msg', sender);
     
-    // Зелена галочка для Кабінету
     if (text.includes('Доступ підтверджено')) {
         div.innerHTML = '✅ ' + text.replace('✅ ', '');
     } else {
@@ -66,7 +61,6 @@ function appendMsg(sender, text) {
     saveMsgToHistory(sender, text);
 }
 
-// Відправка повідомлення (Команда: Кабінет)
 function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
@@ -88,4 +82,4 @@ function sendMessage() {
             appendMsg('bot', '❌ Команду не розпізнано.');
         }
     }, 600);
-}
+                                 }
