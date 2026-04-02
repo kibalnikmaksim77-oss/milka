@@ -3,12 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Milka Mini App</title>
+    <title>Milka App</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div id="app-container">
+    <div id="loading-screen">
+        <div class="neural-net-bg"></div> <div class="scanner-line"></div> <div class="loader-content">
+            <div id="cyber-bull-logo"></div> <div class="loading-text">
+                BOOT_SCAN_PROG... <span id="load-percent">0</span>%
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden">
         <div id="burger-btn" onclick="toggleMenu()">
             <span></span><span></span><span></span>
         </div>
@@ -23,12 +31,11 @@
         </div>
         
         <div class="menu-content">
-            <div id="user-view">
-                <p class="dev-text">Система в стадії розробки...</p>
+            <div id="user-view" class="view-section">
+                <p class="dev-text neon-text-glow">Система в стадії розробки.<br>Зачекайте оновлення.</p>
             </div>
 
-            <div id="admin-view" class="hidden">
-                <div class="divider"></div>
+            <div id="admin-view" class="view-section hidden">
                 <button class="menu-item secret-btn" onclick="openChat()">⚡ Milka Bot</button>
             </div>
         </div>
