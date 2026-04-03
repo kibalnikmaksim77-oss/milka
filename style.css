@@ -119,7 +119,7 @@ Body {
 
 #chat-messages { 
     flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; 
-    padding-bottom: 15px; /* Щоб повідомлення не залазили під прозору панель вводу */
+    padding-bottom: 15px;
 }
 
 .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; word-wrap: break-word; user-select: none; }
@@ -143,13 +143,9 @@ Body {
     display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #bc13fe;
 }
 
-/* --- ОНОВЛЕНА ПРОЗОРА ПАНЕЛЬ ВВОДУ --- */
 .chat-input-area { 
-    padding: 10px 15px 25px 15px; /* Більше відступ знизу */
-    display: flex; gap: 12px; 
-    background: transparent; /* БІЛЬШЕ НІЯКОЇ ІЗОЛЕНТИ! */
-    border-top: none; /* Жодної верхньої межі */
-    align-items: flex-end;
+    padding: 10px 15px 25px 15px; display: flex; gap: 12px; 
+    background: transparent; border-top: none; align-items: flex-end;
 }
 
 .icon-neon-btn {
@@ -161,20 +157,16 @@ Body {
 
 .attach-btn { min-width: 36px; height: 36px; font-size: 24px; margin-bottom: 8px; }
 
-/* ЗБІЛЬШЕНИЙ І ЗАПАЯНИЙ В ДИЗАЙН ІНПУТ (Скляний ефект) */
 .editor-wrapper {
     position: relative; flex-grow: 1; 
-    background: rgba(15, 15, 15, 0.6); /* Легке скло */
-    backdrop-filter: blur(8px); /* Розмиття фону позаду */
-    border-radius: 24px; 
-    border: 1px solid rgba(188, 19, 254, 0.5); 
+    background: rgba(15, 15, 15, 0.6); backdrop-filter: blur(8px); 
+    border-radius: 24px; border: 1px solid rgba(188, 19, 254, 0.5); 
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), inset 0 0 5px rgba(188, 19, 254, 0.2);
     display: flex; align-items: flex-end; padding-right: 48px;
 }
 .editor {
     width: 100%; min-height: 24px; max-height: 140px;
-    padding: 15px 10px 15px 18px; /* Розширені відступи */
-    color: #fff; outline: none;
+    padding: 15px 10px 15px 18px; color: #fff; outline: none;
     overflow-y: auto; font-size: 15px; line-height: 1.4; word-break: break-word;
 }
 .editor:empty:before { content: attr(data-placeholder); color: #888; pointer-events: none; display: block; }
@@ -192,7 +184,12 @@ Body {
 
 .custom-code-block { background: #151515; border-radius: 8px; margin: 8px 0; border: 1px solid #333; overflow: hidden; }
 .code-header { background: #222; padding: 6px 10px; font-size: 11px; color: #bc13fe; display: flex; justify-content: space-between; border-bottom: 1px solid #333; }
-.code-content { padding: 10px; color: #00ffcc; font-family: monospace; font-size: 13px; margin: 0; white-space: pre-wrap; }
+
+/* ОНОВЛЕНО: додано outline: none щоб не було рамки при кліку всередину */
+.code-content { 
+    padding: 10px; color: #00ffcc; font-family: monospace; font-size: 13px; margin: 0; 
+    white-space: pre-wrap; outline: none; word-break: break-all;
+}
 
 .icon-neon { display: inline-block; width: 14px; height: 14px; margin-right: 10px; border: 1.5px solid #bc13fe; box-shadow: 0 0 8px #bc13fe; position: relative; flex-shrink: 0; }
 .icon-frame { border-radius: 2px; }
@@ -202,7 +199,6 @@ Body {
 
 .hidden { display: none !important; }
 
-/* КАСТОМНЕ НЕОНОВЕ ВІКНО ВИДАЛЕННЯ */
 #delete-confirm-modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.85); z-index: 9999;
@@ -227,4 +223,4 @@ Body {
     color: #bc13fe; box-shadow: 0 0 10px rgba(188,19,254,0.4); text-shadow: 0 0 5px #bc13fe;
 }
 .delete-btn:active { transform: scale(0.95); }
-    
+        
