@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Milka Mini App</title>
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -22,7 +22,7 @@
             <button class="settings-item" onclick="resetBackground()">
                 <span class="icon-neon icon-trash"></span> Видалити фон
             </button>
-            <input type="file" id="bg-upload" accept="image/*" class="hidden" style="display: none !important;" onchange="changeBackground(event)">
+            <input type="file" id="bg-upload" accept="image/*" class="hidden" onchange="changeBackground(event)">
         </div>
 
         <div id="user-commands-safe-zone"></div>
@@ -72,12 +72,22 @@
         <div id="media-preview-container" class="hidden"></div>
         
         <div class="chat-input-area">
-            <button onclick="document.getElementById('attach-upload').click()" class="attach-btn">🖇️</button>
-            <input type="file" id="attach-upload" style="display: none !important;" accept="image/*,video/*" multiple onchange="handleAttachment(event)">
+            <button onclick="document.getElementById('attach-upload').click()" class="attach-btn icon-neon-btn">🖇️</button>
+            <input type="file" id="attach-upload" style="display: none;" accept="image/*,video/*" multiple onchange="handleAttachment(event)">
             
             <div class="editor-wrapper">
                 <div id="chat-input" class="editor" contenteditable="true" data-placeholder="Команда..."></div>
-                <button onclick="sendMessage()" class="send-btn-inside circle-btn">➤</button>
+                <button onclick="sendMessage()" class="send-btn-inside circle-btn icon-neon-btn">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-confirm-modal" class="hidden">
+        <div class="delete-modal-box neon-border">
+            <p>🗑 Видалити це повідомлення?</p>
+            <div class="delete-modal-buttons">
+                <button id="btn-cancel-delete" class="delete-btn cancel">Скасувати</button>
+                <button id="btn-confirm-delete" class="delete-btn confirm">Видалити</button>
             </div>
         </div>
     </div>
