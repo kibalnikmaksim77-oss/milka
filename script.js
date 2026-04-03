@@ -62,7 +62,6 @@ function resetBackground() {
 function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
 function closeApp() { tg.close(); }
 
-// --- ЛОГІКА РЕДАКТОРА ТА ФОРМАТУВАННЯ ---
 const chatInput = document.getElementById('chat-input');
 const formatTrigger = document.getElementById('format-trigger');
 const formatMenu = document.getElementById('format-menu');
@@ -119,7 +118,6 @@ function copyMyCode(btn) {
     });
 }
 
-// --- ЛОГІКА СКРІПКИ (МЕДІА ПРЕВ'Ю) ---
 let pendingMedia = []; 
 
 function handleAttachment(event) {
@@ -163,7 +161,6 @@ function removePendingMedia(index) {
     renderMediaPreview();
 }
 
-// --- ЛОГІКА ЧАТУ ТА ВИДАЛЕННЯ ---
 let msgToDeleteId = null;
 let msgToDeleteDiv = null;
 const deleteConfirmModal = document.getElementById('delete-confirm-modal');
@@ -257,17 +254,24 @@ function closeChat() {
     document.getElementById('app-container').classList.remove('hidden');
 }
 
-// --- ГЛОБАЛЬНИЙ СТАН ДЛЯ ПАМ'ЯТІ ---
+// --- ФУНКЦІЯ РОЗГОРТАННЯ КОДУ З КНОПКИ ---
+window.openNoteFromButton = function(title) {
+    let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
+    if (notes[title]) {
+        appendMsg('bot', `📂 Ось ваш код <b>${title}</b>:<br>` + notes[title]);
+    } else {
+        appendMsg('bot', `❌ Пам'ятку не знайдено.`);
+    }
+};
+
 let awaitingNote = false;
 
-// --- ВІДПРАВКА (ТЕКСТ + МЕДІА + ПАМ'ЯТКА) ---
 function sendMessage() {
     const htmlText = chatInput.innerHTML.trim(); 
     const rawText = chatInput.innerText.trim();
 
     if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div') && pendingMedia.length === 0) return;
     
-    // ПЕРЕХОПЛЕННЯ КОДУ ДЛЯ ПАМ'ЯТКИ
     if (awaitingNote) {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlText;
@@ -310,10 +314,30 @@ function sendMessage() {
     setTimeout(() => {
         const lowerText = rawText.toLowerCase();
         
+        // Встановлення нової пам'ятки
         if (lowerText === '+пам\'ятка' || lowerText === '+пам’ятка') {
             awaitingNote = true;
             appendMsg('bot', 'Що ви хочете зберегти? Відправте текст у вигляді кода (через <b>⋮</b> -> <b>&lt;/&gt;</b>), і я візьму назву з назви коду.');
         } 
+        // --- НОВЕ: ВИВІД СПИСКУ ВСІХ ПАМ'ЯТОК У ВИГЛЯДІ КНОПОК ---
+        else if (lowerText === 'пам\'ятки' || lowerText === 'пам’ятки') {
+            let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
+            let keys = Object.keys(notes);
+
+            if (keys.length === 0) {
+                appendMsg('bot', `📭 Ваша кібер-пам'ять наразі порожня. Збережіть щось за допомогою команди <b>+пам'ятка</b>.`);
+            } else {
+                let buttonsHtml = '<div class="notes-list-container">';
+                keys.forEach(key => {
+                    // Генеруємо неонову кнопку для кожної пам'ятки
+                    buttonsHtml += `<button class="note-btn" onclick="openNoteFromButton('${key.replace(/'/g, "\\'")}')">${key}</button>`;
+                });
+                buttonsHtml += '</div>';
+
+                appendMsg('bot', `🗄 <b>Ваші збережені пам'ятки:</b><br><span style="font-size:12px; color:#aaa;">Натисніть на кнопку, щоб розгорнути код:</span>` + buttonsHtml);
+            }
+        }
+        // Відкриття конкретної пам'ятки текстом
         else if (lowerText.startsWith("пам'ятка ") || lowerText.startsWith("пам’ятка ")) {
             const reqTitle = lowerText.replace(/пам['’]ятка /g, "").trim();
             let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
@@ -324,7 +348,7 @@ function sendMessage() {
                 appendMsg('bot', `❌ Пам'ятку з назвою <b>${reqTitle}</b> не знайдено.`);
             }
         }
-        // --- НОВА КОМАНДА ВИДАЛЕННЯ ПАМ'ЯТКИ ---
+        // Видалення
         else if (lowerText.startsWith("видалити пам'ятку ") || lowerText.startsWith("видалити пам’ятку ")) {
             const delTitle = lowerText.replace(/видалити пам['’]ятку /g, "").trim();
             let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
@@ -337,6 +361,7 @@ function sendMessage() {
                 appendMsg('bot', `❌ Пам'ятку з назвою <b>${delTitle}</b> не знайдено.`);
             }
         }
+        // Старі команди
         else if (lowerText === 'кабінет') {
             localStorage.setItem(CABINET_KEY, 'true');
             document.getElementById('settings-btn')?.classList.remove('hidden');
@@ -351,5 +376,4 @@ function sendMessage() {
             appendMsg('bot', '🧹 Пам\'ять очищено.');
         } 
     }, 600);
-    }
-            
+}
