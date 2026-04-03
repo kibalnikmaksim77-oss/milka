@@ -52,8 +52,25 @@
             <button onclick="closeChat()" class="close-btn">❌</button>
         </div>
         <div id="chat-messages"></div>
+        
         <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Команда...">
+            <div class="editor-wrapper">
+                <div id="format-trigger" class="hidden" onclick="toggleFormatMenu()">⋮</div>
+                
+                <div id="format-menu" class="hidden">
+                    <div class="format-item" onmousedown="applyFormat('codeBlock', event)">Кодовий <code>&lt;/&gt;</code></div>
+                    <div class="format-item" onmousedown="applyFormat('bold', event)"><b>Жирний</b></div>
+                    <div class="format-item" onmousedown="applyFormat('italic', event)"><i>Курсив</i></div>
+                    <div class="format-item" onmousedown="applyFormat('monospaced', event)"><code>Моно</code></div>
+                    <div class="format-item" onmousedown="applyFormat('strikethrough', event)"><s>Закреслений</s></div>
+                    <div class="format-item" onmousedown="applyFormat('underline', event)"><u>Підкреслений</u></div>
+                    <div class="format-item" onmousedown="applyFormat('link', event)">Створити посилання 🔗</div>
+                    <div class="format-item" onmousedown="applyFormat('plain', event)">Звичайний</div>
+                </div>
+
+                <div id="chat-input" class="editor" contenteditable="true" data-placeholder="Команда..."></div>
+            </div>
+            
             <button onclick="sendMessage()" class="send-btn">➤</button>
         </div>
     </div>
