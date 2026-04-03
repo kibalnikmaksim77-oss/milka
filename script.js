@@ -1,25 +1,31 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Отримуємо ключ із посилання
+// Отримуємо унікальний ID користувача з Telegram (або 'guest' якщо запущено з браузера)
+const userId = tg.initDataUnsafe?.user?.id || 'guest';
+
+// Створюємо унікальні "сейфи" для кожного окремого акаунта
+const BG_KEY = `milka_bg_${userId}`;
+const CHAT_KEY = `milka_chat_${userId}`;
+const CABINET_KEY = `cabinet_active_${userId}`;
+
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 
 // ПЕРЕВІРКА ДОСТУПУ:
 if (access === 'admin_king') {
-    // 1. Показуємо кнопку терміналу (Milka Bot)
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
 
-    // 2. Якщо вже вводили "кабінет", показуємо 3 крапки
-    if (localStorage.getItem('cabinet_active') === 'true') {
+    // Перевіряємо статус кабінету тільки для цього юзера
+    if (localStorage.getItem(CABINET_KEY) === 'true') {
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) settingsBtn.classList.remove('hidden');
     }
 }
 
-// --- ЛОГІКА КАСТОМНОГО ФОНУ ---
-const savedBg = localStorage.getItem('milka_bg');
+// --- ЛОГІКА КАСТОМНОГО ФОНУ (ПРИВ'ЯЗАНА ДО ЮЗЕРА) ---
+const savedBg = localStorage.getItem(BG_KEY);
 if (savedBg) {
     document.body.style.backgroundImage = `url('${savedBg}')`;
 }
@@ -40,7 +46,8 @@ function changeBackground(event) {
         reader.onload = function(e) {
             const imgUrl = e.target.result;
             document.body.style.backgroundImage = `url('${imgUrl}')`;
-            localStorage.setItem('milka_bg', imgUrl);
+            // Зберігаємо фон ТІЛЬКИ для поточного акаунта
+            localStorage.setItem(BG_KEY, imgUrl);
         };
         reader.readAsDataURL(file);
     }
@@ -48,7 +55,7 @@ function changeBackground(event) {
 
 function resetBackground() {
     document.body.style.backgroundImage = 'none';
-    localStorage.removeItem('milka_bg');
+    localStorage.removeItem(BG_KEY);
     toggleSettings();
 }
 
@@ -63,7 +70,8 @@ function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
     
-    let history = JSON.parse(localStorage.getItem('milka_chat')) || [];
+    // Завантажуємо історію чату конкретного акаунта
+    let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
 
     if (history.length === 0) {
         appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.');
@@ -75,9 +83,9 @@ function loadChatHistory() {
 }
 
 function saveMsgToHistory(sender, text) {
-    let history = JSON.parse(localStorage.getItem('milka_chat')) || [];
+    let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
     history.push({ sender: sender, text: text });
-    localStorage.setItem('milka_chat', JSON.stringify(history));
+    localStorage.setItem(CHAT_KEY, JSON.stringify(history));
 }
 
 function appendMsgDOM(sender, text) {
@@ -119,8 +127,8 @@ function sendMessage() {
 
     setTimeout(() => {
         if (text.toLowerCase() === 'кабінет') {
-            // Активація режиму власника
-            localStorage.setItem('cabinet_active', 'true');
+            // Вмикаємо режим власника для цього конкретного акаунта
+            localStorage.setItem(CABINET_KEY, 'true');
             
             const settingsBtn = document.getElementById('settings-btn');
             if (settingsBtn) settingsBtn.classList.remove('hidden');
@@ -128,8 +136,8 @@ function sendMessage() {
             appendMsg('bot', 'Ваш mini web app перезавантажився - там тільки ваші команди.');
 
         } else if (text.toLowerCase() === 'вихід') {
-            // Деактивація режиму власника
-            localStorage.removeItem('cabinet_active');
+            // Вимикаємо режим власника
+            localStorage.removeItem(CABINET_KEY);
             
             const settingsBtn = document.getElementById('settings-btn');
             if (settingsBtn) settingsBtn.classList.add('hidden');
@@ -138,7 +146,8 @@ function sendMessage() {
             appendMsg('bot', 'Ваш mini web app перезавантажився тепер у вас команди користувача.');
 
         } else if (text.toLowerCase() === 'очистити') {
-            localStorage.removeItem('milka_chat');
+            // Очищаємо пам'ять чату тільки цього юзера
+            localStorage.removeItem(CHAT_KEY);
             document.getElementById('chat-messages').innerHTML = '';
             appendMsg('bot', '🧹 Пам\'ять терміналу очищено.');
             
@@ -146,4 +155,4 @@ function sendMessage() {
             appendMsg('bot', '❌ Команду не розпізнано.');
         }
     }, 600);
-}
+    }
