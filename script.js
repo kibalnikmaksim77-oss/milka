@@ -1,19 +1,15 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Отримуємо унікальний ID користувача з Telegram
 const userId = tg.initDataUnsafe?.user?.id || 'guest';
-
-// Ключі для пам'яті
 const BG_KEY = `milka_bg_${userId}`;
 const CHAT_KEY = `milka_chat_${userId}`;
 const CABINET_KEY = `cabinet_active_${userId}`;
 
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
-const globalBg = urlParams.get('bg'); // Отримуємо глобальний фон від бота
+const globalBg = urlParams.get('bg'); 
 
-// ПРІОРИТЕТ ФОНУ: Глобальний (якщо є) -> Особистий
 if (globalBg) {
     document.body.style.backgroundImage = `url('${globalBg}')`;
 } else {
@@ -23,7 +19,6 @@ if (globalBg) {
     }
 }
 
-// ПЕРЕВІРКА ДОСТУПУ
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
@@ -43,7 +38,6 @@ function triggerBgUpload() {
     toggleSettings();
 }
 
-// ФУНКЦІЯ ЗМІНИ ФОНУ
 function changeBackground(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -84,7 +78,6 @@ const chatInput = document.getElementById('chat-input');
 const formatTrigger = document.getElementById('format-trigger');
 const formatMenu = document.getElementById('format-menu');
 
-// Слідкуємо за текстом, щоб показувати/ховати 3 крапки
 chatInput.addEventListener('input', () => {
     if (chatInput.innerText.trim().length > 0) {
         formatTrigger.classList.remove('hidden');
@@ -98,9 +91,8 @@ function toggleFormatMenu() {
     formatMenu.classList.toggle('hidden');
 }
 
-// Застосування стилів (onmousedown щоб не втрачати фокус виділення)
 function applyFormat(type, event) {
-    event.preventDefault(); // Запобігаємо зняттю виділення тексту
+    event.preventDefault(); 
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
 
@@ -118,10 +110,20 @@ function applyFormat(type, event) {
         case 'codeBlock':
             const text = selection.toString();
             if(text) {
+                let codeTitle = prompt("Введіть назву для коду (наприклад, script.js або Python):", "Код");
+                
+                if (codeTitle === null) {
+                    formatMenu.classList.add('hidden');
+                    return;
+                }
+                if (codeTitle.trim() === '') {
+                    codeTitle = "Код";
+                }
+
                 const codeHTML = `
                 <div class="custom-code-block" contenteditable="false">
                     <div class="code-header">
-                        <span>Назва коду</span>
+                        <span>${codeTitle}</span>
                         <span style="cursor:pointer;" onclick="copyMyCode(this)">📋 Копіювати</span>
                     </div>
                     <pre class="code-content">${text}</pre>
@@ -133,7 +135,6 @@ function applyFormat(type, event) {
     formatMenu.classList.add('hidden');
 }
 
-// Функція копіювання коду
 function copyMyCode(btn) {
     const pre = btn.parentElement.nextElementSibling;
     navigator.clipboard.writeText(pre.innerText).then(() => {
@@ -143,7 +144,7 @@ function copyMyCode(btn) {
     });
 }
 
-// --- ЛОГІКА ЧАТУ ---
+// --- ЛОГІКА ЧАТУ ТА ВИДАЛЕННЯ ---
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
@@ -151,28 +152,61 @@ function loadChatHistory() {
     if (history.length === 0) {
         appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.');
     } else {
-        history.forEach(item => appendMsgDOM(item.sender, item.text));
+        history.forEach(item => {
+            if (!item.id) item.id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+            appendMsgDOM(item.sender, item.text, item.id);
+        });
+        localStorage.setItem(CHAT_KEY, JSON.stringify(history));
     }
 }
 
-function saveMsgToHistory(sender, htmlText) {
+function saveMsgToHistory(sender, htmlText, id) {
     let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
-    history.push({ sender: sender, text: htmlText }); // Зберігаємо саме HTML зі стилями
+    history.push({ id: id, sender: sender, text: htmlText });
     localStorage.setItem(CHAT_KEY, JSON.stringify(history));
 }
 
-function appendMsgDOM(sender, htmlText) {
+function deleteMsgFromHistory(id) {
+    let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
+    history = history.filter(msg => msg.id !== id);
+    localStorage.setItem(CHAT_KEY, JSON.stringify(history));
+}
+
+function appendMsgDOM(sender, htmlText, id) {
     const box = document.getElementById('chat-messages');
     const div = document.createElement('div');
     div.classList.add('msg', sender);
-    div.innerHTML = htmlText; // Використовуємо innerHTML, щоб теги рендерились
+    div.innerHTML = htmlText; 
+    div.dataset.id = id;
+
+    // Логіка зажаття для видалення
+    let pressTimer;
+    const startPress = (e) => {
+        if (e.type === 'click' && e.button !== 0) return;
+        pressTimer = setTimeout(() => {
+            if (confirm("🗑 Видалити це повідомлення?")) {
+                deleteMsgFromHistory(id);
+                div.remove();
+            }
+        }, 800); 
+    };
+    const cancelPress = () => { clearTimeout(pressTimer); };
+
+    div.addEventListener('mousedown', startPress);
+    div.addEventListener('touchstart', startPress);
+    div.addEventListener('mouseup', cancelPress);
+    div.addEventListener('mouseleave', cancelPress);
+    div.addEventListener('touchend', cancelPress);
+    div.addEventListener('touchmove', cancelPress);
+
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
 
 function appendMsg(sender, htmlText) {
-    appendMsgDOM(sender, htmlText);
-    saveMsgToHistory(sender, htmlText);
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+    appendMsgDOM(sender, htmlText, id);
+    saveMsgToHistory(sender, htmlText, id);
 }
 
 function openChat() {
@@ -183,18 +217,15 @@ function openChat() {
 
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
 
-// Оновлена функція відправки
+// ЛОГІКА ВІДПРАВКИ (Без Ехо)
 function sendMessage() {
-    // Беремо HTML для відображення і текст для перевірки команд
     const htmlText = chatInput.innerHTML.trim(); 
     const rawText = chatInput.innerText.trim();
 
-    if (!rawText) return;
+    if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div')) return;
     
-    // Відправляємо повідомлення з форматуванням
     appendMsg('user', htmlText);
     
-    // Очищаємо поле та ховаємо крапки
     chatInput.innerHTML = '';
     formatTrigger.classList.add('hidden');
     formatMenu.classList.add('hidden');
@@ -213,9 +244,20 @@ function sendMessage() {
             localStorage.removeItem(CHAT_KEY);
             document.getElementById('chat-messages').innerHTML = '';
             appendMsg('bot', '🧹 Пам\'ять очищено.');
-        } else {
-            // Для тестів можемо ехо-повернути те саме повідомлення
-            appendMsg('bot', '✅ Прийнято: ' + htmlText);
-        }
+        } 
     }, 600);
+}
+
+// ЛОГІКА ФАЙЛІВ
+function handleAttachment(event) {
+    const files = event.target.files;
+    if (!files.length) return;
+    
+    let fileNames = [];
+    for(let i = 0; i < files.length; i++) {
+        fileNames.push(files[i].name);
+    }
+    
+    appendMsg('user', `📎 <b>Прикріплено файлів: ${files.length}</b><br><i>${fileNames.join('<br>')}</i>`);
+    event.target.value = ""; 
 }
