@@ -5,18 +5,16 @@ const userId = tg.initDataUnsafe?.user?.id || 'guest';
 const BG_KEY = `milka_bg_${userId}`;
 const CHAT_KEY = `milka_chat_${userId}`;
 const CABINET_KEY = `cabinet_active_${userId}`;
+const NOTES_KEY = `milka_notes_${userId}`;
 
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 
-if (globalBg) {
-    document.body.style.backgroundImage = `url('${globalBg}')`;
-} else {
+if (globalBg) { document.body.style.backgroundImage = `url('${globalBg}')`; } 
+else {
     const savedBg = localStorage.getItem(BG_KEY);
-    if (savedBg) {
-        document.body.style.backgroundImage = `url('${savedBg}')`;
-    }
+    if (savedBg) { document.body.style.backgroundImage = `url('${savedBg}')`; }
 }
 
 if (access === 'admin_king') {
@@ -29,14 +27,8 @@ if (access === 'admin_king') {
     }
 }
 
-function toggleSettings() {
-    document.getElementById('settings-menu').classList.toggle('hidden');
-}
-
-function triggerBgUpload() {
-    document.getElementById('bg-upload').click();
-    toggleSettings();
-}
+function toggleSettings() { document.getElementById('settings-menu').classList.toggle('hidden'); }
+function triggerBgUpload() { document.getElementById('bg-upload').click(); toggleSettings(); }
 
 function changeBackground(event) {
     const file = event.target.files[0];
@@ -51,9 +43,7 @@ function changeBackground(event) {
     reader.readAsDataURL(file);
 
     if (access === 'admin_king') {
-        tg.sendData(JSON.stringify({
-            action: "request_photo"
-        }));
+        tg.sendData(JSON.stringify({ action: "request_photo" }));
         alert("🦾 Сигнал передано Питону! \n\nТепер закрий додаток і просто відправ потрібне фото боту в повідомлення. Він сам його розішле.");
         setTimeout(() => { tg.close(); }, 500);
     }
@@ -62,7 +52,6 @@ function changeBackground(event) {
 function resetBackground() {
     document.body.style.backgroundImage = 'none';
     localStorage.removeItem(BG_KEY);
-    
     if (access === 'admin_king') {
         tg.sendData(JSON.stringify({ action: "reset_all_bg" }));
         alert("🧹 𝚍𝚎𝚜𝚒𝚐𝚗_𝚛𝚎𝚜𝚎𝚝: 𝚊𝚕𝚕_𝚞𝚜𝚎𝚛𝚜_𝚞𝚙𝚍𝚊𝚝𝚒𝚗𝚐");
@@ -79,12 +68,8 @@ const formatTrigger = document.getElementById('format-trigger');
 const formatMenu = document.getElementById('format-menu');
 
 chatInput.addEventListener('input', () => {
-    if (chatInput.innerText.trim().length > 0) {
-        formatTrigger.classList.remove('hidden');
-    } else {
-        formatTrigger.classList.add('hidden');
-        formatMenu.classList.add('hidden');
-    }
+    if (chatInput.innerText.trim().length > 0) { formatTrigger.classList.remove('hidden'); } 
+    else { formatTrigger.classList.add('hidden'); formatMenu.classList.add('hidden'); }
 });
 
 function toggleFormatMenu() { formatMenu.classList.toggle('hidden'); }
@@ -108,7 +93,7 @@ function applyFormat(type, event) {
         case 'codeBlock':
             const text = selection.toString();
             if(text) {
-                let codeTitle = prompt("Введіть назву для коду (наприклад, script.js або Python):", "Код");
+                let codeTitle = prompt("Введіть назву для коду (наприклад, index.html):", "Код");
                 if (codeTitle === null) { formatMenu.classList.add('hidden'); return; }
                 if (codeTitle.trim() === '') { codeTitle = "Код"; }
 
@@ -136,7 +121,7 @@ function copyMyCode(btn) {
     });
 }
 
-// --- ЛОГІКА СКРІПКИ (МЕДІА ПРЕВ'Ю І ЗАВАНТАЖЕННЯ) ---
+// --- ЛОГІКА СКРІПКИ (МЕДІА ПРЕВ'Ю) ---
 let pendingMedia = []; 
 
 function handleAttachment(event) {
@@ -146,7 +131,6 @@ function handleAttachment(event) {
     for(let i = 0; i < files.length; i++) {
         const file = files[i];
         const reader = new FileReader();
-        
         reader.onload = function(e) {
             const dataUrl = e.target.result;
             const isVideo = file.type.startsWith('video/');
@@ -161,11 +145,7 @@ function handleAttachment(event) {
 function renderMediaPreview() {
     const container = document.getElementById('media-preview-container');
     container.innerHTML = '';
-    
-    if (pendingMedia.length === 0) {
-        container.classList.add('hidden');
-        return;
-    }
+    if (pendingMedia.length === 0) { container.classList.add('hidden'); return; }
     
     container.classList.remove('hidden');
     pendingMedia.forEach((media, index) => {
@@ -185,21 +165,18 @@ function removePendingMedia(index) {
     renderMediaPreview();
 }
 
-// --- ЛОГІКА ЧАТУ ТА КАСТОМНОГО ВІКНА ВИДАЛЕННЯ ---
+// --- ЛОГІКА ЧАТУ ТА ВИДАЛЕННЯ ---
 let msgToDeleteId = null;
 let msgToDeleteDiv = null;
-
 const deleteConfirmModal = document.getElementById('delete-confirm-modal');
-const btnConfirmDelete = document.getElementById('btn-confirm-delete');
-const btnCancelDelete = document.getElementById('btn-cancel-delete');
 
-btnCancelDelete.addEventListener('click', () => {
+document.getElementById('btn-cancel-delete').addEventListener('click', () => {
     deleteConfirmModal.classList.add('hidden');
     msgToDeleteId = null;
     msgToDeleteDiv = null;
 });
 
-btnConfirmDelete.addEventListener('click', () => {
+document.getElementById('btn-confirm-delete').addEventListener('click', () => {
     if (msgToDeleteId && msgToDeleteDiv) {
         deleteMsgFromHistory(msgToDeleteId);
         msgToDeleteDiv.remove();
@@ -213,9 +190,8 @@ function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
     let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
-    if (history.length === 0) {
-        appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.');
-    } else {
+    if (history.length === 0) { appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.'); } 
+    else {
         history.forEach(item => {
             if (!item.id) item.id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
             appendMsgDOM(item.sender, item.text, item.id);
@@ -247,7 +223,6 @@ function appendMsgDOM(sender, htmlText, id) {
     const startPress = (e) => {
         if (e.type === 'click' && e.button !== 0) return;
         pressTimer = setTimeout(() => {
-            // Виклик КАСТОМНОГО неонового вікна замість стандартного confirm()
             msgToDeleteId = id;
             msgToDeleteDiv = div;
             deleteConfirmModal.classList.remove('hidden');
@@ -280,20 +255,45 @@ function openChat() {
 
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
 
-// --- ВІДПРАВКА (ТЕКСТ + МЕДІА) ---
+// --- ГЛОБАЛЬНИЙ СТАН ДЛЯ ПАМ'ЯТІ ---
+let awaitingNote = false;
+
+// --- ВІДПРАВКА (ТЕКСТ + МЕДІА + ПАМ'ЯТКА) ---
 function sendMessage() {
     const htmlText = chatInput.innerHTML.trim(); 
     const rawText = chatInput.innerText.trim();
 
     if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div') && pendingMedia.length === 0) return;
     
+    // ПЕРЕХОПЛЕННЯ КОДУ ДЛЯ ПАМ'ЯТКИ
+    if (awaitingNote) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlText;
+        const codeHeaderSpan = tempDiv.querySelector('.code-header span:first-child');
+        
+        if (codeHeaderSpan) {
+            const noteTitle = codeHeaderSpan.innerText.trim();
+            let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
+            notes[noteTitle.toLowerCase()] = htmlText; 
+            localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+            appendMsg('bot', `💾 Код <b>${noteTitle}</b> успішно завантажено в кібер-пам'ять!`);
+        } else {
+            appendMsg('bot', `❌ Відмінено. Ви не відправили форматований блок коду (через &lt;/&gt;).`);
+        }
+        
+        awaitingNote = false;
+        chatInput.innerHTML = '';
+        pendingMedia = [];
+        renderMediaPreview();
+        formatTrigger.classList.add('hidden');
+        formatMenu.classList.add('hidden');
+        return; 
+    }
+
     let mediaHtml = '';
     pendingMedia.forEach(media => {
-        if (media.type === 'video') {
-            mediaHtml += `<video src="${media.src}" controls></video><br>`;
-        } else {
-            mediaHtml += `<img src="${media.src}"><br>`;
-        }
+        if (media.type === 'video') { mediaHtml += `<video src="${media.src}" controls></video><br>`; } 
+        else { mediaHtml += `<img src="${media.src}"><br>`; }
     });
 
     const finalMessageHtml = mediaHtml + htmlText;
@@ -307,7 +307,22 @@ function sendMessage() {
     
     setTimeout(() => {
         const lowerText = rawText.toLowerCase();
-        if (lowerText === 'кабінет') {
+        
+        if (lowerText === '+пам\'ятка' || lowerText === '+пам’ятка') {
+            awaitingNote = true;
+            appendMsg('bot', 'Що ви хочете зберегти? Відправте текст у вигляді кода (через <b>⋮</b> -> <b>&lt;/&gt;</b>), і я візьму назву з назви коду.');
+        } 
+        else if (lowerText.startsWith("пам'ятка ") || lowerText.startsWith("пам’ятка ")) {
+            const reqTitle = lowerText.replace(/пам['’]ятка /g, "").trim();
+            let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
+            
+            if (notes[reqTitle]) {
+                appendMsg('bot', `📂 Ось ваш код:<br>` + notes[reqTitle]);
+            } else {
+                appendMsg('bot', `❌ Пам'ятку з назвою <b>${reqTitle}</b> не знайдено.`);
+            }
+        }
+        else if (lowerText === 'кабінет') {
             localStorage.setItem(CABINET_KEY, 'true');
             document.getElementById('settings-btn')?.classList.remove('hidden');
             appendMsg('bot', 'Ваш mini web app перезавантажився - режим власника активний.');
@@ -321,5 +336,5 @@ function sendMessage() {
             appendMsg('bot', '🧹 Пам\'ять очищено.');
         } 
     }, 600);
-        }
-        
+    }
+            
