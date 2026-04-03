@@ -43,12 +43,11 @@ function triggerBgUpload() {
     toggleSettings();
 }
 
-// ФУНКЦІЯ ЗМІНИ ФОНУ (ЛОГІКА №3: ПРЯМА ПЕРЕДАЧА ЧЕРЕЗ БОТА)
+// ФУНКЦІЯ ЗМІНИ ФОНУ
 function changeBackground(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // 1. Ставимо фон тобі локально миттєво (через FileReader)
     const reader = new FileReader();
     reader.onload = function(e) {
         const imgUrl = e.target.result;
@@ -57,47 +56,94 @@ function changeBackground(event) {
     };
     reader.readAsDataURL(file);
 
-    // 2. Якщо ти адмін — даємо сигнал Питону
     if (access === 'admin_king') {
-        // Ми не вантажимо файл тут, щоб не було "Помилки сервера"
-        // Ми просто кажемо боту приготуватися прийняти фото в чаті
         tg.sendData(JSON.stringify({
             action: "request_photo"
         }));
-
         alert("🦾 Сигнал передано Питону! \n\nТепер закрий додаток і просто відправ потрібне фото боту в повідомлення. Він сам його розішле.");
-        
-        // Закриваємо додаток, щоб ти міг одразу кинути файл у чат
-        setTimeout(() => {
-            tg.close();
-        }, 500);
+        setTimeout(() => { tg.close(); }, 500);
     }
 }
 
-// ОНОВЛЕНА ФУНКЦІЯ ВИДАЛЕННЯ ФОНУ (ЛОКАЛЬНО + ГЛОБАЛЬНО ДЛЯ АДМІНА)
 function resetBackground() {
-    // 1. Очищення локально у тебе
     document.body.style.backgroundImage = 'none';
     localStorage.removeItem(BG_KEY);
     
-    // 2. Сигнал Питону на повне видалення фону у всіх
     if (access === 'admin_king') {
-        tg.sendData(JSON.stringify({
-            action: "reset_all_bg"
-        }));
+        tg.sendData(JSON.stringify({ action: "reset_all_bg" }));
         alert("🧹 𝚍𝚎𝚜𝚒𝚐𝚗_𝚛𝚎𝚜𝚎𝚝: 𝚊𝚕𝚕_𝚞𝚜𝚎𝚛𝚜_𝚞𝚙𝚍𝚊𝚝𝚒𝚗𝚐");
     }
-    
     toggleSettings();
 }
 
-function toggleMenu() {
-    document.getElementById('side-menu').classList.toggle('active');
-}
-
+function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
 function closeApp() { tg.close(); }
 
-// Логіка чату та терміналу
+// --- ЛОГІКА РЕДАКТОРА ТА ФОРМАТУВАННЯ ---
+const chatInput = document.getElementById('chat-input');
+const formatTrigger = document.getElementById('format-trigger');
+const formatMenu = document.getElementById('format-menu');
+
+// Слідкуємо за текстом, щоб показувати/ховати 3 крапки
+chatInput.addEventListener('input', () => {
+    if (chatInput.innerText.trim().length > 0) {
+        formatTrigger.classList.remove('hidden');
+    } else {
+        formatTrigger.classList.add('hidden');
+        formatMenu.classList.add('hidden');
+    }
+});
+
+function toggleFormatMenu() {
+    formatMenu.classList.toggle('hidden');
+}
+
+// Застосування стилів (onmousedown щоб не втрачати фокус виділення)
+function applyFormat(type, event) {
+    event.preventDefault(); // Запобігаємо зняттю виділення тексту
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    switch(type) {
+        case 'bold': document.execCommand('bold'); break;
+        case 'italic': document.execCommand('italic'); break;
+        case 'strikethrough': document.execCommand('strikeThrough'); break;
+        case 'underline': document.execCommand('underline'); break;
+        case 'monospaced': document.execCommand('fontName', false, 'monospace'); break;
+        case 'link':
+            let url = prompt("Введіть посилання (URL):");
+            if (url) document.execCommand('createLink', false, url);
+            break;
+        case 'plain': document.execCommand('removeFormat'); break;
+        case 'codeBlock':
+            const text = selection.toString();
+            if(text) {
+                const codeHTML = `
+                <div class="custom-code-block" contenteditable="false">
+                    <div class="code-header">
+                        <span>Назва коду</span>
+                        <span style="cursor:pointer;" onclick="copyMyCode(this)">📋 Копіювати</span>
+                    </div>
+                    <pre class="code-content">${text}</pre>
+                </div><br>`;
+                document.execCommand('insertHTML', false, codeHTML);
+            }
+            break;
+    }
+    formatMenu.classList.add('hidden');
+}
+
+// Функція копіювання коду
+function copyMyCode(btn) {
+    const pre = btn.parentElement.nextElementSibling;
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = '✅ Скопійовано!';
+        setTimeout(() => { btn.innerText = originalText; }, 2000);
+    });
+}
+
+// --- ЛОГІКА ЧАТУ ---
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
@@ -109,24 +155,24 @@ function loadChatHistory() {
     }
 }
 
-function saveMsgToHistory(sender, text) {
+function saveMsgToHistory(sender, htmlText) {
     let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
-    history.push({ sender: sender, text: text });
+    history.push({ sender: sender, text: htmlText }); // Зберігаємо саме HTML зі стилями
     localStorage.setItem(CHAT_KEY, JSON.stringify(history));
 }
 
-function appendMsgDOM(sender, text) {
+function appendMsgDOM(sender, htmlText) {
     const box = document.getElementById('chat-messages');
     const div = document.createElement('div');
     div.classList.add('msg', sender);
-    div.innerText = text;
+    div.innerHTML = htmlText; // Використовуємо innerHTML, щоб теги рендерились
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
 
-function appendMsg(sender, text) {
-    appendMsgDOM(sender, text);
-    saveMsgToHistory(sender, text);
+function appendMsg(sender, htmlText) {
+    appendMsgDOM(sender, htmlText);
+    saveMsgToHistory(sender, htmlText);
 }
 
 function openChat() {
@@ -137,14 +183,24 @@ function openChat() {
 
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
 
+// Оновлена функція відправки
 function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text) return;
-    appendMsg('user', text);
-    input.value = '';
+    // Беремо HTML для відображення і текст для перевірки команд
+    const htmlText = chatInput.innerHTML.trim(); 
+    const rawText = chatInput.innerText.trim();
+
+    if (!rawText) return;
+    
+    // Відправляємо повідомлення з форматуванням
+    appendMsg('user', htmlText);
+    
+    // Очищаємо поле та ховаємо крапки
+    chatInput.innerHTML = '';
+    formatTrigger.classList.add('hidden');
+    formatMenu.classList.add('hidden');
+    
     setTimeout(() => {
-        const lowerText = text.toLowerCase();
+        const lowerText = rawText.toLowerCase();
         if (lowerText === 'кабінет') {
             localStorage.setItem(CABINET_KEY, 'true');
             document.getElementById('settings-btn')?.classList.remove('hidden');
@@ -158,7 +214,8 @@ function sendMessage() {
             document.getElementById('chat-messages').innerHTML = '';
             appendMsg('bot', '🧹 Пам\'ять очищено.');
         } else {
-            appendMsg('bot', '❌ Команду не розпізнано.');
+            // Для тестів можемо ехо-повернути те саме повідомлення
+            appendMsg('bot', '✅ Прийнято: ' + htmlText);
         }
     }, 600);
 }
