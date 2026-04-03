@@ -1,4 +1,4 @@
-body {
+Body {
     margin: 0; padding: 0; background-color: #080808;
     color: #fff; font-family: 'Segoe UI', sans-serif;
     overflow: hidden; width: 100vw; height: 100vh;
@@ -25,18 +25,23 @@ body {
 #burger-btn {
     position: absolute; top: 20px; left: 20px;
     cursor: pointer; z-index: 50; padding: 5px;
+    display: flex; flex-direction: column; justify-content: center;
+    height: 24px;
 }
 #burger-btn span {
     display: block; width: 24px; height: 2px;
-    background: #bc13fe; margin: 5px 0;
+    background: #bc13fe; margin: 3px 0;
     box-shadow: 0 0 10px #bc13fe;
 }
 
 #settings-btn {
-    position: absolute; top: 12px; right: 20px;
+    position: absolute; top: 20px; right: 20px;
     cursor: pointer; z-index: 50; padding: 5px 10px;
-    color: #bc13fe; font-size: 24px; font-weight: bold;
+    color: #bc13fe; font-size: 26px; font-weight: bold;
     text-shadow: 0 0 10px #bc13fe; user-select: none;
+    display: flex; align-items: center; justify-content: center;
+    height: 24px; 
+    line-height: 0; 
 }
 
 #settings-menu {
@@ -142,4 +147,4 @@ body {
     border: none; box-shadow: none; width: 16px; height: 16px;
     background: linear-gradient(45deg, transparent 20%, #bc13fe 20%, #bc13fe 80%, transparent 80%);
     filter: drop-shadow(0 0 5px #bc13fe);
-}
+                }
