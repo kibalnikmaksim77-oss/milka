@@ -43,28 +43,31 @@ function triggerBgUpload() {
     toggleSettings();
 }
 
-// ФУНКЦІЯ ЗМІНИ ФОНУ (ОНОВЛЕНА: Обхід лімітів Телеграму)
-async function changeBackground(event) {
+// ФУНКЦІЯ ЗМІНИ ФОНУ (ФІНАЛЬНА ВЕРСІЯ: ОБХІД БЛОКУВАНЬ)
+function changeBackground(event) {
     const file = event.target.files[0];
-    if (file) {
-        // 1. ОДРАЗУ ставимо фон локально (щоб тобі було швидко і красиво)
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const imgUrl = e.target.result;
-            document.body.style.backgroundImage = `url('${imgUrl}')`;
-            localStorage.setItem(BG_KEY, imgUrl);
-        };
-        reader.readAsDataURL(file);
+    if (!file) return;
 
-        // 2. ЯКЩО ТИ АДМІН — ВАНТАЖИМО НА СЕРВЕР І ПЕРЕДАЄМО БОТУ
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const imgUrl = e.target.result; // Це Base64 код картинки
+        
+        // 1. Ставимо фон тобі миттєво
+        document.body.style.backgroundImage = `url('${imgUrl}')`;
+        localStorage.setItem(BG_KEY, imgUrl);
+
+        // 2. Якщо ти адмін — вантажимо на сервер і передаємо боту
         if (access === 'admin_king') {
-            alert("⏳ Завантажую фон на сервер для всіх юзерів. Зачекай секунду...");
+            alert("⏳ Система Milka обробляє фото... Почекай.");
 
-            const formData = new FormData();
-            formData.append("image", file);
+            // Чистимо Base64 для сервера (прибираємо заголовок)
+            const base64Data = imgUrl.split(',')[1];
             
-            // Безкоштовний ключ ImgBB для завантаження
-            const apiKey = "6df273a241b712c41c7b3c202022b7d5"; 
+            const formData = new FormData();
+            formData.append("image", base64Data);
+            
+            // Новий стабільний API ключ ImgBB
+            const apiKey = "819ab286cbf530733d3c26b52c0f99a5"; 
 
             try {
                 const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
@@ -75,24 +78,24 @@ async function changeBackground(event) {
                 const data = await response.json();
                 
                 if (data.success) {
-                    const shortImageUrl = data.data.url; // Отримуємо короткий лінк!
+                    const shortImageUrl = data.data.url;
                     
-                    // Передаємо Питону цей коротенький лінк (він 100% пройде ліміти)
+                    // ВІДПРАВЛЯЄМО ПИТОНУ (Тепер це малий текст, він пройде 100%)
                     tg.sendData(JSON.stringify({
                         action: "set_global_bg",
                         image: shortImageUrl
                     }));
                     
-                    alert("✅ Фон успішно відправлено боту! Зараз юзери отримають оновлення.");
+                    alert("✅ ГОТОВО! Дизайн розіслано всім юзерам.");
                 } else {
-                    alert("❌ Помилка сервера картинок. Фон змінився тільки для тебе.");
+                    alert("❌ Помилка сервера: " + (data.error ? data.error.message : "невідомо"));
                 }
             } catch (error) {
-                alert("❌ Помилка інтернету. Фон змінився тільки для тебе.");
-                console.error(error);
+                alert("❌ Помилка з'єднання. Спробуй інше фото.");
             }
         }
-    }
+    };
+    reader.readAsDataURL(file);
 }
 
 function resetBackground() {
@@ -171,4 +174,4 @@ function sendMessage() {
             appendMsg('bot', '❌ Команду не розпізнано.');
         }
     }, 600);
-    }
+}
