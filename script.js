@@ -6,29 +6,24 @@ const userId = tg.initDataUnsafe?.user?.id || 'guest';
 
 // Ключі для пам'яті
 const BG_KEY = `milka_bg_${userId}`;
-const GLOBAL_BG_KEY = `milka_global_current`;
 const CHAT_KEY = `milka_chat_${userId}`;
 const CABINET_KEY = `cabinet_active_${userId}`;
 
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
-const globalBgFromUrl = urlParams.get('bg');
+const globalBg = urlParams.get('bg'); // Отримуємо глобальний фон від бота
 
-// --- ЛОГІКА АВТО-ОНОВЛЕННЯ ФОНУ ---
-if (globalBgFromUrl) {
-    document.body.style.backgroundImage = `url('${globalBgFromUrl}')`;
-    localStorage.setItem(GLOBAL_BG_KEY, globalBgFromUrl);
+// ПРІОРИТЕТ ФОНУ: Глобальний (якщо є) -> Особистий
+if (globalBg) {
+    document.body.style.backgroundImage = `url('${globalBg}')`;
 } else {
-    const lastGlobal = localStorage.getItem(GLOBAL_BG_KEY);
-    if (lastGlobal) {
-        document.body.style.backgroundImage = `url('${lastGlobal}')`;
-    } else {
-        const savedBg = localStorage.getItem(BG_KEY);
-        if (savedBg) document.body.style.backgroundImage = `url('${savedBg}')`;
+    const savedBg = localStorage.getItem(BG_KEY);
+    if (savedBg) {
+        document.body.style.backgroundImage = `url('${savedBg}')`;
     }
 }
 
-// --- ПЕРЕВІРКА ДОСТУПУ ---
+// ПЕРЕВІРКА ДОСТУПУ
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
@@ -39,7 +34,6 @@ if (access === 'admin_king') {
     }
 }
 
-// --- МЕНЮ ТА НАЛАШТУВАННЯ ---
 function toggleSettings() {
     document.getElementById('settings-menu').classList.toggle('hidden');
 }
@@ -49,6 +43,7 @@ function triggerBgUpload() {
     toggleSettings();
 }
 
+// ФУНКЦІЯ ЗМІНИ ФОНУ (Тепер з відправкою боту)
 function changeBackground(event) {
     const file = event.target.files[0];
     if (file) {
@@ -56,9 +51,11 @@ function changeBackground(event) {
         reader.onload = function(e) {
             const imgUrl = e.target.result;
             document.body.style.backgroundImage = `url('${imgUrl}')`;
+            
+            // Зберігаємо локально
             localStorage.setItem(BG_KEY, imgUrl);
 
-            // Якщо ти адмін — передаємо фото боту (Python)
+            // ЯКЩО ТИ АДМІН — ПЕРЕДАЄМО ФОТО БОТУ, ЩОБ ВІН ВСТАНОВИВ ЙОГО ДЛЯ ВСІХ
             if (access === 'admin_king') {
                 tg.sendData(JSON.stringify({
                     action: "set_global_bg",
@@ -73,7 +70,6 @@ function changeBackground(event) {
 function resetBackground() {
     document.body.style.backgroundImage = 'none';
     localStorage.removeItem(BG_KEY);
-    localStorage.removeItem(GLOBAL_BG_KEY);
     toggleSettings();
 }
 
@@ -81,11 +77,9 @@ function toggleMenu() {
     document.getElementById('side-menu').classList.toggle('active');
 }
 
-function closeApp() { 
-    tg.close(); 
-}
+function closeApp() { tg.close(); }
 
-// --- ЧАТ ТА ТЕРМІНАЛ (ТЕПЕР ВСЕ НА МІСЦІ!) ---
+// Логіка чату та терміналу (залишається без змін)
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
@@ -123,38 +117,30 @@ function openChat() {
     loadChatHistory();
 }
 
-function closeChat() { 
-    document.getElementById('chat-modal').classList.add('hidden'); 
-}
+function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
 
 function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if (!text) return;
-    
     appendMsg('user', text);
     input.value = '';
-    
     setTimeout(() => {
         const lowerText = text.toLowerCase();
         if (lowerText === 'кабінет') {
             localStorage.setItem(CABINET_KEY, 'true');
-            const settingsBtn = document.getElementById('settings-btn');
-            if (settingsBtn) settingsBtn.classList.remove('hidden');
+            document.getElementById('settings-btn')?.classList.remove('hidden');
             appendMsg('bot', 'Ваш mini web app перезавантажився - режим власника активний.');
         } else if (lowerText === 'вихід') {
             localStorage.removeItem(CABINET_KEY);
-            const settingsBtn = document.getElementById('settings-btn');
-            if (settingsBtn) settingsBtn.classList.add('hidden');
+            document.getElementById('settings-btn')?.classList.add('hidden');
             appendMsg('bot', 'Ваш mini web app перезавантажився - режим користувача.');
         } else if (lowerText === 'очистити') {
             localStorage.removeItem(CHAT_KEY);
-            const box = document.getElementById('chat-messages');
-            if (box) box.innerHTML = '';
+            document.getElementById('chat-messages').innerHTML = '';
             appendMsg('bot', '🧹 Пам\'ять очищено.');
         } else {
             appendMsg('bot', '❌ Команду не розпізнано.');
         }
     }, 600);
-        }
-    
+}
