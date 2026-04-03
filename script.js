@@ -1,7 +1,10 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+// Отримуємо унікальний ID користувача з Telegram
 const userId = tg.initDataUnsafe?.user?.id || 'guest';
+
+// Ключі для пам'яті
 const BG_KEY = `milka_bg_${userId}`;
 const CHAT_KEY = `milka_chat_${userId}`;
 const CABINET_KEY = `cabinet_active_${userId}`;
@@ -10,6 +13,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 
+// ПРІОРИТЕТ ФОНУ
 if (globalBg) {
     document.body.style.backgroundImage = `url('${globalBg}')`;
 } else {
@@ -19,6 +23,7 @@ if (globalBg) {
     }
 }
 
+// ПЕРЕВІРКА ДОСТУПУ
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
@@ -144,6 +149,52 @@ function copyMyCode(btn) {
     });
 }
 
+// --- ЛОГІКА СКРІПКИ ТА ПЕРЕГЛЯДУ ЗОБРАЖЕННЯ ---
+const attachUpload = document.getElementById('attach-upload');
+const previewContainer = document.getElementById('image-preview-container');
+
+function handleAttachment(event) {
+    const files = event.target.files;
+    if (!files.length) return;
+    
+    // Очищаємо попередній прев'ю
+    previewContainer.innerHTML = '';
+    
+    let hasImages = false;
+    let fileNames = [];
+
+    // Перебираємо файли
+    for(let i = 0; i < files.length; i++) {
+        const file = files[i];
+        fileNames.push(file.name);
+
+        // Якщо це зображення — створюємо прев'ю
+        if (file.type.startsWith('image/')) {
+            hasImages = true;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                previewContainer.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    // Показуємо контейнер прев'ю, якщо є зображення
+    if (hasImages) {
+        previewContainer.classList.remove('hidden');
+    } else {
+        previewContainer.classList.add('hidden');
+    }
+    
+    // Також відразу відправляємо повідомлення про прикріплені файли в чат
+    appendMsg('user', `📎 <b>Прикріплено файлів: ${files.length}</b><br><i>${fileNames.join('<br>')}</i>`);
+    
+    // Скидаємо значення інпута
+    event.target.value = ""; 
+}
+
 // --- ЛОГІКА ЧАТУ ТА ВИДАЛЕННЯ ---
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
@@ -217,12 +268,13 @@ function openChat() {
 
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
 
-// ЛОГІКА ВІДПРАВКИ (Без Ехо)
+// ЛОГІКА ВІДПРАВКИ (Без Ехо, з хованням прев'ю)
 function sendMessage() {
     const htmlText = chatInput.innerHTML.trim(); 
     const rawText = chatInput.innerText.trim();
 
-    if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div')) return;
+    // Перевіряємо чи є текст АБО картинка в прев'ю
+    if (!rawText && !previewContainer.innerHTML) return;
     
     appendMsg('user', htmlText);
     
@@ -230,6 +282,10 @@ function sendMessage() {
     formatTrigger.classList.add('hidden');
     formatMenu.classList.add('hidden');
     
+    // Ховаємо прев'ю після відправки
+    previewContainer.classList.add('hidden');
+    previewContainer.innerHTML = '';
+
     setTimeout(() => {
         const lowerText = rawText.toLowerCase();
         if (lowerText === 'кабінет') {
@@ -246,18 +302,5 @@ function sendMessage() {
             appendMsg('bot', '🧹 Пам\'ять очищено.');
         } 
     }, 600);
-}
-
-// ЛОГІКА ФАЙЛІВ
-function handleAttachment(event) {
-    const files = event.target.files;
-    if (!files.length) return;
-    
-    let fileNames = [];
-    for(let i = 0; i < files.length; i++) {
-        fileNames.push(files[i].name);
-    }
-    
-    appendMsg('user', `📎 <b>Прикріплено файлів: ${files.length}</b><br><i>${fileNames.join('<br>')}</i>`);
-    event.target.value = ""; 
-}
+                       }
+        
