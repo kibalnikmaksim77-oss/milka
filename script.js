@@ -1,10 +1,7 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Отримуємо унікальний ID користувача з Telegram
 const userId = tg.initDataUnsafe?.user?.id || 'guest';
-
-// Ключі для пам'яті
 const BG_KEY = `milka_bg_${userId}`;
 const CHAT_KEY = `milka_chat_${userId}`;
 const CABINET_KEY = `cabinet_active_${userId}`;
@@ -13,7 +10,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 
-// ПРІОРИТЕТ ФОНУ
 if (globalBg) {
     document.body.style.backgroundImage = `url('${globalBg}')`;
 } else {
@@ -23,7 +19,6 @@ if (globalBg) {
     }
 }
 
-// ПЕРЕВІРКА ДОСТУПУ
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
@@ -92,9 +87,7 @@ chatInput.addEventListener('input', () => {
     }
 });
 
-function toggleFormatMenu() {
-    formatMenu.classList.toggle('hidden');
-}
+function toggleFormatMenu() { formatMenu.classList.toggle('hidden'); }
 
 function applyFormat(type, event) {
     event.preventDefault(); 
@@ -116,14 +109,8 @@ function applyFormat(type, event) {
             const text = selection.toString();
             if(text) {
                 let codeTitle = prompt("Введіть назву для коду (наприклад, script.js або Python):", "Код");
-                
-                if (codeTitle === null) {
-                    formatMenu.classList.add('hidden');
-                    return;
-                }
-                if (codeTitle.trim() === '') {
-                    codeTitle = "Код";
-                }
+                if (codeTitle === null) { formatMenu.classList.add('hidden'); return; }
+                if (codeTitle.trim() === '') { codeTitle = "Код"; }
 
                 const codeHTML = `
                 <div class="custom-code-block" contenteditable="false">
@@ -149,53 +136,79 @@ function copyMyCode(btn) {
     });
 }
 
-// --- ЛОГІКА СКРІПКИ ТА ПЕРЕГЛЯДУ ЗОБРАЖЕННЯ ---
-const attachUpload = document.getElementById('attach-upload');
-const previewContainer = document.getElementById('image-preview-container');
+// --- ЛОГІКА СКРІПКИ (МЕДІА ПРЕВ'Ю І ЗАВАНТАЖЕННЯ) ---
+let pendingMedia = []; 
 
 function handleAttachment(event) {
     const files = event.target.files;
     if (!files.length) return;
     
-    // Очищаємо попередній прев'ю
-    previewContainer.innerHTML = '';
-    
-    let hasImages = false;
-    let fileNames = [];
-
-    // Перебираємо файли
     for(let i = 0; i < files.length; i++) {
         const file = files[i];
-        fileNames.push(file.name);
-
-        // Якщо це зображення — створюємо прев'ю
-        if (file.type.startsWith('image/')) {
-            hasImages = true;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                previewContainer.appendChild(img);
-            }
-            reader.readAsDataURL(file);
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const dataUrl = e.target.result;
+            const isVideo = file.type.startsWith('video/');
+            pendingMedia.push({ type: isVideo ? 'video' : 'image', src: dataUrl });
+            renderMediaPreview();
         }
+        reader.readAsDataURL(file);
     }
-    
-    // Показуємо контейнер прев'ю, якщо є зображення
-    if (hasImages) {
-        previewContainer.classList.remove('hidden');
-    } else {
-        previewContainer.classList.add('hidden');
-    }
-    
-    // Також відразу відправляємо повідомлення про прикріплені файли в чат
-    appendMsg('user', `📎 <b>Прикріплено файлів: ${files.length}</b><br><i>${fileNames.join('<br>')}</i>`);
-    
-    // Скидаємо значення інпута
     event.target.value = ""; 
 }
 
-// --- ЛОГІКА ЧАТУ ТА ВИДАЛЕННЯ ---
+function renderMediaPreview() {
+    const container = document.getElementById('media-preview-container');
+    container.innerHTML = '';
+    
+    if (pendingMedia.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    container.classList.remove('hidden');
+    pendingMedia.forEach((media, index) => {
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        if (media.type === 'video') {
+            div.innerHTML = `<video src="${media.src}"></video><div class="preview-remove" onclick="removePendingMedia(${index})">❌</div>`;
+        } else {
+            div.innerHTML = `<img src="${media.src}"><div class="preview-remove" onclick="removePendingMedia(${index})">❌</div>`;
+        }
+        container.appendChild(div);
+    });
+}
+
+function removePendingMedia(index) {
+    pendingMedia.splice(index, 1);
+    renderMediaPreview();
+}
+
+// --- ЛОГІКА ЧАТУ ТА КАСТОМНОГО ВІКНА ВИДАЛЕННЯ ---
+let msgToDeleteId = null;
+let msgToDeleteDiv = null;
+
+const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+const btnCancelDelete = document.getElementById('btn-cancel-delete');
+
+btnCancelDelete.addEventListener('click', () => {
+    deleteConfirmModal.classList.add('hidden');
+    msgToDeleteId = null;
+    msgToDeleteDiv = null;
+});
+
+btnConfirmDelete.addEventListener('click', () => {
+    if (msgToDeleteId && msgToDeleteDiv) {
+        deleteMsgFromHistory(msgToDeleteId);
+        msgToDeleteDiv.remove();
+    }
+    deleteConfirmModal.classList.add('hidden');
+    msgToDeleteId = null;
+    msgToDeleteDiv = null;
+});
+
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
@@ -230,15 +243,14 @@ function appendMsgDOM(sender, htmlText, id) {
     div.innerHTML = htmlText; 
     div.dataset.id = id;
 
-    // Логіка зажаття для видалення
     let pressTimer;
     const startPress = (e) => {
         if (e.type === 'click' && e.button !== 0) return;
         pressTimer = setTimeout(() => {
-            if (confirm("🗑 Видалити це повідомлення?")) {
-                deleteMsgFromHistory(id);
-                div.remove();
-            }
+            // Виклик КАСТОМНОГО неонового вікна замість стандартного confirm()
+            msgToDeleteId = id;
+            msgToDeleteDiv = div;
+            deleteConfirmModal.classList.remove('hidden');
         }, 800); 
     };
     const cancelPress = () => { clearTimeout(pressTimer); };
@@ -268,24 +280,31 @@ function openChat() {
 
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
 
-// ЛОГІКА ВІДПРАВКИ (Без Ехо, з хованням прев'ю)
+// --- ВІДПРАВКА (ТЕКСТ + МЕДІА) ---
 function sendMessage() {
     const htmlText = chatInput.innerHTML.trim(); 
     const rawText = chatInput.innerText.trim();
 
-    // Перевіряємо чи є текст АБО картинка в прев'ю
-    if (!rawText && !previewContainer.innerHTML) return;
+    if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div') && pendingMedia.length === 0) return;
     
-    appendMsg('user', htmlText);
+    let mediaHtml = '';
+    pendingMedia.forEach(media => {
+        if (media.type === 'video') {
+            mediaHtml += `<video src="${media.src}" controls></video><br>`;
+        } else {
+            mediaHtml += `<img src="${media.src}"><br>`;
+        }
+    });
+
+    const finalMessageHtml = mediaHtml + htmlText;
+    appendMsg('user', finalMessageHtml);
     
     chatInput.innerHTML = '';
+    pendingMedia = [];
+    renderMediaPreview();
     formatTrigger.classList.add('hidden');
     formatMenu.classList.add('hidden');
     
-    // Ховаємо прев'ю після відправки
-    previewContainer.classList.add('hidden');
-    previewContainer.innerHTML = '';
-
     setTimeout(() => {
         const lowerText = rawText.toLowerCase();
         if (lowerText === 'кабінет') {
@@ -302,5 +321,5 @@ function sendMessage() {
             appendMsg('bot', '🧹 Пам\'ять очищено.');
         } 
     }, 600);
-                       }
+        }
         
