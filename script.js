@@ -43,59 +43,35 @@ function triggerBgUpload() {
     toggleSettings();
 }
 
-// ФУНКЦІЯ ЗМІНИ ФОНУ (ФІНАЛЬНА ВЕРСІЯ: ОБХІД БЛОКУВАНЬ)
+// ФУНКЦІЯ ЗМІНИ ФОНУ (ЛОГІКА №3: ПРЯМА ПЕРЕДАЧА ЧЕРЕЗ БОТА)
 function changeBackground(event) {
     const file = event.target.files[0];
     if (!file) return;
 
+    // 1. Ставимо фон тобі локально миттєво (через FileReader)
     const reader = new FileReader();
-    reader.onload = async function(e) {
-        const imgUrl = e.target.result; // Це Base64 код картинки
-        
-        // 1. Ставимо фон тобі миттєво
+    reader.onload = function(e) {
+        const imgUrl = e.target.result;
         document.body.style.backgroundImage = `url('${imgUrl}')`;
         localStorage.setItem(BG_KEY, imgUrl);
-
-        // 2. Якщо ти адмін — вантажимо на сервер і передаємо боту
-        if (access === 'admin_king') {
-            alert("⏳ Система Milka обробляє фото... Почекай.");
-
-            // Чистимо Base64 для сервера (прибираємо заголовок)
-            const base64Data = imgUrl.split(',')[1];
-            
-            const formData = new FormData();
-            formData.append("image", base64Data);
-            
-            // Новий стабільний API ключ ImgBB
-            const apiKey = "819ab286cbf530733d3c26b52c0f99a5"; 
-
-            try {
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-                    method: "POST",
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    const shortImageUrl = data.data.url;
-                    
-                    // ВІДПРАВЛЯЄМО ПИТОНУ (Тепер це малий текст, він пройде 100%)
-                    tg.sendData(JSON.stringify({
-                        action: "set_global_bg",
-                        image: shortImageUrl
-                    }));
-                    
-                    alert("✅ ГОТОВО! Дизайн розіслано всім юзерам.");
-                } else {
-                    alert("❌ Помилка сервера: " + (data.error ? data.error.message : "невідомо"));
-                }
-            } catch (error) {
-                alert("❌ Помилка з'єднання. Спробуй інше фото.");
-            }
-        }
     };
     reader.readAsDataURL(file);
+
+    // 2. Якщо ти адмін — даємо сигнал Питону
+    if (access === 'admin_king') {
+        // Ми не вантажимо файл тут, щоб не було "Помилки сервера"
+        // Ми просто кажемо боту приготуватися прийняти фото в чаті
+        tg.sendData(JSON.stringify({
+            action: "request_photo"
+        }));
+
+        alert("🦾 Сигнал передано Питону! \n\nТепер закрий додаток і просто відправ потрібне фото боту в повідомлення. Він сам його розішле.");
+        
+        // Закриваємо додаток, щоб ти міг одразу кинути файл у чат
+        setTimeout(() => {
+            tg.close();
+        }, 500);
+    }
 }
 
 function resetBackground() {
@@ -110,7 +86,7 @@ function toggleMenu() {
 
 function closeApp() { tg.close(); }
 
-// Логіка чату та терміналу (залишається без змін)
+// Логіка чату та терміналу
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     box.innerHTML = ''; 
