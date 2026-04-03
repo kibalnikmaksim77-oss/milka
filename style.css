@@ -3,9 +3,8 @@ body {
     color: #fff; font-family: 'Segoe UI', sans-serif;
     overflow: hidden; width: 100vw; height: 100vh;
     
-    /* НАЛАШТУВАННЯ ДЛЯ ФОТО З БИКОМ */
     background-size: cover; 
-    background-position: top center; /* Притискає фото до верху */
+    background-position: top center; 
     background-repeat: no-repeat;
     transition: background-image 0.5s ease;
 }
@@ -18,12 +17,11 @@ body {
     position: relative;
 }
 
-/* --- БЕЗПЕЧНА ЗОНА (ЗАХИСТ БИКА ВІД ПЕРЕКРИТТЯ) --- */
 #user-commands-safe-zone {
     position: absolute;
-    top: 50%; /* Починається рівно під копитами бика */
+    top: 50%; 
     width: 90%;
-    height: 38%; /* Місце до кнопки КІБЕРГ-СОН */
+    height: 38%; 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -42,7 +40,6 @@ body {
     box-shadow: 0 0 10px #bc13fe;
 }
 
-/* 3 КРАПКИ ТА МЕНЮ */
 #settings-btn {
     position: absolute; top: 12px; right: 20px;
     cursor: pointer; z-index: 50; padding: 5px 10px;
@@ -66,7 +63,6 @@ body {
 .settings-item:last-child { border-bottom: none; }
 .settings-item:hover { background: rgba(188, 19, 254, 0.1); }
 
-/* ЗМЕНШЕНА КНОПКА З РОЗМИТТЯМ */
 #exit-btn {
     background: rgba(5, 5, 5, 0.7); 
     border: 1.5px solid #bc13fe;
@@ -74,11 +70,10 @@ body {
     font-weight: bold; font-size: 11px;
     box-shadow: 0 0 8px rgba(188, 19, 254, 0.4);
     cursor: pointer;
-    backdrop-filter: blur(5px); /* Щоб фон під кнопкою гарно читався */
+    backdrop-filter: blur(5px); 
     z-index: 10;
 }
 
-/* ВУЗЬКЕ МЕНЮ */
 #side-menu {
     position: fixed; top: 0; left: 0; 
     width: 170px; height: 100%; 
@@ -102,7 +97,6 @@ body {
 }
 .divider { height: 1px; background: #222; margin: 15px 0; }
 
-/* НЕОНОВИЙ ЧАТ */
 #chat-modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: #050505; z-index: 200; display: flex; flex-direction: column;
@@ -133,3 +127,4 @@ body {
 
 .hidden { display: none !important; }
 .close-btn { background: none; border: none; color: #fff; cursor: pointer; }
+           
