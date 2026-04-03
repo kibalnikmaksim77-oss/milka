@@ -92,21 +92,19 @@ function applyFormat(type, event) {
         case 'plain': document.execCommand('removeFormat'); break;
         case 'codeBlock':
             const text = selection.toString();
-            if(text) {
-                let codeTitle = prompt("Введіть назву для коду (наприклад, index.html):", "Код");
-                if (codeTitle === null) { formatMenu.classList.add('hidden'); return; }
-                if (codeTitle.trim() === '') { codeTitle = "Код"; }
+            let codeTitle = prompt("Введіть назву для коду (наприклад, index.html):", "Код");
+            if (codeTitle === null) { formatMenu.classList.add('hidden'); return; }
+            if (codeTitle.trim() === '') { codeTitle = "Код"; }
 
-                const codeHTML = `
-                <div class="custom-code-block" contenteditable="false">
-                    <div class="code-header">
-                        <span>${codeTitle}</span>
-                        <span style="cursor:pointer;" onclick="copyMyCode(this)">📋 Копіювати</span>
-                    </div>
-                    <pre class="code-content">${text}</pre>
-                </div><br>`;
-                document.execCommand('insertHTML', false, codeHTML);
-            }
+            const codeHTML = `
+            <div class="custom-code-block" contenteditable="false">
+                <div class="code-header">
+                    <span>${codeTitle}</span>
+                    <span style="cursor:pointer;" onclick="copyMyCode(this)">📋 Копіювати</span>
+                </div>
+                <pre class="code-content" contenteditable="true">${text || '// Вставте ваш код сюди...'}</pre>
+            </div><br>`;
+            document.execCommand('insertHTML', false, codeHTML);
             break;
     }
     formatMenu.classList.add('hidden');
@@ -249,11 +247,15 @@ function appendMsg(sender, htmlText) {
 
 function openChat() {
     toggleMenu();
+    document.getElementById('app-container').classList.add('hidden');
     document.getElementById('chat-modal').classList.remove('hidden');
     loadChatHistory();
 }
 
-function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
+function closeChat() { 
+    document.getElementById('chat-modal').classList.add('hidden');
+    document.getElementById('app-container').classList.remove('hidden');
+}
 
 // --- ГЛОБАЛЬНИЙ СТАН ДЛЯ ПАМ'ЯТІ ---
 let awaitingNote = false;
@@ -322,6 +324,19 @@ function sendMessage() {
                 appendMsg('bot', `❌ Пам'ятку з назвою <b>${reqTitle}</b> не знайдено.`);
             }
         }
+        // --- НОВА КОМАНДА ВИДАЛЕННЯ ПАМ'ЯТКИ ---
+        else if (lowerText.startsWith("видалити пам'ятку ") || lowerText.startsWith("видалити пам’ятку ")) {
+            const delTitle = lowerText.replace(/видалити пам['’]ятку /g, "").trim();
+            let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
+            
+            if (notes[delTitle]) {
+                delete notes[delTitle];
+                localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+                appendMsg('bot', `🧹 Пам'ятку <b>${delTitle}</b> успішно видалено з кібер-пам'яті.`);
+            } else {
+                appendMsg('bot', `❌ Пам'ятку з назвою <b>${delTitle}</b> не знайдено.`);
+            }
+        }
         else if (lowerText === 'кабінет') {
             localStorage.setItem(CABINET_KEY, 'true');
             document.getElementById('settings-btn')?.classList.remove('hidden');
@@ -336,5 +351,5 @@ function sendMessage() {
             appendMsg('bot', '🧹 Пам\'ять очищено.');
         } 
     }, 600);
-    }
-            
+        }
+                          
