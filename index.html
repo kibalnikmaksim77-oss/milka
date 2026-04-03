@@ -16,15 +16,20 @@
         <div id="settings-btn" class="hidden" onclick="toggleSettings()">⋮</div>
 
         <div id="settings-menu" class="hidden">
-            <button class="settings-item" onclick="triggerBgUpload()">🔳 Встановити фон</button>
-            <button class="settings-item" onclick="resetBackground()">🚮 Видалити фон</button>
+            <button class="settings-item" onclick="triggerBgUpload()">
+                <span class="icon-neon icon-frame"></span> Встановити фон
+            </button>
+            <button class="settings-item" onclick="resetBackground()">
+                <span class="icon-neon icon-trash"></span> Видалити фон
+            </button>
             <input type="file" id="bg-upload" accept="image/*" class="hidden" onchange="changeBackground(event)">
         </div>
 
-        <div id="user-commands-safe-zone">
-            </div>
+        <div id="user-commands-safe-zone"></div>
 
-        <button id="exit-btn" onclick="closeApp()">КІБЕРГ-СОН 🌌💤</button>
+        <button id="exit-btn" onclick="closeApp()">
+            <span class="icon-neon icon-sleep"></span> КІБЕРГ-СОН
+        </button>
     </div>
 
     <div id="side-menu">
@@ -32,12 +37,8 @@
             <span>МЕНЮ</span>
             <button onclick="toggleMenu()" class="close-btn">❌</button>
         </div>
-        
         <div class="menu-content">
-            <div id="user-view">
-                <p class="dev-text">Система в стадії розробки...</p>
-            </div>
-
+            <div id="user-view"><p class="dev-text">Система в стадії розробки...</p></div>
             <div id="admin-view" class="hidden">
                 <div class="divider"></div>
                 <button class="menu-item secret-btn" onclick="openChat()">⚡ Milka Bot</button>
