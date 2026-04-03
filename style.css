@@ -8,7 +8,6 @@ Body {
     transition: background-image 0.5s ease;
 }
 
-/* --- ЗАГАЛЬНІ НЕОНОВІ РАМКИ ТА АНІМАЦІЯ --- */
 @keyframes neonPulse {
     0% { box-shadow: 0 0 5px rgba(188, 19, 254, 0.4), inset 0 0 2px rgba(188, 19, 254, 0.2); }
     50% { box-shadow: 0 0 20px rgba(188, 19, 254, 0.8), inset 0 0 10px rgba(188, 19, 254, 0.5); }
@@ -17,30 +16,14 @@ Body {
 
 .neon-border {
     border: 2px solid #bc13fe;
-    border-radius: 12px; /* Гармонійно для всіх контейнерів */
+    border-radius: 12px;
     animation: neonPulse 2s infinite ease-in-out;
     box-sizing: border-box;
 }
 
-/* Перевизначення для головного контейнера (на весь екран, рамка по краю) */
-#app-container.neon-border {
-    position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
-    width: auto; height: auto;
-    overflow: hidden; /* Щоб фон не виходив за рамку */
-}
+#app-container.neon-border { position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; width: auto; height: auto; }
+#chat-modal.neon-border { border-radius: 0; border-width: 0; box-shadow: inset 0 0 15px rgba(188, 19, 254, 0.5); }
 
-/* Модальне вікно чату з рамкою */
-#chat-modal.neon-border {
-    border-radius: 0; /* На весь екран */
-    border-width: 0; /* Прибираємо стандартну, додамо внутрішню нижче */
-}
-
-/* Додаємо внутрішню неонову рамку для чату */
-#chat-modal {
-    box-shadow: inset 0 0 15px rgba(188, 19, 254, 0.5);
-}
-
-/* --- РЕШТА ОРИГІНАЛЬНОГО СТИЛЮ (з невеликими правками) --- */
 #app-container {
     display: flex; flex-direction: column;
     justify-content: flex-end; align-items: center;
@@ -71,8 +54,7 @@ Body {
     color: #bc13fe; font-size: 26px; font-weight: bold;
     text-shadow: 0 0 10px #bc13fe; user-select: none;
     display: flex; align-items: center; justify-content: center;
-    height: 24px; 
-    line-height: 0; 
+    height: 24px; line-height: 0; 
 }
 
 #settings-menu {
@@ -93,8 +75,7 @@ Body {
 .settings-item:hover { background: rgba(188, 19, 254, 0.1); }
 
 #exit-btn {
-    background: rgba(5, 5, 5, 0.7); 
-    border: 1.5px solid #bc13fe;
+    background: rgba(5, 5, 5, 0.7); border: 1.5px solid #bc13fe;
     color: #fff; padding: 8px 18px; border-radius: 20px;
     font-weight: bold; font-size: 11px;
     box-shadow: 0 0 8px rgba(188, 19, 254, 0.4);
@@ -103,11 +84,9 @@ Body {
 }
 
 #side-menu {
-    position: fixed; top: 0; left: 0; 
-    width: 170px; height: 100%; 
+    position: fixed; top: 0; left: 0; width: 170px; height: 100%; 
     background: #0f0f0f; border-right: 1px solid #bc13fe;
-    z-index: 100; transition: 0.4s ease;
-    transform: translateX(-100%);
+    z-index: 100; transition: 0.4s ease; transform: translateX(-100%);
 }
 #side-menu.active { transform: translateX(0); }
 
@@ -129,101 +108,128 @@ Body {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: #050505; z-index: 200; display: flex; flex-direction: column;
 }
+
 .chat-header { 
-    padding: 15px 20px; background: #0a0a0a; border-bottom: 2px solid #bc13fe; 
-    display: flex; justify-content: space-between; align-items: center;
+    position: relative; padding: 15px 20px; background: #0a0a0a; border-bottom: 2px solid #bc13fe; 
+    display: flex; justify-content: space-between; align-items: center; z-index: 400;
 }
 .neon-title { text-shadow: 0 0 10px #bc13fe; font-weight: bold; }
 .neon-bot { text-shadow: 0 0 20px #00ffff, 0 0 10px #bc13fe; font-size: 20px; }
 
+.header-controls { display: flex; align-items: center; gap: 15px; }
+
+#format-trigger {
+    color: #bc13fe; font-size: 24px; font-weight: bold;
+    cursor: pointer; user-select: none; padding: 0 5px; margin-top: -5px;
+}
+
+#format-menu {
+    position: absolute; right: 15px; top: calc(100% + 5px); 
+    background: #1a1a1c; border: 1px solid #bc13fe; border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.8); z-index: 1000; min-width: 180px; overflow: hidden;
+}
+
+.close-btn { 
+    background: transparent !important; background-color: transparent !important; 
+    border: none !important; outline: none !important; -webkit-appearance: none; 
+    color: #fff; cursor: pointer; font-size: 16px; padding: 0;
+}
+
 #chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 
 .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; word-wrap: break-word; user-select: none; }
-.msg.bot { 
-    background: rgba(188, 19, 254, 0.05); border: 1px solid #bc13fe; 
-    box-shadow: 0 0 8px rgba(188, 19, 254, 0.3); align-self: flex-start; 
-}
+.msg.bot { background: rgba(188, 19, 254, 0.05); border: 1px solid #bc13fe; box-shadow: 0 0 8px rgba(188, 19, 254, 0.3); align-self: flex-start; }
 .msg.user { background: #bc13fe; color: #fff; align-self: flex-end; box-shadow: 0 0 12px #bc13fe; }
 
-/* --- ОНОВЛЕНИЙ ДИЗАЙН ВВОДУ ТА ІКОНОК --- */
-.chat-input-area { 
-    padding: 10px 15px; display: flex; gap: 12px; /* Трохи більше відступ */
-    background: #0a0a0a; border-top: 1px solid #222; align-items: flex-end;
+.msg img, .msg video { max-width: 100%; border-radius: 8px; margin-top: 5px; border: 1px solid rgba(188, 19, 254, 0.4); box-shadow: 0 0 5px rgba(188, 19, 254, 0.3); }
+
+#media-preview-container { 
+    padding: 10px 15px; background: #0a0a0a; border-top: 1px solid #222; 
+    display: flex; gap: 10px; overflow-x: auto; max-height: 90px;
 }
-.editor-wrapper {
-    position: relative; flex-grow: 1; background: #1a1a1c; /* Трохи темніше фон інпута */
-    border-radius: 24px; /* Більше закруглення */
-    border: 1px solid #333;
-    display: flex; align-items: flex-end; 
-    padding-right: 48px; /* Більше місця для літачка */
+.preview-item { 
+    position: relative; width: 60px; height: 60px; border-radius: 8px; 
+    border: 1px solid #bc13fe; box-shadow: 0 0 5px #bc13fe; overflow: hidden; flex-shrink: 0; 
 }
-.editor {
-    width: 100%; min-height: 20px; max-height: 120px;
-    padding: 14px 10px 14px 18px; /* Правки паддінгів */
-    color: #fff; outline: none;
-    overflow-y: auto; font-size: 15px; line-height: 1.4; word-break: break-word;
-}
-.editor:empty:before {
-    content: attr(data-placeholder);
-    color: #666; /* Трохи світліше плацехолдер */
+.preview-item img, .preview-item video { width: 100%; height: 100%; object-fit: cover; }
+.preview-remove { 
+    position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.8); 
+    color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; 
+    display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #bc13fe;
 }
 
-/* Спільний стиль для НЕОНОВИХ КНОПОК-ІКОНОК */
+.chat-input-area { 
+    padding: 10px 15px; display: flex; gap: 10px; 
+    background: #0a0a0a; align-items: flex-end;
+}
+
 .icon-neon-btn {
-    background: none; border: none; padding: 0; cursor: pointer;
+    background: transparent; border: none; padding: 0; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    color: #bc13fe; text-shadow: 0 0 10px #bc13fe;
-    transition: transform 0.1s ease;
+    color: #bc13fe; text-shadow: 0 0 10px #bc13fe; outline: none; transition: 0.1s;
 }
 .icon-neon-btn:active { transform: scale(0.9); }
 
-/* Літачок всередині інпута (Кружечок, Неон) */
+.attach-btn { min-width: 32px; height: 32px; font-size: 24px; margin-bottom: 6px; }
+
+.editor-wrapper {
+    position: relative; flex-grow: 1; background: #1a1a1c; border-radius: 24px; 
+    border: 1px solid #bc13fe; box-shadow: inset 0 0 5px rgba(188, 19, 254, 0.2);
+    display: flex; align-items: flex-end; padding-right: 45px;
+}
+.editor {
+    width: 100%; min-height: 20px; max-height: 120px;
+    padding: 14px 10px 14px 15px; color: #fff; outline: none;
+    overflow-y: auto; font-size: 14px; line-height: 1.4; word-break: break-word;
+}
+.editor:empty:before { content: attr(data-placeholder); color: #666; pointer-events: none; display: block; }
+
 .send-btn-inside.circle-btn {
-    position: absolute; right: 6px; bottom: 6px;
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(188, 19, 254, 0.1); /* Дуже легкий фон кружка */
-    border: 1px solid #bc13fe;
-    box-shadow: 0 0 10px #bc13fe, inset 0 0 5px #bc13fe;
-    font-size: 18px;
+    position: absolute; right: 5px; bottom: 5px;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(188, 19, 254, 0.1); border: 1px solid #bc13fe;
+    box-shadow: 0 0 8px #bc13fe, inset 0 0 4px #bc13fe; font-size: 16px;
 }
 
-/* Скріпка (Просто іконка, Неон) */
-.attach-btn {
-    min-width: 44px; height: 44px; /* Трохи більше розмір */
-    font-size: 20px;
-    margin-bottom: 2px;
-}
-
-/* --- ПЕРЕГЛЯД ЗОБРАЖЕННЯ ТА КОДУ --- */
-#image-preview-container {
-    padding: 10px 20px; background: #0a0a0a; border-top: 1px solid #222;
-    display: flex; gap: 10px; overflow-x: auto;
-}
-#image-preview-container img {
-    max-height: 80px; border-radius: 8px; border: 1px solid #bc13fe;
-    box-shadow: 0 0 5px #bc13fe;
-}
-
-.custom-code-block {
-    background: #151515; border-radius: 10px; margin: 10px 0;
-    border: 1px solid #333; overflow: hidden;
-    box-shadow: inset 0 0 5px rgba(188, 19, 254, 0.2);
-}
-.code-header {
-    background: #1a1a1c; padding: 8px 12px; font-size: 12px;
-    color: #bc13fe; display: flex; justify-content: space-between;
-    border-bottom: 1px solid #333;
-    font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
-}
-.code-content {
-    padding: 12px; color: #00ffcc; font-family: monospace;
-    font-size: 13px; margin: 0; white-space: pre-wrap;
-}
-
-/* Решта незмінних стилів */
-#format-trigger { cursor: pointer; user-select: none; }
-#format-menu { position: absolute; z-index: 300; min-width: 180px; overflow: hidden; }
 .format-item { padding: 12px 16px; font-size: 14px; color: #fff; cursor: pointer; border-bottom: 1px solid #2a2a2c;}
 .format-item:last-child { border-bottom: none; }
 .format-item:hover { background: #bc13fe; }
-      
+
+.custom-code-block { background: #151515; border-radius: 8px; margin: 8px 0; border: 1px solid #333; overflow: hidden; }
+.code-header { background: #222; padding: 6px 10px; font-size: 11px; color: #bc13fe; display: flex; justify-content: space-between; border-bottom: 1px solid #333; }
+.code-content { padding: 10px; color: #00ffcc; font-family: monospace; font-size: 13px; margin: 0; white-space: pre-wrap; }
+
+.icon-neon { display: inline-block; width: 14px; height: 14px; margin-right: 10px; border: 1.5px solid #bc13fe; box-shadow: 0 0 8px #bc13fe; position: relative; flex-shrink: 0; }
+.icon-frame { border-radius: 2px; }
+.icon-trash::before, .icon-trash::after { content: ''; position: absolute; width: 10px; height: 1.5px; background: #bc13fe; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg); }
+.icon-trash::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.icon-sleep { border: none; box-shadow: none; width: 16px; height: 16px; background: linear-gradient(45deg, transparent 20%, #bc13fe 20%, #bc13fe 80%, transparent 80%); filter: drop-shadow(0 0 5px #bc13fe); }
+
+.hidden { display: none !important; }
+
+/* --- КАСТОМНЕ НЕОНОВЕ ВІКНО ВИДАЛЕННЯ --- */
+#delete-confirm-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85); z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+}
+.delete-modal-box {
+    background: #0a0a0a; padding: 25px; border-radius: 12px;
+    text-align: center; width: 80%; max-width: 320px;
+}
+.delete-modal-box p { 
+    margin-top: 0; margin-bottom: 25px; font-weight: bold; 
+    font-size: 16px; text-shadow: 0 0 5px rgba(255,255,255,0.5); 
+}
+.delete-modal-buttons { display: flex; gap: 15px; justify-content: center; }
+.delete-btn {
+    padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; 
+    cursor: pointer; flex-grow: 1; transition: 0.2s;
+}
+.delete-btn.cancel { background: #222; color: #fff; border: 1px solid #444; }
+.delete-btn.confirm { 
+    background: rgba(188, 19, 254, 0.2); border: 1px solid #bc13fe; 
+    color: #bc13fe; box-shadow: 0 0 10px rgba(188,19,254,0.4); text-shadow: 0 0 5px #bc13fe;
+}
+.delete-btn:active { transform: scale(0.95); }
+    
