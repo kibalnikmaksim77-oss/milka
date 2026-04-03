@@ -351,5 +351,5 @@ function sendMessage() {
             appendMsg('bot', '🧹 Пам\'ять очищено.');
         } 
     }, 600);
-        }
-                          
+    }
+            
