@@ -108,43 +108,125 @@ Body {
 
 #chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 
-.msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; }
+.msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; word-wrap: break-word; }
 .msg.bot { 
     background: rgba(188, 19, 254, 0.05); border: 1px solid #bc13fe; 
     box-shadow: 0 0 8px rgba(188, 19, 254, 0.3); align-self: flex-start; 
 }
 .msg.user { background: #bc13fe; color: #fff; align-self: flex-end; box-shadow: 0 0 12px #bc13fe; }
 
-.chat-input-area { padding: 15px; display: flex; gap: 8px; background: #0a0a0a; border-top: 1px solid #222; }
-#chat-input { flex-grow: 1; padding: 10px; border-radius: 20px; border: none; background: #222; color: #fff; outline: none; }
-.send-btn { background: #bc13fe; border: none; width: 40px; height: 40px; border-radius: 50%; color: #fff; box-shadow: 0 0 10px #bc13fe; }
+.chat-input-area { padding: 10px 15px; display: flex; gap: 8px; background: #0a0a0a; border-top: 1px solid #222; align-items: flex-end;}
+.send-btn { background: #bc13fe; border: none; min-width: 40px; height: 40px; border-radius: 50%; color: #fff; box-shadow: 0 0 10px #bc13fe; margin-bottom: 2px;}
 
 .hidden { display: none !important; }
 .close-btn { background: none; border: none; color: #fff; cursor: pointer; }
 
-/* --- ГРАФІЧНІ НЕОНОВІ ІКОНКИ --- */
-.icon-neon {
-    display: inline-block;
-    width: 14px; height: 14px;
-    margin-right: 10px;
-    border: 1.5px solid #bc13fe;
-    box-shadow: 0 0 8px #bc13fe;
+/* НОВІ СТИЛІ ДЛЯ РЕДАКТОРА ТА МЕНЮ ФОРМАТУВАННЯ */
+.editor-wrapper {
     position: relative;
-    flex-shrink: 0;
+    flex-grow: 1;
+    background: #222;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
 }
 
-.icon-frame { border-radius: 2px; }
+.editor {
+    width: 100%;
+    min-height: 20px;
+    max-height: 120px;
+    padding: 12px 35px 12px 15px; /* Місце для 3 крапок справа */
+    color: #fff;
+    outline: none;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+}
 
+.editor:empty:before {
+    content: attr(data-placeholder);
+    color: #888;
+    pointer-events: none;
+    display: block; /* For Firefox */
+}
+
+#format-trigger {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #bc13fe;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+    user-select: none;
+}
+
+#format-menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    background: #1a1a1c;
+    border: 1px solid #bc13fe;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+    z-index: 300;
+    min-width: 180px;
+    overflow: hidden;
+}
+
+.format-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #fff;
+    cursor: pointer;
+    border-bottom: 1px solid #2a2a2c;
+}
+.format-item:last-child { border-bottom: none; }
+.format-item:hover { background: #bc13fe; }
+
+/* Дизайн блоку коду у чаті */
+.custom-code-block {
+    background: #151515;
+    border-radius: 8px;
+    margin: 8px 0;
+    border: 1px solid #333;
+    overflow: hidden;
+}
+.code-header {
+    background: #222;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #bc13fe;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #333;
+}
+.code-content {
+    padding: 10px;
+    color: #00ffcc;
+    font-family: monospace;
+    font-size: 13px;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* Іконки */
+.icon-neon {
+    display: inline-block; width: 14px; height: 14px; margin-right: 10px;
+    border: 1.5px solid #bc13fe; box-shadow: 0 0 8px #bc13fe; position: relative; flex-shrink: 0;
+}
+.icon-frame { border-radius: 2px; }
 .icon-trash::before, .icon-trash::after {
-    content: ''; position: absolute;
-    width: 10px; height: 1.5px;
-    background: #bc13fe; top: 50%; left: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
+    content: ''; position: absolute; width: 10px; height: 1.5px;
+    background: #bc13fe; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);
 }
 .icon-trash::after { transform: translate(-50%, -50%) rotate(-45deg); }
-
 .icon-sleep {
     border: none; box-shadow: none; width: 16px; height: 16px;
     background: linear-gradient(45deg, transparent 20%, #bc13fe 20%, #bc13fe 80%, transparent 80%);
     filter: drop-shadow(0 0 5px #bc13fe);
-                }
+    }
+    
