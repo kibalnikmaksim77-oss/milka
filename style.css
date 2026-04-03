@@ -2,7 +2,6 @@ body {
     margin: 0; padding: 0; background-color: #080808;
     color: #fff; font-family: 'Segoe UI', sans-serif;
     overflow: hidden; width: 100vw; height: 100vh;
-    
     background-size: cover; 
     background-position: top center; 
     background-repeat: no-repeat;
@@ -18,16 +17,9 @@ body {
 }
 
 #user-commands-safe-zone {
-    position: absolute;
-    top: 50%; 
-    width: 90%;
-    height: 38%; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 15px; 
-    overflow-y: auto; 
+    position: absolute; top: 50%; width: 90%; height: 38%; 
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; gap: 15px; overflow-y: auto; 
 }
 
 #burger-btn {
@@ -59,6 +51,7 @@ body {
     background: transparent; border: none; color: #bc13fe;
     padding: 12px 15px; font-size: 12px; font-weight: bold;
     cursor: pointer; text-align: left; border-bottom: 1px solid #222;
+    display: flex; align-items: center;
 }
 .settings-item:last-child { border-bottom: none; }
 .settings-item:hover { background: rgba(188, 19, 254, 0.1); }
@@ -69,9 +62,8 @@ body {
     color: #fff; padding: 8px 18px; border-radius: 20px;
     font-weight: bold; font-size: 11px;
     box-shadow: 0 0 8px rgba(188, 19, 254, 0.4);
-    cursor: pointer;
-    backdrop-filter: blur(5px); 
-    z-index: 10;
+    cursor: pointer; backdrop-filter: blur(5px); z-index: 10;
+    display: flex; align-items: center; justify-content: center;
 }
 
 #side-menu {
@@ -116,10 +108,7 @@ body {
     background: rgba(188, 19, 254, 0.05); border: 1px solid #bc13fe; 
     box-shadow: 0 0 8px rgba(188, 19, 254, 0.3); align-self: flex-start; 
 }
-.msg.user { 
-    background: #bc13fe; color: #fff; align-self: flex-end; 
-    box-shadow: 0 0 12px #bc13fe; 
-}
+.msg.user { background: #bc13fe; color: #fff; align-self: flex-end; box-shadow: 0 0 12px #bc13fe; }
 
 .chat-input-area { padding: 15px; display: flex; gap: 8px; background: #0a0a0a; border-top: 1px solid #222; }
 #chat-input { flex-grow: 1; padding: 10px; border-radius: 20px; border: none; background: #222; color: #fff; outline: none; }
@@ -127,4 +116,30 @@ body {
 
 .hidden { display: none !important; }
 .close-btn { background: none; border: none; color: #fff; cursor: pointer; }
-           
+
+/* --- ГРАФІЧНІ НЕОНОВІ ІКОНКИ --- */
+.icon-neon {
+    display: inline-block;
+    width: 14px; height: 14px;
+    margin-right: 10px;
+    border: 1.5px solid #bc13fe;
+    box-shadow: 0 0 8px #bc13fe;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.icon-frame { border-radius: 2px; }
+
+.icon-trash::before, .icon-trash::after {
+    content: ''; position: absolute;
+    width: 10px; height: 1.5px;
+    background: #bc13fe; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+.icon-trash::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+.icon-sleep {
+    border: none; box-shadow: none; width: 16px; height: 16px;
+    background: linear-gradient(45deg, transparent 20%, #bc13fe 20%, #bc13fe 80%, transparent 80%);
+    filter: drop-shadow(0 0 5px #bc13fe);
+}
