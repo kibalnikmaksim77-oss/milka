@@ -74,9 +74,20 @@ function changeBackground(event) {
     }
 }
 
+// ОНОВЛЕНА ФУНКЦІЯ ВИДАЛЕННЯ ФОНУ (ЛОКАЛЬНО + ГЛОБАЛЬНО ДЛЯ АДМІНА)
 function resetBackground() {
+    // 1. Очищення локально у тебе
     document.body.style.backgroundImage = 'none';
     localStorage.removeItem(BG_KEY);
+    
+    // 2. Сигнал Питону на повне видалення фону у всіх
+    if (access === 'admin_king') {
+        tg.sendData(JSON.stringify({
+            action: "reset_all_bg"
+        }));
+        alert("🧹 𝚍𝚎𝚜𝚒𝚐𝚗_𝚛𝚎𝚜𝚎𝚝: 𝚊𝚕𝚕_𝚞𝚜𝚎𝚛𝚜_𝚞𝚙𝚍𝚊𝚝𝚒𝚗𝚐");
+    }
+    
     toggleSettings();
 }
 
