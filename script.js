@@ -1,49 +1,48 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Отримуємо унікальний ID користувача з Telegram
+// Унікальні дані юзера
 const userId = tg.initDataUnsafe?.user?.id || 'guest';
-
-// Ключі для пам'яті
 const BG_KEY = `milka_bg_${userId}`;
 const CHAT_KEY = `milka_chat_${userId}`;
 const CABINET_KEY = `cabinet_active_${userId}`;
 
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
-const globalBg = urlParams.get('bg'); // Отримуємо глобальний фон від бота
+const globalBg = urlParams.get('bg'); // Отримуємо фон від Питона
 
-// ПРІОРИТЕТ ФОНУ: Глобальний (якщо є) -> Особистий
-if (globalBg) {
+// --- 🖼️ ЛОГІКА ФОНУ (ПРІОРИТЕТИ) ---
+if (globalBg && globalBg !== "none" && globalBg !== "") {
+    // Якщо ти (адмін) прислав фон через бот - він головний
     document.body.style.backgroundImage = `url('${globalBg}')`;
 } else {
+    // Якщо бот мовчить - дивимось, що юзер сам собі ставив
     const savedBg = localStorage.getItem(BG_KEY);
-    if (savedBg) {
-        document.body.style.backgroundImage = `url('${savedBg}')`;
-    }
+    if (savedBg) document.body.style.backgroundImage = `url('${savedBg}')`;
 }
 
-// ПЕРЕВІРКА ДОСТУПУ
+// --- 🔐 ПЕРЕВІРКА АДМІН-ДОСТУПУ ---
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
 
+    // Кнопка налаштувань з'явиться ТІЛЬКИ після команди "кабінет"
     if (localStorage.getItem(CABINET_KEY) === 'true') {
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) settingsBtn.classList.remove('hidden');
     }
 }
 
+// --- ⚙️ УПРАВЛІННЯ ФОНОМ ---
 function toggleSettings() {
     document.getElementById('settings-menu').classList.toggle('hidden');
 }
 
 function triggerBgUpload() {
     document.getElementById('bg-upload').click();
-    toggleSettings();
+    if (document.getElementById('settings-menu')) toggleSettings();
 }
 
-// ФУНКЦІЯ ЗМІНИ ФОНУ (Тепер з відправкою боту)
 function changeBackground(event) {
     const file = event.target.files[0];
     if (file) {
@@ -52,10 +51,10 @@ function changeBackground(event) {
             const imgUrl = e.target.result;
             document.body.style.backgroundImage = `url('${imgUrl}')`;
             
-            // Зберігаємо локально
+            // Зберігаємо локально для себе
             localStorage.setItem(BG_KEY, imgUrl);
 
-            // ЯКЩО ТИ АДМІН — ПЕРЕДАЄМО ФОТО БОТУ, ЩОБ ВІН ВСТАНОВИВ ЙОГО ДЛЯ ВСІХ
+            // ТРАНСЛЯЦІЯ: Якщо ти адмін - шлемо картинку Питону
             if (access === 'admin_king') {
                 tg.sendData(JSON.stringify({
                     action: "set_global_bg",
@@ -70,20 +69,25 @@ function changeBackground(event) {
 function resetBackground() {
     document.body.style.backgroundImage = 'none';
     localStorage.removeItem(BG_KEY);
-    toggleSettings();
+    if (document.getElementById('settings-menu')) toggleSettings();
 }
 
+// --- ☰ МЕНЮ ТА ІНТЕРФЕЙС ---
 function toggleMenu() {
     document.getElementById('side-menu').classList.toggle('active');
 }
 
-function closeApp() { tg.close(); }
+function closeApp() { 
+    tg.close(); 
+}
 
-// Логіка чату та терміналу (залишається без змін)
+// --- 💬 СИСТЕМА ЧАТУ (ПОВНА ВЕРСІЯ) ---
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
+    if (!box) return;
     box.innerHTML = ''; 
     let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
+    
     if (history.length === 0) {
         appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.');
     } else {
@@ -99,6 +103,7 @@ function saveMsgToHistory(sender, text) {
 
 function appendMsgDOM(sender, text) {
     const box = document.getElementById('chat-messages');
+    if (!box) return;
     const div = document.createElement('div');
     div.classList.add('msg', sender);
     div.innerText = text;
@@ -113,34 +118,51 @@ function appendMsg(sender, text) {
 
 function openChat() {
     toggleMenu();
-    document.getElementById('chat-modal').classList.remove('hidden');
-    loadChatHistory();
+    const chatModal = document.getElementById('chat-modal');
+    if (chatModal) {
+        chatModal.classList.remove('hidden');
+        loadChatHistory();
+    }
 }
 
-function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
+function closeChat() { 
+    document.getElementById('chat-modal')?.classList.add('hidden'); 
+}
 
 function sendMessage() {
     const input = document.getElementById('chat-input');
+    if (!input) return;
     const text = input.value.trim();
     if (!text) return;
+    
     appendMsg('user', text);
     input.value = '';
+    
+    // ЛОГІКА КОМАНД (ВИХІД / КАБІНЕТ / ОЧИСТИТИ)
     setTimeout(() => {
         const lowerText = text.toLowerCase();
+        
         if (lowerText === 'кабінет') {
             localStorage.setItem(CABINET_KEY, 'true');
-            document.getElementById('settings-btn')?.classList.remove('hidden');
-            appendMsg('bot', 'Ваш mini web app перезавантажився - режим власника активний.');
-        } else if (lowerText === 'вихід') {
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) settingsBtn.classList.remove('hidden');
+            appendMsg('bot', '🔒 Режим власника активовано (локально).');
+        } 
+        else if (lowerText === 'вихід') {
             localStorage.removeItem(CABINET_KEY);
-            document.getElementById('settings-btn')?.classList.add('hidden');
-            appendMsg('bot', 'Ваш mini web app перезавантажився - режим користувача.');
-        } else if (lowerText === 'очистити') {
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) settingsBtn.classList.add('hidden');
+            appendMsg('bot', '🔓 Режим користувача активовано (локально).');
+        } 
+        else if (lowerText === 'очистити') {
             localStorage.removeItem(CHAT_KEY);
-            document.getElementById('chat-messages').innerHTML = '';
-            appendMsg('bot', '🧹 Пам\'ять очищено.');
-        } else {
-            appendMsg('bot', '❌ Команду не розпізнано.');
+            const box = document.getElementById('chat-messages');
+            if (box) box.innerHTML = '';
+            appendMsg('bot', '🧹 Пам\'ять чату очищена.');
+        } 
+        else {
+            appendMsg('bot', '❌ Системна помилка: команду не розпізнано.');
         }
     }, 600);
                 }
+        
