@@ -37,69 +37,52 @@ Body {
 }
 
 #burger-btn {
-    position: absolute; top: 20px; left: 20px;
-    cursor: pointer; z-index: 50; padding: 5px;
-    display: flex; flex-direction: column; justify-content: center;
-    height: 24px;
+    position: absolute; top: 20px; left: 20px; cursor: pointer; z-index: 50; padding: 5px;
+    display: flex; flex-direction: column; justify-content: center; height: 24px;
 }
 #burger-btn span {
-    display: block; width: 24px; height: 2px;
-    background: #bc13fe; margin: 3px 0;
-    box-shadow: 0 0 10px #bc13fe;
+    display: block; width: 24px; height: 2px; background: #bc13fe; margin: 3px 0; box-shadow: 0 0 10px #bc13fe;
 }
 
 #settings-btn {
-    position: absolute; top: 20px; right: 20px;
-    cursor: pointer; z-index: 50; padding: 5px 10px;
-    color: #bc13fe; font-size: 26px; font-weight: bold;
-    text-shadow: 0 0 10px #bc13fe; user-select: none;
-    display: flex; align-items: center; justify-content: center;
-    height: 24px; line-height: 0; 
+    position: absolute; top: 20px; right: 20px; cursor: pointer; z-index: 50; padding: 5px 10px;
+    color: #bc13fe; font-size: 26px; font-weight: bold; text-shadow: 0 0 10px #bc13fe; user-select: none;
+    display: flex; align-items: center; justify-content: center; height: 24px; line-height: 0; 
 }
 
 #settings-menu {
-    position: absolute; top: 55px; right: 20px;
-    background: rgba(15, 15, 15, 0.95); border: 1px solid #bc13fe;
-    border-radius: 8px; z-index: 101;
-    box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
+    position: absolute; top: 55px; right: 20px; background: rgba(15, 15, 15, 0.95); border: 1px solid #bc13fe;
+    border-radius: 8px; z-index: 101; box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
     display: flex; flex-direction: column; overflow: hidden;
 }
 
 .settings-item {
-    background: transparent; border: none; color: #bc13fe;
-    padding: 12px 15px; font-size: 12px; font-weight: bold;
-    cursor: pointer; text-align: left; border-bottom: 1px solid #222;
-    display: flex; align-items: center;
+    background: transparent; border: none; color: #bc13fe; padding: 12px 15px; font-size: 12px; font-weight: bold;
+    cursor: pointer; text-align: left; border-bottom: 1px solid #222; display: flex; align-items: center;
 }
 .settings-item:last-child { border-bottom: none; }
 .settings-item:hover { background: rgba(188, 19, 254, 0.1); }
 
 #exit-btn {
-    background: rgba(5, 5, 5, 0.7); border: 1.5px solid #bc13fe;
-    color: #fff; padding: 8px 18px; border-radius: 20px;
-    font-weight: bold; font-size: 11px;
-    box-shadow: 0 0 8px rgba(188, 19, 254, 0.4);
-    cursor: pointer; backdrop-filter: blur(5px); z-index: 10;
-    display: flex; align-items: center; justify-content: center;
+    background: rgba(5, 5, 5, 0.7); border: 1.5px solid #bc13fe; color: #fff; padding: 8px 18px; border-radius: 20px;
+    font-weight: bold; font-size: 11px; box-shadow: 0 0 8px rgba(188, 19, 254, 0.4);
+    cursor: pointer; backdrop-filter: blur(5px); z-index: 10; display: flex; align-items: center; justify-content: center;
 }
 
 #side-menu {
-    position: fixed; top: 0; left: 0; width: 170px; height: 100%; 
-    background: #0f0f0f; border-right: 1px solid #bc13fe;
+    position: fixed; top: 0; left: 0; width: 170px; height: 100%; background: #0f0f0f; border-right: 1px solid #bc13fe;
     z-index: 100; transition: 0.4s ease; transform: translateX(-100%);
 }
 #side-menu.active { transform: translateX(0); }
 
 .menu-header {
-    padding: 15px; border-bottom: 1px solid #222;
-    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center;
     color: #bc13fe; font-size: 12px; font-weight: bold;
 }
 .menu-content { padding: 10px; }
 .dev-text { color: #444; font-size: 10px; text-align: center; }
 .menu-item {
-    width: 100%; padding: 10px; background: #151515;
-    border: 1px solid #bc13fe; color: #bc13fe;
+    width: 100%; padding: 10px; background: #151515; border: 1px solid #bc13fe; color: #bc13fe;
     border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer;
 }
 .divider { height: 1px; background: #222; margin: 15px 0; }
@@ -119,8 +102,7 @@ Body {
 .header-controls { display: flex; align-items: center; gap: 15px; }
 
 #format-trigger {
-    color: #bc13fe; font-size: 24px; font-weight: bold;
-    cursor: pointer; user-select: none; padding: 0 5px; margin-top: -5px;
+    color: #bc13fe; font-size: 24px; font-weight: bold; cursor: pointer; user-select: none; padding: 0 5px; margin-top: -5px;
 }
 
 #format-menu {
@@ -135,7 +117,10 @@ Body {
     color: #fff; cursor: pointer; font-size: 16px; padding: 0;
 }
 
-#chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+#chat-messages { 
+    flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; 
+    padding-bottom: 15px; /* Щоб повідомлення не залазили під прозору панель вводу */
+}
 
 .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; word-wrap: break-word; user-select: none; }
 .msg.bot { background: rgba(188, 19, 254, 0.05); border: 1px solid #bc13fe; box-shadow: 0 0 8px rgba(188, 19, 254, 0.3); align-self: flex-start; }
@@ -144,7 +129,7 @@ Body {
 .msg img, .msg video { max-width: 100%; border-radius: 8px; margin-top: 5px; border: 1px solid rgba(188, 19, 254, 0.4); box-shadow: 0 0 5px rgba(188, 19, 254, 0.3); }
 
 #media-preview-container { 
-    padding: 10px 15px; background: #0a0a0a; border-top: 1px solid #222; 
+    padding: 10px 15px; background: transparent; 
     display: flex; gap: 10px; overflow-x: auto; max-height: 90px;
 }
 .preview-item { 
@@ -158,9 +143,13 @@ Body {
     display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #bc13fe;
 }
 
+/* --- ОНОВЛЕНА ПРОЗОРА ПАНЕЛЬ ВВОДУ --- */
 .chat-input-area { 
-    padding: 10px 15px; display: flex; gap: 10px; 
-    background: #0a0a0a; align-items: flex-end;
+    padding: 10px 15px 25px 15px; /* Більше відступ знизу */
+    display: flex; gap: 12px; 
+    background: transparent; /* БІЛЬШЕ НІЯКОЇ ІЗОЛЕНТИ! */
+    border-top: none; /* Жодної верхньої межі */
+    align-items: flex-end;
 }
 
 .icon-neon-btn {
@@ -170,25 +159,31 @@ Body {
 }
 .icon-neon-btn:active { transform: scale(0.9); }
 
-.attach-btn { min-width: 32px; height: 32px; font-size: 24px; margin-bottom: 6px; }
+.attach-btn { min-width: 36px; height: 36px; font-size: 24px; margin-bottom: 8px; }
 
+/* ЗБІЛЬШЕНИЙ І ЗАПАЯНИЙ В ДИЗАЙН ІНПУТ (Скляний ефект) */
 .editor-wrapper {
-    position: relative; flex-grow: 1; background: #1a1a1c; border-radius: 24px; 
-    border: 1px solid #bc13fe; box-shadow: inset 0 0 5px rgba(188, 19, 254, 0.2);
-    display: flex; align-items: flex-end; padding-right: 45px;
+    position: relative; flex-grow: 1; 
+    background: rgba(15, 15, 15, 0.6); /* Легке скло */
+    backdrop-filter: blur(8px); /* Розмиття фону позаду */
+    border-radius: 24px; 
+    border: 1px solid rgba(188, 19, 254, 0.5); 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), inset 0 0 5px rgba(188, 19, 254, 0.2);
+    display: flex; align-items: flex-end; padding-right: 48px;
 }
 .editor {
-    width: 100%; min-height: 20px; max-height: 120px;
-    padding: 14px 10px 14px 15px; color: #fff; outline: none;
-    overflow-y: auto; font-size: 14px; line-height: 1.4; word-break: break-word;
+    width: 100%; min-height: 24px; max-height: 140px;
+    padding: 15px 10px 15px 18px; /* Розширені відступи */
+    color: #fff; outline: none;
+    overflow-y: auto; font-size: 15px; line-height: 1.4; word-break: break-word;
 }
-.editor:empty:before { content: attr(data-placeholder); color: #666; pointer-events: none; display: block; }
+.editor:empty:before { content: attr(data-placeholder); color: #888; pointer-events: none; display: block; }
 
 .send-btn-inside.circle-btn {
-    position: absolute; right: 5px; bottom: 5px;
-    width: 34px; height: 34px; border-radius: 50%;
-    background: rgba(188, 19, 254, 0.1); border: 1px solid #bc13fe;
-    box-shadow: 0 0 8px #bc13fe, inset 0 0 4px #bc13fe; font-size: 16px;
+    position: absolute; right: 6px; bottom: 6px;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(188, 19, 254, 0.15); border: 1px solid #bc13fe;
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.6), inset 0 0 5px #bc13fe; font-size: 18px;
 }
 
 .format-item { padding: 12px 16px; font-size: 14px; color: #fff; cursor: pointer; border-bottom: 1px solid #2a2a2c;}
@@ -207,7 +202,7 @@ Body {
 
 .hidden { display: none !important; }
 
-/* --- КАСТОМНЕ НЕОНОВЕ ВІКНО ВИДАЛЕННЯ --- */
+/* КАСТОМНЕ НЕОНОВЕ ВІКНО ВИДАЛЕННЯ */
 #delete-confirm-modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.85); z-index: 9999;
