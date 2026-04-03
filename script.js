@@ -13,10 +13,8 @@ const globalBg = urlParams.get('bg'); // Отримуємо фон від Пит
 
 // --- 🖼️ ЛОГІКА ФОНУ (ПРІОРИТЕТИ) ---
 if (globalBg && globalBg !== "none" && globalBg !== "") {
-    // Якщо ти (адмін) прислав фон через бот - він головний
     document.body.style.backgroundImage = `url('${globalBg}')`;
 } else {
-    // Якщо бот мовчить - дивимось, що юзер сам собі ставив
     const savedBg = localStorage.getItem(BG_KEY);
     if (savedBg) document.body.style.backgroundImage = `url('${savedBg}')`;
 }
@@ -26,7 +24,6 @@ if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
 
-    // Кнопка налаштувань з'явиться ТІЛЬКИ після команди "кабінет"
     if (localStorage.getItem(CABINET_KEY) === 'true') {
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) settingsBtn.classList.remove('hidden');
@@ -40,7 +37,9 @@ function toggleSettings() {
 
 function triggerBgUpload() {
     document.getElementById('bg-upload').click();
-    if (document.getElementById('settings-menu')) toggleSettings();
+    if (document.getElementById('settings-menu')) {
+        document.getElementById('settings-menu').classList.add('hidden');
+    }
 }
 
 function changeBackground(event) {
@@ -54,7 +53,7 @@ function changeBackground(event) {
             // Зберігаємо локально для себе
             localStorage.setItem(BG_KEY, imgUrl);
 
-            // ТРАНСЛЯЦІЯ: Якщо ти адмін - шлемо картинку Питону
+            // ТРАНСЛЯЦІЯ: Якщо ти адмін - шлемо сигнал боту для синхронізації всіх
             if (access === 'admin_king') {
                 tg.sendData(JSON.stringify({
                     action: "set_global_bg",
@@ -69,7 +68,9 @@ function changeBackground(event) {
 function resetBackground() {
     document.body.style.backgroundImage = 'none';
     localStorage.removeItem(BG_KEY);
-    if (document.getElementById('settings-menu')) toggleSettings();
+    if (document.getElementById('settings-menu')) {
+        document.getElementById('settings-menu').classList.add('hidden');
+    }
 }
 
 // --- ☰ МЕНЮ ТА ІНТЕРФЕЙС ---
@@ -81,7 +82,7 @@ function closeApp() {
     tg.close(); 
 }
 
-// --- 💬 СИСТЕМА ЧАТУ (ПОВНА ВЕРСІЯ) ---
+// --- 💬 СИСТЕМА ЧАТУ (ТВІЙ ПОВНИЙ КОД) ---
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
     if (!box) return;
@@ -138,7 +139,6 @@ function sendMessage() {
     appendMsg('user', text);
     input.value = '';
     
-    // ЛОГІКА КОМАНД (ВИХІД / КАБІНЕТ / ОЧИСТИТИ)
     setTimeout(() => {
         const lowerText = text.toLowerCase();
         
@@ -164,5 +164,5 @@ function sendMessage() {
             appendMsg('bot', '❌ Системна помилка: команду не розпізнано.');
         }
     }, 600);
-                }
-        
+        }
+                      
