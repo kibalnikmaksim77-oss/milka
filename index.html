@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Milka Mini App</title>
-    <link rel="stylesheet" href="style.css?v=11">
+    <link rel="stylesheet" href="style.css?v=10">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div id="app-container" class="neon-border">
-        <div id="main-content-view" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div id="main-content-view" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative;">
             <div id="burger-btn" onclick="toggleMenu()">
                 <span></span><span></span><span></span>
             </div>
@@ -29,9 +29,8 @@
             <div id="user-commands-safe-zone"></div>
         </div>
 
-        <div id="dynamic-page-view" class="hidden" style="width: 100%; height: 100%; position: relative;">
-            <div style="position: absolute; top: 20px; left: 20px; color: #bc13fe; font-weight: bold; cursor: pointer; z-index: 100;" onclick="closeDynamicPage()">⬅ НАЗАД</div>
-            <div id="dynamic-settings-trigger" style="position: absolute; top: 20px; right: 20px; color: #bc13fe; font-size: 26px; cursor: pointer;" onclick="toggleSettings()">⋮</div>
+        <div id="dynamic-page-view" class="hidden" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 150;">
+            <div style="position: absolute; top: 20px; left: 20px; color: #bc13fe; font-weight: bold; cursor: pointer; z-index: 160; text-shadow: 0 0 10px #bc13fe;" onclick="closeDynamicPage()">⬅ НАЗАД</div>
             <div id="dynamic-body" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <p class="dev-text" id="dynamic-status">Система в стадії розробки...</p>
             </div>
@@ -44,12 +43,13 @@
             <button onclick="toggleMenu()" class="close-btn">❌</button>
         </div>
         <div class="menu-content">
-            <div id="user-view"></div>
+            <div id="user-view"><p class="dev-text">Система в стадії розробки...</p></div>
             
             <div id="admin-view" class="hidden">
                 <div class="divider"></div>
-                <button class="menu-item secret-btn" onclick="openChat()" style="margin-bottom: 10px;">⚡ Milka Bot</button>
-                <div id="owner-view"></div>
+                <button class="menu-item secret-btn" onclick="openChat()">⚡ Milka Bot</button>
+                
+                <div id="owner-view" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
         </div>
     </div>
@@ -57,10 +57,12 @@
     <div id="chat-modal" class="hidden neon-border">
         <div class="chat-header">
             <span class="neon-title"><span class="neon-bot">🤖</span> Milka System</span>
+            
             <div class="header-controls">
                 <div id="format-trigger" class="hidden" onclick="toggleFormatMenu()">⋮</div>
                 <button onclick="closeChat()" class="close-btn">❌</button>
             </div>
+            
             <div id="format-menu" class="hidden">
                 <div class="format-item" onmousedown="applyFormat('codeBlock', event)">Кодовий <code>&lt;/&gt;</code></div>
                 <div class="format-item" onmousedown="applyFormat('bold', event)"><b>Жирний</b></div>
@@ -72,11 +74,15 @@
                 <div class="format-item" onmousedown="applyFormat('plain', event)">Звичайний</div>
             </div>
         </div>
+        
         <div id="chat-messages"></div>
+        
         <div id="media-preview-container" class="hidden"></div>
+        
         <div class="chat-input-area">
             <button onclick="document.getElementById('attach-upload').click()" class="attach-btn icon-neon-btn">🖇️</button>
             <input type="file" id="attach-upload" style="display: none !important; opacity: 0; position: absolute; z-index: -1;" accept="image/*,video/*" multiple onchange="handleAttachment(event)">
+            
             <div class="editor-wrapper">
                 <div id="chat-input" class="editor" contenteditable="true" data-placeholder="Команда..."></div>
                 <button onclick="sendMessage()" class="send-btn-inside circle-btn icon-neon-btn">➤</button>
@@ -94,6 +100,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=11"></script>
+    <script src="script.js"></script>
 </body>
 </html>
