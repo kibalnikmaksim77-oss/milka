@@ -10,11 +10,10 @@ const NOTES_KEY = `milka_notes_${userId}`;
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
-const encodedData = urlParams.get('cd'); // Параметр для кнопок з Питона
+const encodedData = urlParams.get('cd'); 
 
 let cyberPages = {};
 
-// --- РОЗШИФРОВКА БАЗИ ---
 if (encodedData) {
     try {
         cyberPages = JSON.parse(atob(encodedData));
@@ -27,69 +26,78 @@ else {
     if (savedBg) { document.body.style.backgroundImage = `url('${savedBg}')`; }
 }
 
-// 🛑 ВАЖЛИВИЙ ФІКС: ТЕПЕР АПКА ВІРИТЬ ТІЛЬКИ ПИТОНУ! 🛑
+// 🛑 ВБИВЦЯ ПРИВИДА: ВІРИМО ТІЛЬКИ ПИТОНУ
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
-
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) settingsBtn.classList.remove('hidden');
     
-    localStorage.setItem(CABINET_KEY, 'true'); // Записуємо, що ти бос
+    // Пишемо в кеш, щоб старі функції не ламалися
+    localStorage.setItem(CABINET_KEY, 'true'); 
 } else {
-    // Якщо пароля від Питона немає - ПРИМУСОВО ховаємо все і ЧИСТИМО пам'ять!
+    // Жорстко забираємо права і чистимо кеш!
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.add('hidden');
-
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) settingsBtn.classList.add('hidden');
     
-    localStorage.removeItem(CABINET_KEY); // ВБИВАЄМО ПРИВИДА!
+    localStorage.removeItem(CABINET_KEY);
 }
 
-// --- ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ ---
 function neonizeEmoji(text) {
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- МАЛЮВАННЯ КНОПОК З ПИТОНА ---
 function renderCyberButtons() {
-    const mainGrid = document.getElementById('user-commands-safe-zone');
-    const userNav = document.getElementById('user-view');
-    const ownerNav = document.getElementById('owner-view'); 
-    
-    if (!cyberPages.main || !mainGrid) return;
+    try {
+        const mainGrid = document.getElementById('user-commands-safe-zone');
+        const userNav = document.getElementById('user-view');
+        const ownerNav = document.getElementById('owner-view'); 
+        
+        if (!cyberPages.main || !mainGrid) return;
 
-    let userCount = 0;
-    let ownerCount = 0;
+        let userCount = 0;
+        let ownerCount = 0;
 
-    cyberPages.main.buttons.forEach(btn => {
-        const isOwnerBtn = btn.role === 'owner';
-        if (isOwnerBtn && access !== 'admin_king') return; 
+        cyberPages.main.buttons.forEach(btn => {
+            const isOwnerBtn = btn.role === 'owner';
+            const isIncognito = btn.incognito === true;
 
-        const b = document.createElement('button');
-        b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
-        b.style.marginBottom = "8px";
-        b.style.width = "100%";
-        b.innerHTML = neonizeEmoji(btn.text);
-        b.onclick = () => openCyberPage(btn.target);
+            // Фільтр доступу
+            if ((isOwnerBtn || isIncognito) && access !== 'admin_king') return; 
 
-        if (btn.location === 'main') {
-            mainGrid.appendChild(b);
-        } else {
-            if (isOwnerBtn && ownerNav) {
-                ownerNav.appendChild(b);
-                ownerCount++;
-            } else if (userNav) {
-                userNav.appendChild(b);
-                userCount++;
+            const b = document.createElement('button');
+            b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
+            b.style.marginBottom = "8px";
+            b.style.width = "100%";
+            
+            if (isIncognito && access === 'admin_king') {
+                b.style.border = "1px dashed #bc13fe";
+                b.innerHTML = neonizeEmoji("🕵️‍♂️ " + btn.text);
+            } else {
+                b.innerHTML = neonizeEmoji(btn.text);
             }
-        }
-    });
+            
+            b.onclick = () => openCyberPage(btn.target);
 
-    if (userNav) setupAccordion(userNav, userCount);
-    if (ownerNav && access === 'admin_king') setupAccordion(ownerNav, ownerCount);
+            if (btn.location === 'main') {
+                mainGrid.appendChild(b);
+            } else {
+                if (isOwnerBtn && ownerNav) {
+                    ownerNav.appendChild(b);
+                    ownerCount++;
+                } else if (userNav) {
+                    userNav.appendChild(b);
+                    userCount++;
+                }
+            }
+        });
+
+        if (userNav) setupAccordion(userNav, userCount);
+        if (ownerNav && access === 'admin_king') setupAccordion(ownerNav, ownerCount);
+    } catch (err) { console.error("Crash prevented in renderCyberButtons", err); }
 }
 
 function setupAccordion(container, count) {
@@ -109,7 +117,6 @@ function setupAccordion(container, count) {
     }
 }
 
-// --- НАВІГАЦІЯ СТОРІНОК ---
 function openCyberPage(pageId) {
     const data = cyberPages[pageId];
     if (!data) return;
@@ -134,7 +141,6 @@ function closeDynamicPage() {
     document.body.style.backgroundImage = bg ? `url('${bg}')` : 'none';
 }
 
-// --- ТВОЇ ОРИГІНАЛЬНІ ФУНКЦІЇ ---
 function toggleSettings() { document.getElementById('settings-menu').classList.toggle('hidden'); }
 function triggerBgUpload() { document.getElementById('bg-upload').click(); toggleSettings(); }
 
@@ -482,13 +488,9 @@ function sendMessage() {
             else { appendMsg('bot', `❌ Пам'ятку <b>${reqTitle}</b> не знайдено.`); }
         }
         else if (lowerText === 'кабінет') {
-            localStorage.setItem(CABINET_KEY, 'true');
-            document.getElementById('settings-btn')?.classList.remove('hidden');
-            appendMsg('bot', 'Режим власника активний. Але повний доступ видає тільки бот!');
+            appendMsg('bot', '✅ Запит прийнято. Для повного доступу пропиши "кабінет" в офіційному чаті бота.');
         } else if (lowerText === 'вихід') {
-            localStorage.removeItem(CABINET_KEY);
-            document.getElementById('settings-btn')?.classList.add('hidden');
-            appendMsg('bot', 'Режим користувача. Права скинуто.');
+            appendMsg('bot', '✅ Запит прийнято. Для повного виходу пропиши "вихід" в офіційному чаті бота.');
         } else if (lowerText === 'очистити') {
             localStorage.removeItem(CHAT_KEY);
             document.getElementById('chat-messages').innerHTML = '';
@@ -498,6 +500,6 @@ function sendMessage() {
 }
 
 window.onload = () => {
-    renderCyberButtons();
+    try { renderCyberButtons(); } catch(e) { console.error("Error drawing buttons:", e); }
 };
-        
+                                   
