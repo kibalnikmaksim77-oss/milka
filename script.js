@@ -10,11 +10,15 @@ const NOTES_KEY = `milka_notes_${userId}`;
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
-const encodedData = urlParams.get('cd'); // Параметр для кнопок з Питона
+const encodedData = urlParams.get('cd'); 
+
+// --- ПРІОРИТЕТ 4: ЗАЛІЗНЕ ПРАВИЛО ДОСТУПУ (Smart Reset) ---
+// Тільки Пітон вирішує, чи ти Власник в даний момент.
+const isAdmin = (access === 'admin_king'); 
 
 let cyberPages = {};
 
-// --- НОВИНКА: РОЗШИФРОВКА БАЗИ (КРОК 3-4) ---
+// РОЗШИФРОВКА БАЗИ
 if (encodedData) {
     try {
         cyberPages = JSON.parse(atob(encodedData));
@@ -27,25 +31,36 @@ else {
     if (savedBg) { document.body.style.backgroundImage = `url('${savedBg}')`; }
 }
 
-if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
+// Застосовуємо Залізне Правило
+if (isAdmin) {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
 
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) settingsBtn.classList.remove('hidden');
+    
+    // Впроваджуємо UI для "Голосу Бога" тільки для Власника
+    injectVoiceOfGodUI();
+} else {
+    // Жорсткий Reset: ховаємо адмінку, навіть якщо локально щось збилося
+    const adminSection = document.getElementById('admin-view');
+    if (adminSection) adminSection.classList.add('hidden');
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) settingsBtn.classList.add('hidden');
+    localStorage.removeItem(CABINET_KEY); // Чистимо локальний кеш
 }
 
-// --- НОВИНКА: ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ (КРОК 7) ---
+// ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ
 function neonizeEmoji(text) {
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- НОВИНКА: МАЛЮВАННЯ КНОПОК З ПИТОНА (КРОК 6-8) ---
+// МАЛЮВАННЯ КНОПОК З ПИТОНА (З ФІЛЬТРОМ ІНКОГНІТО)
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
-    const ownerNav = document.getElementById('owner-view'); // Має бути в index.html
+    const ownerNav = document.getElementById('owner-view'); 
     
     if (!cyberPages.main || !mainGrid) return;
 
@@ -54,13 +69,24 @@ function renderCyberButtons() {
 
     cyberPages.main.buttons.forEach(btn => {
         const isOwnerBtn = btn.role === 'owner';
-        if (isOwnerBtn && access !== 'admin_king') return; 
+        const isIncognito = btn.incognito === true;
+
+        // ПРІОРИТЕТ 3: ІНКОГНІТО ЛОГІКА. Звичайний юзер не бачить прихованого!
+        if ((isOwnerBtn || isIncognito) && !isAdmin) return; 
 
         const b = document.createElement('button');
         b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
         b.style.marginBottom = "8px";
         b.style.width = "100%";
-        b.innerHTML = neonizeEmoji(btn.text);
+        
+        // Візуал: Власник бачить інкогніто-кнопки по-особливому
+        if (isIncognito && isAdmin) {
+            b.style.border = "1px dashed #bc13fe";
+            b.innerHTML = neonizeEmoji("🕵️‍♂️ " + btn.text);
+        } else {
+            b.innerHTML = neonizeEmoji(btn.text);
+        }
+        
         b.onclick = () => openCyberPage(btn.target);
 
         if (btn.location === 'main') {
@@ -77,7 +103,7 @@ function renderCyberButtons() {
     });
 
     if (userNav) setupAccordion(userNav, userCount);
-    if (ownerNav && access === 'admin_king') setupAccordion(ownerNav, ownerCount);
+    if (ownerNav && isAdmin) setupAccordion(ownerNav, ownerCount);
 }
 
 function setupAccordion(container, count) {
@@ -97,7 +123,7 @@ function setupAccordion(container, count) {
     }
 }
 
-// --- НОВИНКА: НАВІГАЦІЯ СТОРІНОК (КРОК 5) ---
+// НАВІГАЦІЯ СТОРІНОК (З НЕОНОВИМ ХРЕСТИКОМ)
 function openCyberPage(pageId) {
     const data = cyberPages[pageId];
     if (!data) return;
@@ -108,6 +134,19 @@ function openCyberPage(pageId) {
     if (mainView && dynamicView) {
         mainView.classList.add('hidden');
         dynamicView.classList.remove('hidden');
+        
+        // ПРІОРИТЕТ 2: НЕОНОВИЙ ХРЕСТИК ❌
+        let closeBtn = document.getElementById('neon-close-btn');
+        if (!closeBtn) {
+            closeBtn = document.createElement('div');
+            closeBtn.id = 'neon-close-btn';
+            closeBtn.innerHTML = '❌';
+            closeBtn.style.cssText = "position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; background: rgba(255, 255, 255, 0.1); border: 1px solid #bc13fe; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 10px #bc13fe; font-size: 14px; z-index: 1000;";
+            closeBtn.onclick = closeDynamicPage;
+            dynamicView.style.position = "relative"; 
+            dynamicView.appendChild(closeBtn);
+        }
+
         if (data.bg) document.body.style.backgroundImage = `url('${data.bg}')`;
         const status = document.getElementById('dynamic-status');
         if (status) status.innerText = data.bg ? "" : "Система в стадії розробки...";
@@ -122,7 +161,64 @@ function closeDynamicPage() {
     document.body.style.backgroundImage = bg ? `url('${bg}')` : 'none';
 }
 
-// --- ТВОЇ ОРИГІНАЛЬНІ ФУНКЦІЇ ПІШЛИ ДАЛІ ---
+// --- ПРІОРИТЕТ 7: ГОЛОС БОГА (DIVINE INPUT UI) ---
+function injectVoiceOfGodUI() {
+    if (document.getElementById('voice-of-god-panel')) return;
+
+    const panel = document.createElement('div');
+    panel.id = 'voice-of-god-panel';
+    panel.style.cssText = "display:none; position:fixed; bottom:0; left:0; width:100%; background:#111; border-top:1px solid #bc13fe; padding:10px; z-index:9999; box-shadow: 0 -5px 15px rgba(188,19,254,0.3); box-sizing: border-box;";
+    
+    panel.innerHTML = `
+        <div style="color:#bc13fe; font-weight:bold; font-size:12px; margin-bottom:5px;">👁️ Голос Бога (Стелс-трансляція)</div>
+        <div style="display:flex; gap:5px; margin-bottom: 20px;">
+            <input id="vog-chat-id" type="text" placeholder="ID чату" style="width:30%; background:#222; color:#fff; border:1px solid #bc13fe; padding:5px; border-radius:5px; outline:none;">
+            <input id="vog-text" type="text" placeholder="Текст повідомлення..." style="flex:1; background:#222; color:#fff; border:1px solid #bc13fe; padding:5px; border-radius:5px; outline:none;">
+            <button onclick="sendVoiceOfGod()" style="background:#bc13fe; color:#fff; border:none; padding:5px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">⚡</button>
+        </div>
+        <div onclick="toggleVoiceOfGod()" style="position:absolute; top:-25px; right:10px; background:#111; color:#bc13fe; border:1px solid #bc13fe; border-bottom:none; padding:3px 10px; border-radius:5px 5px 0 0; cursor:pointer; font-size:12px; font-weight:bold;">🔽 Сховати</div>
+    `;
+    document.body.appendChild(panel);
+
+    const toggler = document.createElement('div');
+    toggler.id = 'vog-toggler';
+    toggler.innerHTML = '🎤 Голос Бога';
+    toggler.style.cssText = "position:fixed; bottom:15px; right:15px; background:rgba(17,17,17,0.8); color:#bc13fe; border:1px solid #bc13fe; padding:8px 12px; border-radius:10px; cursor:pointer; z-index:9998; font-size:12px; box-shadow:0 0 10px #bc13fe; font-weight:bold;";
+    toggler.onclick = toggleVoiceOfGod;
+    document.body.appendChild(toggler);
+}
+
+window.toggleVoiceOfGod = function() {
+    const panel = document.getElementById('voice-of-god-panel');
+    const toggler = document.getElementById('vog-toggler');
+    if(panel.style.display === 'none') {
+        panel.style.display = 'block';
+        toggler.style.display = 'none';
+    } else {
+        panel.style.display = 'none';
+        toggler.style.display = 'block';
+    }
+};
+
+window.sendVoiceOfGod = function() {
+    const chatId = document.getElementById('vog-chat-id').value.trim();
+    const text = document.getElementById('vog-text').value.trim();
+    if(!chatId || !text) {
+        alert("❌ Введіть ID чату та текст!");
+        return;
+    }
+    // Відправляємо сигнал Питону
+    tg.sendData(JSON.stringify({ action: "voice_of_god", chat_id: chatId, text: text }));
+    
+    // Блискавичний візуальний фідбек
+    const btn = document.querySelector('#voice-of-god-panel button');
+    btn.style.background = '#0f0';
+    setTimeout(() => btn.style.background = '#bc13fe', 500);
+    
+    document.getElementById('vog-text').value = ''; // Очищаємо поле вводу
+};
+
+// ТВОЇ ОРИГІНАЛЬНІ ФУНКЦІЇ ЙДУТЬ ДАЛІ
 function toggleSettings() { document.getElementById('settings-menu').classList.toggle('hidden'); }
 function triggerBgUpload() { document.getElementById('bg-upload').click(); toggleSettings(); }
 
@@ -138,7 +234,7 @@ function changeBackground(event) {
     };
     reader.readAsDataURL(file);
 
-    if (access === 'admin_king') {
+    if (isAdmin) {
         tg.sendData(JSON.stringify({ action: "request_photo" }));
         alert("🦾 Сигнал передано Питону! \n\nТепер закрий додаток і просто відправ потрібне фото боту в повідомлення. Він сам його розішле.");
         setTimeout(() => { tg.close(); }, 500);
@@ -148,7 +244,7 @@ function changeBackground(event) {
 function resetBackground() {
     document.body.style.backgroundImage = 'none';
     localStorage.removeItem(BG_KEY);
-    if (access === 'admin_king') {
+    if (isAdmin) {
         tg.sendData(JSON.stringify({ action: "reset_all_bg" }));
         alert("🧹 𝚍𝚎𝚜𝚒𝚐𝚗_𝚛𝚎𝚜𝚎𝚝: 𝚊𝚕𝚕_𝚞𝚜𝚎𝚛𝚜_𝚞𝚙𝚍𝚊𝚝𝚒𝚗𝚐");
     }
@@ -396,97 +492,4 @@ window.openNoteFromButton = function(title, msgId) {
 
 window.returnToNotesList = function(msgId) {
     let htmlContent = generateNotesListHTML(msgId);
-    updateMsg(msgId, htmlContent);
-};
-
-let awaitingNote = false;
-
-function sendMessage() {
-    const htmlText = chatInput.innerHTML.trim(); 
-    const rawText = chatInput.innerText.trim();
-
-    if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div') && pendingMedia.length === 0) return;
-    
-    if (awaitingNote) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlText;
-        const codeHeaderSpan = tempDiv.querySelector('.code-header span:first-child');
-        
-        if (codeHeaderSpan) {
-            const noteTitle = codeHeaderSpan.innerText.trim();
-            let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
-            notes[noteTitle.toLowerCase()] = htmlText; 
-            localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
-            appendMsg('bot', `💾 Код <b>${noteTitle}</b> успішно завантажено в кібер-пам'ять!`);
-        } else {
-            appendMsg('bot', `❌ Відмінено. Ви не відправили форматований блок коду (через &lt;/&gt;).`);
-        }
-        
-        awaitingNote = false;
-        chatInput.innerHTML = '';
-        pendingMedia = [];
-        renderMediaPreview();
-        formatTrigger.classList.add('hidden');
-        formatMenu.classList.add('hidden');
-        return; 
-    }
-
-    let mediaHtml = '';
-    pendingMedia.forEach(media => {
-        if (media.type === 'video') { mediaHtml += `<video src="${media.src}" controls></video><br>`; } 
-        else { mediaHtml += `<img src="${media.src}"><br>`; }
-    });
-
-    const finalMessageHtml = mediaHtml + htmlText;
-    appendMsg('user', finalMessageHtml);
-    
-    chatInput.innerHTML = '';
-    pendingMedia = [];
-    renderMediaPreview();
-    formatTrigger.classList.add('hidden');
-    formatMenu.classList.add('hidden');
-    
-    setTimeout(() => {
-        const lowerText = rawText.toLowerCase();
-        
-        if (lowerText === '+пам\'ятка' || lowerText === '+пам’ятка') {
-            awaitingNote = true;
-            appendMsg('bot', 'Що ви хочете зберегти? Відправте текст у вигляді кода (через <b>⋮</b> -> <b>&lt;/&gt;</b>), і я візьму назву з назви коду.');
-        } 
-        else if (lowerText === 'пам\'ятки' || lowerText === 'пам’ятки') {
-            let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
-            let keys = Object.keys(notes);
-            const msgId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
-            if (keys.length === 0) {
-                appendMsg('bot', `📭 Ваша кібер-пам'ять наразі порожня.`, msgId);
-            } else {
-                appendMsg('bot', generateNotesListHTML(msgId), msgId);
-            }
-        }
-        else if (lowerText.startsWith("пам'ятка ") || lowerText.startsWith("пам’ятка ")) {
-            const reqTitle = lowerText.replace(/пам['’]ятка /g, "").trim();
-            let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
-            if (notes[reqTitle]) { appendMsg('bot', `📂 Ось ваш код:<br>` + notes[reqTitle]); } 
-            else { appendMsg('bot', `❌ Пам'ятку <b>${reqTitle}</b> не знайдено.`); }
-        }
-        else if (lowerText === 'кабінет') {
-            localStorage.setItem(CABINET_KEY, 'true');
-            document.getElementById('settings-btn')?.classList.remove('hidden');
-            appendMsg('bot', 'Режим власника активний.');
-        } else if (lowerText === 'вихід') {
-            localStorage.removeItem(CABINET_KEY);
-            document.getElementById('settings-btn')?.classList.add('hidden');
-            appendMsg('bot', 'Режим користувача.');
-        } else if (lowerText === 'очистити') {
-            localStorage.removeItem(CHAT_KEY);
-            document.getElementById('chat-messages').innerHTML = '';
-            appendMsg('bot', '🧹 Пам\'ять очищено.');
-        } 
-    }, 600);
-}
-
-// --- ІНІЦІАЛІЗАЦІЯ ПРИ ЗАВАНТАЖЕННІ (Щоб кнопки малювалися відразу) ---
-window.onload = () => {
-    renderCyberButtons();
-};
-    
+    updateM
