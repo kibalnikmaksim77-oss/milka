@@ -14,7 +14,7 @@ const encodedData = urlParams.get('cd'); // Параметр для кнопок
 
 let cyberPages = {};
 
-// --- НОВИНКА: РОЗШИФРОВКА БАЗИ (КРОК 3-4) ---
+// --- РОЗШИФРОВКА БАЗИ ---
 if (encodedData) {
     try {
         cyberPages = JSON.parse(atob(encodedData));
@@ -27,25 +27,37 @@ else {
     if (savedBg) { document.body.style.backgroundImage = `url('${savedBg}')`; }
 }
 
-if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
+// 🛑 ВАЖЛИВИЙ ФІКС: ТЕПЕР АПКА ВІРИТЬ ТІЛЬКИ ПИТОНУ! 🛑
+if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
 
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) settingsBtn.classList.remove('hidden');
+    
+    localStorage.setItem(CABINET_KEY, 'true'); // Записуємо, що ти бос
+} else {
+    // Якщо пароля від Питона немає - ПРИМУСОВО ховаємо все і ЧИСТИМО пам'ять!
+    const adminSection = document.getElementById('admin-view');
+    if (adminSection) adminSection.classList.add('hidden');
+
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) settingsBtn.classList.add('hidden');
+    
+    localStorage.removeItem(CABINET_KEY); // ВБИВАЄМО ПРИВИДА!
 }
 
-// --- НОВИНКА: ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ (КРОК 7) ---
+// --- ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ ---
 function neonizeEmoji(text) {
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- НОВИНКА: МАЛЮВАННЯ КНОПОК З ПИТОНА (КРОК 6-8) ---
+// --- МАЛЮВАННЯ КНОПОК З ПИТОНА ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
-    const ownerNav = document.getElementById('owner-view'); // Має бути в index.html
+    const ownerNav = document.getElementById('owner-view'); 
     
     if (!cyberPages.main || !mainGrid) return;
 
@@ -97,7 +109,7 @@ function setupAccordion(container, count) {
     }
 }
 
-// --- НОВИНКА: НАВІГАЦІЯ СТОРІНОК (КРОК 5) ---
+// --- НАВІГАЦІЯ СТОРІНОК ---
 function openCyberPage(pageId) {
     const data = cyberPages[pageId];
     if (!data) return;
@@ -122,7 +134,7 @@ function closeDynamicPage() {
     document.body.style.backgroundImage = bg ? `url('${bg}')` : 'none';
 }
 
-// --- ТВОЇ ОРИГІНАЛЬНІ ФУНКЦІЇ ПІШЛИ ДАЛІ ---
+// --- ТВОЇ ОРИГІНАЛЬНІ ФУНКЦІЇ ---
 function toggleSettings() { document.getElementById('settings-menu').classList.toggle('hidden'); }
 function triggerBgUpload() { document.getElementById('bg-upload').click(); toggleSettings(); }
 
@@ -472,11 +484,11 @@ function sendMessage() {
         else if (lowerText === 'кабінет') {
             localStorage.setItem(CABINET_KEY, 'true');
             document.getElementById('settings-btn')?.classList.remove('hidden');
-            appendMsg('bot', 'Режим власника активний.');
+            appendMsg('bot', 'Режим власника активний. Але повний доступ видає тільки бот!');
         } else if (lowerText === 'вихід') {
             localStorage.removeItem(CABINET_KEY);
             document.getElementById('settings-btn')?.classList.add('hidden');
-            appendMsg('bot', 'Режим користувача.');
+            appendMsg('bot', 'Режим користувача. Права скинуто.');
         } else if (lowerText === 'очистити') {
             localStorage.removeItem(CHAT_KEY);
             document.getElementById('chat-messages').innerHTML = '';
@@ -485,8 +497,7 @@ function sendMessage() {
     }, 600);
 }
 
-// --- ІНІЦІАЛІЗАЦІЯ ПРИ ЗАВАНТАЖЕННІ (Щоб кнопки малювалися відразу) ---
 window.onload = () => {
     renderCyberButtons();
 };
-    
+        
