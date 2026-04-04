@@ -41,16 +41,20 @@ function neonizeEmoji(text) {
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- НОВИНКА: МАЛЮВАННЯ КНОПОК З ПИТОНА (КРОК 6-8) ---
+// --- НОВИНКА: МАЛЮВАННЯ КНОПОК З ПИТОНА (КРОК 6-8) ВІДРЕДАГОВАНО ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
-    const ownerNav = document.getElementById('owner-view'); // Має бути в index.html
+    const ownerNav = document.getElementById('owner-view'); 
     
-    if (!cyberPages.main || !mainGrid) return;
+    if (!cyberPages.main) return;
 
     let userCount = 0;
     let ownerCount = 0;
+
+    // Знаходимо текст про розробку, щоб керувати ним
+    const devTextElement = userNav ? userNav.querySelector('.dev-text') : null;
+    let hasUserButtons = false;
 
     cyberPages.main.buttons.forEach(btn => {
         const isOwnerBtn = btn.role === 'owner';
@@ -61,20 +65,32 @@ function renderCyberButtons() {
         b.style.marginBottom = "8px";
         b.style.width = "100%";
         b.innerHTML = neonizeEmoji(btn.text);
-        b.onclick = () => openCyberPage(btn.target);
+        
+        // Поки кнопки "мертві" (Етап 1), вони просто світяться
+        b.onclick = () => console.log("Натиснуто: " + btn.text);
 
         if (btn.location === 'main') {
-            mainGrid.appendChild(b);
-        } else {
+            if (mainGrid) mainGrid.appendChild(b);
+        } else if (btn.location === 'burger') {
             if (isOwnerBtn && ownerNav) {
                 ownerNav.appendChild(b);
                 ownerCount++;
             } else if (userNav) {
                 userNav.appendChild(b);
                 userCount++;
+                hasUserButtons = true;
             }
         }
     });
+
+    // Магія зникнення тексту "Система в стадії розробки..."
+    if (devTextElement) {
+        if (hasUserButtons) {
+            devTextElement.style.display = 'none';
+        } else {
+            devTextElement.style.display = 'block';
+        }
+    }
 
     if (userNav) setupAccordion(userNav, userCount);
     if (ownerNav && access === 'admin_king') setupAccordion(ownerNav, ownerCount);
@@ -489,4 +505,3 @@ function sendMessage() {
 window.onload = () => {
     renderCyberButtons();
 };
-            
