@@ -14,10 +14,17 @@ const encodedData = urlParams.get('cd');
 
 let cyberPages = {};
 
+// 🛠 ГОЛОВНИЙ ФІКС: ПРАВИЛЬНА РОЗШИФРОВКА УКРАЇНСЬКОЇ МОВИ З BASE64
 if (encodedData) {
     try {
-        cyberPages = JSON.parse(atob(encodedData));
-    } catch (e) { console.error("Помилка декодування бази cd"); }
+        // 1. Повертаємо плюси, якщо URL перетворив їх на пробіли
+        let cleanData = encodedData.replace(/ /g, '+');
+        // 2. Магічна формула для розшифровки кирилиці
+        let decodedString = decodeURIComponent(escape(atob(cleanData)));
+        cyberPages = JSON.parse(decodedString);
+    } catch (e) { 
+        console.error("Помилка декодування бази cd", e); 
+    }
 }
 
 if (globalBg) { document.body.style.backgroundImage = `url('${globalBg}')`; } 
@@ -33,10 +40,8 @@ if (access === 'admin_king') {
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) settingsBtn.classList.remove('hidden');
     
-    // Пишемо в кеш, щоб старі функції не ламалися
     localStorage.setItem(CABINET_KEY, 'true'); 
 } else {
-    // Жорстко забираємо права і чистимо кеш!
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.add('hidden');
     const settingsBtn = document.getElementById('settings-btn');
@@ -65,7 +70,6 @@ function renderCyberButtons() {
             const isOwnerBtn = btn.role === 'owner';
             const isIncognito = btn.incognito === true;
 
-            // Фільтр доступу
             if ((isOwnerBtn || isIncognito) && access !== 'admin_king') return; 
 
             const b = document.createElement('button');
@@ -97,7 +101,7 @@ function renderCyberButtons() {
 
         if (userNav) setupAccordion(userNav, userCount);
         if (ownerNav && access === 'admin_king') setupAccordion(ownerNav, ownerCount);
-    } catch (err) { console.error("Crash prevented in renderCyberButtons", err); }
+    } catch (err) { console.error("Помилка генерації кнопок:", err); }
 }
 
 function setupAccordion(container, count) {
@@ -499,7 +503,8 @@ function sendMessage() {
     }, 600);
 }
 
+// 🛠 ГОЛОВНИЙ ЗАПУСК - МАЛЮЄ КНОПКИ І ЧАТ ОДНОЧАСНО
 window.onload = () => {
-    try { renderCyberButtons(); } catch(e) { console.error("Error drawing buttons:", e); }
+    try { renderCyberButtons(); } catch(e) { console.error("Error drawing buttons", e); }
+    try { loadChatHistory(); } catch(e) { console.error("Error loading chat", e); }
 };
-                                   
