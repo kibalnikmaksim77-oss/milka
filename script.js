@@ -35,7 +35,7 @@ if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     if (settingsBtn) settingsBtn.classList.remove('hidden');
 }
 
-// --- ФУНКЦІЯ ГОЛОГРАФІЧНИХ ЕМОДЗІ (ОНОВЛЕНО: фікс іконок і розміру в меню) ---
+// --- ФУНКЦІЯ ГОЛОГРАФІЧНИХ ЕМОДЗІ (ФІНАЛЬНИЙ ФІКС РОЗМІРІВ ТА ІКОНОК) ---
 function renderHolographicEmoji(text, location = 'main') {
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
     const match = text.match(emojiRegex);
@@ -43,7 +43,7 @@ function renderHolographicEmoji(text, location = 'main') {
     if (match) {
         const emoji = match[0];
         
-        // Отримуємо Unicode-код емодзі для назви файлу (видаляємо 'fe0f' як у Python)
+        // Видаляємо 'fe0f' для правильного пошуку файлу
         const hexCode = [...emoji]
             .map(c => c.codePointAt(0).toString(16))
             .filter(code => code !== 'fe0f') 
@@ -51,19 +51,18 @@ function renderHolographicEmoji(text, location = 'main') {
             
         const cleanText = text.replace(emoji, '').trim();
         
-        // Якщо це бокове меню (burger), робимо іконку меншою і в рядок
+        // БОКОВЕ МЕНЮ: Без квадратів! Тільки текст і неонова іконка в один рядок.
+        // Якщо іконки немає на GitHub, onerror просто ховає її, залишаючи чистий текст.
         if (location === 'burger') {
             return `
-                <div style="display: flex; align-items: center; width: 100%; justify-content: flex-start; gap: 10px;">
-                    <div class="hologram-wrapper" style="width: 26px; height: 26px; margin: 0; border-radius: 6px;">
-                        <img src="assets/icons/${hexCode}.svg" style="width: 16px; height: 16px; filter: drop-shadow(0 0 4px #bc13fe);" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg=='">
-                    </div>
-                    <span class="btn-label" style="text-align: left; font-size: 11px;">${cleanText}</span>
+                <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
+                    <img src="assets/icons/${hexCode}.svg" style="width: 16px; height: 16px; flex-shrink: 0; filter: drop-shadow(0 0 4px #bc13fe);" onerror="this.style.display='none'">
+                    <span class="btn-label" style="text-align: left; font-size: 11px; text-shadow: none; line-height: 1;">${cleanText}</span>
                 </div>
             `;
         }
         
-        // Якщо це головне меню (main), повертаємо іконку над текстом у неоновому квадраті
+        // ГОЛОВНЕ МЕНЮ: Залишаємо великі квадрати
         return `
             <div class="hologram-wrapper">
                 <img src="assets/icons/${hexCode}.svg" class="cyber-svg-icon" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg=='">
@@ -71,7 +70,7 @@ function renderHolographicEmoji(text, location = 'main') {
             <span class="btn-label">${cleanText}</span>
         `;
     }
-    // Якщо емодзі немає, повертаємо просто текст
+    // Якщо емодзі немає
     return `<span class="btn-label">${text}</span>`;
 }
 
@@ -141,7 +140,7 @@ function openUserEyeStudio() {
             if (btn.role === 'user' && btn.location === 'main') {
                 const b = document.createElement('button');
                 b.className = 'note-btn';
-                // ОНОВЛЕНО: Передаємо 'main' для Ока Юзера
+                // Передаємо 'main' для Ока Юзера
                 b.innerHTML = renderHolographicEmoji(btn.text, 'main'); 
                 b.style.cssText = "display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:14px 10px; font-size:14px; border-radius:16px; background:rgba(15, 15, 15, 0.4); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1.5px solid rgba(188, 19, 254, 0.6); box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 0 10px rgba(188,19,254,0.2), 0 0 15px rgba(188,19,254,0.4); color:#fff; text-shadow:0 0 10px #bc13fe; margin:0;";
                 grid.appendChild(b);
@@ -195,7 +194,7 @@ function renderCyberButtons() {
         const b = document.createElement('button');
         b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
         
-        // ОНОВЛЕНО: Передаємо btn.location ('main' або 'burger')
+        // Передаємо btn.location ('main' або 'burger')
         b.innerHTML = renderHolographicEmoji(btn.text, btn.location); 
         
         b.onclick = () => console.log("Натиснуто: " + btn.text);
