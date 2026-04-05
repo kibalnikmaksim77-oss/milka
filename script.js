@@ -35,10 +35,27 @@ if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     if (settingsBtn) settingsBtn.classList.remove('hidden');
 }
 
-// --- ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ ---
-function neonizeEmoji(text) {
+// --- ФУНКЦІЯ ГОЛОГРАФІЧНИХ ЕМОДЗІ (ОНОВЛЕНО) ---
+function renderHolographicEmoji(text) {
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
-    return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
+    const match = text.match(emojiRegex);
+    
+    if (match) {
+        const emoji = match[0];
+        // Отримуємо Unicode-код емодзі для назви файлу
+        const hexCode = [...emoji].map(c => c.codePointAt(0).toString(16)).join('-');
+        const cleanText = text.replace(emoji, '').trim();
+        
+        // Повертаємо іконку над текстом у неоновому квадраті
+        return `
+            <div class="hologram-wrapper">
+                <img src="assets/icons/${hexCode}.svg" class="cyber-svg-icon" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg=='">
+            </div>
+            <span class="btn-label">${cleanText}</span>
+        `;
+    }
+    // Якщо емодзі немає, повертаємо просто текст
+    return `<span class="btn-label">${text}</span>`;
 }
 
 // --- СТУДІЯ "ОКО ЮЗЕРА" (ДРУГИЙ СВІТ - ІДЕАЛЬНО ЧИСТИЙ) ---
@@ -107,13 +124,12 @@ function openUserEyeStudio() {
             if (btn.role === 'user' && btn.location === 'main') {
                 const b = document.createElement('button');
                 b.className = 'note-btn';
-                b.innerHTML = neonizeEmoji(btn.text);
-                b.style.cssText = "width:100%; padding:14px 10px; font-size:14px; border-radius:16px; background:rgba(15, 15, 15, 0.4); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1.5px solid rgba(188, 19, 254, 0.6); box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 0 10px rgba(188,19,254,0.2), 0 0 15px rgba(188,19,254,0.4); color:#fff; text-shadow:0 0 10px #bc13fe; margin:0;";
+                b.innerHTML = renderHolographicEmoji(btn.text); // ОНОВЛЕНИЙ ВИКЛИК
+                b.style.cssText = "display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:14px 10px; font-size:14px; border-radius:16px; background:rgba(15, 15, 15, 0.4); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1.5px solid rgba(188, 19, 254, 0.6); box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 0 10px rgba(188,19,254,0.2), 0 0 15px rgba(188,19,254,0.4); color:#fff; text-shadow:0 0 10px #bc13fe; margin:0;";
                 grid.appendChild(b);
             }
         });
     }
-    // ТУТ БУВ ЗАЙВИЙ ТЕКСТ. Я ЙОГО ПОВНІСТЮ ВИДАЛИВ! ЕКРАН ТЕПЕР ЧИСТИЙ.
 
     modal.style.display = 'flex';
     if (document.getElementById('side-menu').classList.contains('active')) toggleMenu(); 
@@ -160,21 +176,23 @@ function renderCyberButtons() {
 
         const b = document.createElement('button');
         b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
-        b.innerHTML = neonizeEmoji(btn.text);
+        b.innerHTML = renderHolographicEmoji(btn.text); // ОНОВЛЕНИЙ ВИКЛИК
         
         b.onclick = () => console.log("Натиснуто: " + btn.text);
 
         if (btn.location === 'main') {
+            b.style.display = "flex";
+            b.style.flexDirection = "column";
+            b.style.alignItems = "center";
+            b.style.justifyContent = "center";
             b.style.width = "100%";
             b.style.margin = "0"; 
             b.style.padding = "14px 10px";
             b.style.fontSize = "14px";
             b.style.borderRadius = "16px"; 
-            
             b.style.background = "rgba(15, 15, 15, 0.4)"; 
             b.style.backdropFilter = "blur(12px)"; 
             b.style.WebkitBackdropFilter = "blur(12px)"; 
-            
             b.style.border = "1.5px solid rgba(188, 19, 254, 0.6)"; 
             b.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(188, 19, 254, 0.2), 0 0 15px rgba(188, 19, 254, 0.4)"; 
             b.style.color = "#fff";
@@ -197,7 +215,6 @@ function renderCyberButtons() {
         }
     });
 
-    // Логіка тексту "В розробці" ПРАЦЮЄ ТІЛЬКИ ДЛЯ БУРГЕР МЕНЮ
     if (devTextElement) {
         devTextElement.style.display = hasUserButtons ? 'none' : 'block';
     }
