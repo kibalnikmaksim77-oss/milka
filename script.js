@@ -10,14 +10,18 @@ const NOTES_KEY = `milka_notes_${userId}`;
 const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
-const encodedData = urlParams.get('cd'); // Параметр для кнопок з Питона
+const encodedData = urlParams.get('cd'); 
 
-let cyberPages = {};
+// База даних з підтримкою вкладених сторінок (матрьошка)
+let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {} };
+let isEditMode = false;
+let navStack = []; // Пам'ять кроків (Стек навігації)
 
 // --- РОЗШИФРОВКА БАЗИ КНОПОК ---
 if (encodedData) {
     try {
-        cyberPages = JSON.parse(atob(encodedData));
+        const parsed = JSON.parse(atob(encodedData));
+        cyberPages = { ...cyberPages, ...parsed };
     } catch (e) { console.error("Помилка декодування бази cd"); }
 }
 
@@ -30,7 +34,6 @@ else {
 if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
-
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) settingsBtn.classList.remove('hidden');
 }
@@ -38,7 +41,88 @@ if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
 // --- ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ ---
 function neonizeEmoji(text) {
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
-    return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
+    return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 8px #bc13fe); font-size: 1.2em;">$1</span>');
+}
+
+// --- НАВІГАЦІЯ (СТУДІЯ МАТРЬОШОК ТА СТЕК ПАМ'ЯТІ) ---
+function goHome() {
+    navStack = []; 
+    const terminal = document.getElementById('dynamic-terminal-page');
+    if (terminal) terminal.classList.add('hidden');
+    document.getElementById('app-container').classList.remove('hidden');
+    if (document.getElementById('side-menu').classList.contains('active')) toggleMenu();
+}
+
+function goBack() {
+    navStack.pop(); 
+    if (navStack.length > 0) {
+        renderTerminal(); 
+    } else {
+        goHome(); 
+    }
+}
+
+function openTerminalPage(pageTitle) {
+    // Системні кнопки не відкривають нові вікна
+    if(pageTitle.includes('Око Юзера') || pageTitle.includes('Milka Bot') || pageTitle === '🏠') return;
+    
+    navStack.push(pageTitle); 
+    renderTerminal();
+}
+
+function renderTerminal() {
+    if (navStack.length === 0) return;
+    const currentPage = navStack[navStack.length - 1]; 
+    
+    document.getElementById('app-container').classList.add('hidden');
+    if (document.getElementById('side-menu').classList.contains('active')) toggleMenu();
+    
+    let terminal = document.getElementById('dynamic-terminal-page');
+    if (!terminal) {
+        terminal = document.createElement('div');
+        terminal.id = 'dynamic-terminal-page';
+        terminal.className = 'neon-border';
+        document.body.appendChild(terminal);
+    }
+    
+    const isUserEye = document.getElementById('user-eye-studio') && document.getElementById('user-eye-studio').style.display !== 'none';
+    
+    let dotsHtml = '';
+    if (access === 'admin_king' && !isUserEye) {
+        dotsHtml = `<div class="admin-dots" onclick="toggleSettings()" style="margin-right: 15px;">⋮</div>`;
+    }
+
+    terminal.innerHTML = `
+        <div class="terminal-header">
+            <div class="terminal-burger" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="terminal-title">${neonizeEmoji(currentPage)}</div>
+            <div class="terminal-right-controls">
+                ${dotsHtml}
+                <div class="close-cross-btn" onclick="goBack()">❌</div>
+            </div>
+        </div>
+        <div class="terminal-content" id="terminal-buttons-container"></div>
+    `;
+    terminal.classList.remove('hidden');
+
+    // Рендеримо вкладені кнопки (матрьошки)
+    const contentContainer = document.getElementById('terminal-buttons-container');
+    if (cyberPages.pages && cyberPages.pages[currentPage]) {
+        cyberPages.pages[currentPage].buttons.forEach(btn => {
+            if (btn.role === 'owner' && access !== 'admin_king') return;
+            const b = document.createElement('button');
+            b.className = btn.role === 'owner' ? 'note-btn secret-btn' : 'note-btn';
+            b.innerHTML = neonizeEmoji(btn.text);
+            b.onclick = () => openTerminalPage(btn.text);
+            
+            b.style.cssText = "width:100%; padding:14px 10px; font-size:14px; border-radius:16px; background:rgba(15, 15, 15, 0.4); backdrop-filter:blur(12px); border:1.5px solid rgba(188, 19, 254, 0.6); box-shadow:0 8px 32px rgba(0,0,0,0.5); color:#fff; text-shadow:0 0 10px #bc13fe;";
+            contentContainer.appendChild(b);
+        });
+    } else {
+        contentContainer.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #555; margin-top: 20px;">Сторінка порожня...</div>`;
+    }
 }
 
 // --- СТУДІЯ "ОКО ЮЗЕРА" (ДРУГИЙ СВІТ - ІДЕАЛЬНО ЧИСТИЙ) ---
@@ -51,48 +135,20 @@ function openUserEyeStudio() {
         modal.style.cssText = "position:absolute; top:10px; left:10px; right:10px; bottom:10px; z-index:9999; background-size:cover; background-position:top center; background-repeat:no-repeat; display:flex; flex-direction:column; align-items:center; background-color:#080808; overflow:hidden;";
         
         const header = document.createElement('div');
-        header.style.cssText = "position:absolute; top:20px; left:20px; right:20px; display:flex; justify-content:space-between; align-items:center; z-index:10000;";
+        header.style.cssText = "position:relative; width: 100%; height: 60px; display:flex; justify-content:space-between; align-items:center; padding: 0 20px; box-sizing: border-box; margin-top: 10px;";
         
-        // ЗЛІВА: ХРЕСТ ДЛЯ ВИХОДУ
-        const backBtn = document.createElement('div');
-        backBtn.innerHTML = "❌";
-        backBtn.style.cssText = "color:#ff4d4d; font-weight:bold; cursor:pointer; text-shadow:0 0 10px #ff4d4d; font-size: 20px; padding: 5px; line-height: 0;";
+        header.innerHTML = `
+            <div class="terminal-burger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+            <div class="terminal-title">ОКО ЮЗЕРА</div>
+            <div class="close-cross-btn" onclick="document.getElementById('user-eye-studio').style.display='none'">❌</div>
+        `;
         
-        // СПРАВА: 3 КРАПКИ
-        const rightContainer = document.createElement('div');
-        rightContainer.style.position = 'relative';
-
-        const eyeSettingsBtn = document.createElement('div');
-        eyeSettingsBtn.innerHTML = "⋮";
-        eyeSettingsBtn.style.cssText = "cursor:pointer; padding:5px 10px; color:#bc13fe; font-size:26px; font-weight:bold; text-shadow:0 0 10px #bc13fe; user-select:none; display:flex; align-items:center; justify-content:center; height:24px; line-height:0;";
-        
-        const eyeSettingsMenu = document.createElement('div');
-        eyeSettingsMenu.style.cssText = "position:absolute; top:40px; right:0; background:rgba(15,15,15,0.95); border:1px solid #bc13fe; border-radius:8px; z-index:10051; box-shadow:0 0 15px rgba(188,19,254,0.3); display:none; flex-direction:column; overflow:hidden;";
-        
-        const editBtn = document.createElement('button');
-        editBtn.innerHTML = "✏️ Редагування";
-        editBtn.style.cssText = "background:transparent; border:none; color:#bc13fe; padding:12px 15px; font-size:12px; font-weight:bold; cursor:pointer; text-align:left; display:flex; align-items:center; white-space:nowrap;";
-        editBtn.onclick = () => {
-            alert("🛠 Режим редагування: Функція зменшення та переміщення кнопок буде додана в наступному оновленні!");
-            eyeSettingsMenu.style.display = 'none';
-        };
-
-        eyeSettingsBtn.onclick = () => { eyeSettingsMenu.style.display = eyeSettingsMenu.style.display === 'none' ? 'flex' : 'none'; };
-        backBtn.onclick = () => { modal.style.display = 'none'; eyeSettingsMenu.style.display = 'none'; };
-
-        eyeSettingsMenu.appendChild(editBtn);
-        rightContainer.appendChild(eyeSettingsBtn);
-        rightContainer.appendChild(eyeSettingsMenu);
-
-        header.appendChild(backBtn);
-        header.appendChild(rightContainer);
         modal.appendChild(header);
 
         const grid = document.createElement('div');
         grid.id = 'user-eye-grid';
         grid.style.cssText = "position:absolute; top:50%; width:90%; height:38%; display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; align-content:start; overflow-y:auto;";
         modal.appendChild(grid);
-
         document.body.appendChild(modal);
     }
     
@@ -108,7 +164,8 @@ function openUserEyeStudio() {
                 const b = document.createElement('button');
                 b.className = 'note-btn';
                 b.innerHTML = neonizeEmoji(btn.text);
-                b.style.cssText = "width:100%; padding:14px 10px; font-size:14px; border-radius:16px; background:rgba(15, 15, 15, 0.4); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1.5px solid rgba(188, 19, 254, 0.6); box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 0 10px rgba(188,19,254,0.2), 0 0 15px rgba(188,19,254,0.4); color:#fff; text-shadow:0 0 10px #bc13fe; margin:0;";
+                b.style.cssText = "width:100%; padding:14px 10px; font-size:14px; border-radius:16px; background:rgba(15, 15, 15, 0.4); backdrop-filter:blur(12px); border:1.5px solid rgba(188, 19, 254, 0.6); box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 0 10px rgba(188,19,254,0.2); color:#fff; text-shadow:0 0 10px #bc13fe; margin:0;";
+                b.onclick = () => openTerminalPage(btn.text);
                 grid.appendChild(b);
             }
         });
@@ -118,136 +175,118 @@ function openUserEyeStudio() {
     if (document.getElementById('side-menu').classList.contains('active')) toggleMenu(); 
 }
 
-// --- МАЛЮВАННЯ КНОПОК ТА СІТКИ (Ідеальне розділення) ---
+// --- РЕЖИМ КОНСТРУКТОРА ТА НАЛАШТУВАННЯ ---
+function toggleSettings() { 
+    let menu = document.getElementById('settings-menu');
+    // Впроваджуємо кнопку редагування
+    if (!menu.querySelector('.edit-mode-btn') && access === 'admin_king') {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'settings-item edit-mode-btn';
+        editBtn.innerHTML = '🛠 Режим Конструктора';
+        editBtn.onclick = () => {
+            isEditMode = !isEditMode;
+            menu.classList.add('hidden');
+            renderCyberButtons();
+            alert(isEditMode ? "🛠 Режим Конструктора УВІМКНЕНО." : "🛠 Режим Конструктора ВИМКНЕНО.");
+        };
+        menu.insertBefore(editBtn, menu.firstChild);
+    }
+    menu.classList.toggle('hidden'); 
+}
+
+function handleButtonAction(action, btnId, location) {
+    tg.HapticFeedback.impactOccurred('medium');
+    tg.sendData(JSON.stringify({ action: "move_btn", btn_id: btnId, direction: action, loc: location }));
+}
+
+// --- МАЛЮВАННЯ КНОПОК ТА СІТКИ ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
     const ownerNav = document.getElementById('owner-view'); 
-    const adminSection = document.getElementById('admin-view');
     
-    if (access === 'admin_king' && adminSection && !document.getElementById('trigger-eye-btn')) {
+    if (mainGrid) {
+        mainGrid.innerHTML = '';
+        mainGrid.style.display = "grid";
+        mainGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
+    }
+    if (userNav) userNav.innerHTML = '';
+    if (ownerNav) ownerNav.innerHTML = '';
+
+    // Створюємо "Хатинку" в Бургер-меню
+    const menuContent = document.querySelector('.menu-content');
+    if (menuContent && !document.getElementById('home-btn-burger')) {
+        const homeBtn = document.createElement('button');
+        homeBtn.id = 'home-btn-burger';
+        homeBtn.innerHTML = '🏠';
+        homeBtn.className = 'home-btn-burger';
+        homeBtn.onclick = goHome;
+        menuContent.insertBefore(homeBtn, menuContent.firstChild);
+    }
+
+    if (access === 'admin_king' && !document.getElementById('trigger-eye-btn') && ownerNav) {
         const eyeBtn = document.createElement('button');
         eyeBtn.id = 'trigger-eye-btn';
         eyeBtn.className = 'menu-item secret-btn';
         eyeBtn.innerHTML = '👁️ Око Юзера';
-        eyeBtn.style.marginTop = "15px";
-        eyeBtn.style.backgroundColor = "rgba(188, 19, 254, 0.15)";
         eyeBtn.onclick = openUserEyeStudio;
-        adminSection.insertBefore(eyeBtn, ownerNav); 
+        ownerNav.appendChild(eyeBtn); 
     }
 
-    if (!cyberPages.main) return;
-
-    let userCount = 0;
-    let ownerCount = 0;
-    const devTextElement = userNav ? userNav.querySelector('.dev-text') : null;
-    let hasUserButtons = false;
-
-    if (mainGrid) {
-        mainGrid.style.display = "grid";
-        mainGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
-        mainGrid.style.gap = "12px";
-        mainGrid.style.alignContent = "start"; 
+    if (cyberPages.main && cyberPages.main.buttons) {
+        cyberPages.main.buttons.forEach((btn) => createButtonElement(btn, 'main', mainGrid));
     }
+    if (cyberPages.burger && cyberPages.burger.buttons) {
+        cyberPages.burger.buttons.forEach((btn) => {
+            if(btn.role === 'owner' && ownerNav) createButtonElement(btn, 'burger', ownerNav);
+            if(btn.role === 'user' && userNav) createButtonElement(btn, 'burger', userNav);
+        });
+    }
+}
 
-    cyberPages.main.buttons.forEach(btn => {
-        const isOwnerBtn = btn.role === 'owner';
-        const isUserBtn = btn.role === 'user';
+function createButtonElement(btn, location, container) {
+    if (btn.role === 'owner' && access !== 'admin_king') return; 
 
-        if (isOwnerBtn && access !== 'admin_king') return; 
-        if (isUserBtn && btn.location === 'main' && access === 'admin_king') return; 
+    const wrapper = document.createElement('div');
+    wrapper.className = `btn-wrapper ${location === 'main' ? 'grid-item' : ''}`;
+    
+    const b = document.createElement('button');
+    b.className = btn.role === 'owner' && location === 'burger' ? 'menu-item secret-btn' : 'note-btn';
+    b.innerHTML = neonizeEmoji(btn.text);
+    b.onclick = () => openTerminalPage(btn.text);
+    
+    if (location === 'main') {
+        b.style.cssText = "width:100%; padding:14px 10px; font-size:14px; border-radius:16px; background:rgba(15, 15, 15, 0.4); backdrop-filter:blur(12px); border:1.5px solid rgba(188, 19, 254, 0.6); box-shadow:0 8px 32px rgba(0,0,0,0.5); color:#fff; text-shadow:0 0 10px #bc13fe;";
+    } else {
+        b.style.width = "100%";
+        b.style.marginBottom = "5px";
+    }
+    
+    wrapper.appendChild(b);
 
-        const b = document.createElement('button');
-        b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
-        b.innerHTML = neonizeEmoji(btn.text);
-        
-        b.onclick = () => console.log("Натиснуто: " + btn.text);
-
-        if (btn.location === 'main') {
-            b.style.width = "100%";
-            b.style.margin = "0"; 
-            b.style.padding = "14px 10px";
-            b.style.fontSize = "14px";
-            b.style.borderRadius = "16px"; 
-            
-            b.style.background = "rgba(15, 15, 15, 0.4)"; 
-            b.style.backdropFilter = "blur(12px)"; 
-            b.style.WebkitBackdropFilter = "blur(12px)"; 
-            
-            b.style.border = "1.5px solid rgba(188, 19, 254, 0.6)"; 
-            b.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(188, 19, 254, 0.2), 0 0 15px rgba(188, 19, 254, 0.4)"; 
-            b.style.color = "#fff";
-            b.style.textShadow = "0 0 10px #bc13fe";
-            b.style.transition = "all 0.3s ease";
-            
-            if (mainGrid) mainGrid.appendChild(b);
-        } else if (btn.location === 'burger') {
-            b.style.width = "100%";
-            b.style.marginBottom = "8px";
-            
-            if (isOwnerBtn && ownerNav) {
-                ownerNav.appendChild(b);
-                ownerCount++;
-            } else if (userNav) {
-                userNav.appendChild(b);
-                userCount++;
-                hasUserButtons = true;
-            }
+    // Додаємо стрілочки якщо режим редагування увімкнено
+    if (isEditMode && access === 'admin_king') {
+        const controls = document.createElement('div');
+        controls.className = 'edit-controls';
+        if (location === 'main') {
+            controls.innerHTML = `
+                <div class="edit-btn" onclick="event.stopPropagation(); handleButtonAction('left', '${btn.text}', 'main')">←</div>
+                <div class="edit-btn" onclick="event.stopPropagation(); handleButtonAction('up', '${btn.text}', 'main')">↑</div>
+                <div class="edit-btn" onclick="event.stopPropagation(); handleButtonAction('down', '${btn.text}', 'main')">↓</div>
+                <div class="edit-btn" onclick="event.stopPropagation(); handleButtonAction('right', '${btn.text}', 'main')">→</div>
+            `;
+        } else {
+            controls.innerHTML = `
+                <div class="edit-btn" onclick="event.stopPropagation(); handleButtonAction('up', '${btn.text}', 'burger')">↑</div>
+                <div class="edit-btn" onclick="event.stopPropagation(); handleButtonAction('down', '${btn.text}', 'burger')">↓</div>
+            `;
         }
-    });
-
-    if (devTextElement) {
-        devTextElement.style.display = hasUserButtons ? 'none' : 'block';
+        wrapper.appendChild(controls);
     }
-
-    if (userNav) setupAccordion(userNav, userCount);
-    if (ownerNav && access === 'admin_king') setupAccordion(ownerNav, ownerCount);
+    if(container) container.appendChild(wrapper);
 }
 
-function setupAccordion(container, count) {
-    if (count > 5) {
-        const btns = container.querySelectorAll('button');
-        for (let i = 5; i < btns.length; i++) btns[i].style.display = 'none';
-        const arrow = document.createElement('div');
-        arrow.style = "text-align:center; color:#444; cursor:pointer; font-size:14px; padding:5px; width:100%;";
-        arrow.innerHTML = "▼";
-        arrow.onclick = (e) => {
-            e.stopPropagation();
-            const hidden = btns[5].style.display === 'none';
-            for (let i = 5; i < btns.length; i++) btns[i].style.display = hidden ? 'block' : 'none';
-            arrow.innerHTML = hidden ? "▲" : "▼";
-        };
-        container.appendChild(arrow);
-    }
-}
-
-// --- НАВІГАЦІЯ СТОРІНОК ---
-function openCyberPage(pageId) {
-    const data = cyberPages[pageId];
-    if (!data) return;
-
-    const mainView = document.getElementById('main-content-view');
-    const dynamicView = document.getElementById('dynamic-page-view');
-
-    if (mainView && dynamicView) {
-        mainView.classList.add('hidden');
-        dynamicView.classList.remove('hidden');
-        if (data.bg) document.body.style.backgroundImage = `url('${data.bg}')`;
-        const status = document.getElementById('dynamic-status');
-        if (status) status.innerText = data.bg ? "" : "Система в стадії розробки...";
-    }
-    if (document.getElementById('side-menu').classList.contains('active')) toggleMenu();
-}
-
-function closeDynamicPage() {
-    document.getElementById('dynamic-page-view').classList.add('hidden');
-    document.getElementById('main-content-view').classList.remove('hidden');
-    const bg = globalBg || localStorage.getItem(BG_KEY);
-    document.body.style.backgroundImage = bg ? `url('${bg}')` : 'none';
-}
-
-// --- ТВОЇ ОРИГІНАЛЬНІ ФУНКЦІЇ ---
-function toggleSettings() { document.getElementById('settings-menu').classList.toggle('hidden'); }
+// --- БАЗОВІ ФУНКЦІЇ ДОДАТКА ТА НАЛАШТУВАНЬ ---
 function triggerBgUpload() { document.getElementById('bg-upload').click(); toggleSettings(); }
 
 function changeBackground(event) {
@@ -282,6 +321,7 @@ function resetBackground() {
 function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
 function closeApp() { tg.close(); }
 
+// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (ТВІЙ КОД ЗБЕРЕЖЕНО НА 100%) ---
 const chatInput = document.getElementById('chat-input');
 const formatTrigger = document.getElementById('format-trigger');
 const formatMenu = document.getElementById('format-menu');
