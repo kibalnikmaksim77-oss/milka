@@ -14,7 +14,7 @@ const encodedData = urlParams.get('cd'); // Параметр для кнопок
 
 let cyberPages = {};
 
-// --- НОВИНКА: РОЗШИФРОВКА БАЗИ (КРОК 3-4) ---
+// --- РОЗШИФРОВКА БАЗИ КНОПОК ---
 if (encodedData) {
     try {
         cyberPages = JSON.parse(atob(encodedData));
@@ -35,13 +35,13 @@ if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     if (settingsBtn) settingsBtn.classList.remove('hidden');
 }
 
-// --- НОВИНКА: ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ (КРОК 7) ---
+// --- ФУНКЦІЯ НЕОНОВИХ ЕМОДЗІ ---
 function neonizeEmoji(text) {
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- НОВИНКА: МАЛЮВАННЯ КНОПОК З ПИТОНА (КРОК 6-8) ВІДРЕДАГОВАНО ---
+// --- МАЛЮВАННЯ КНОПОК З ПИТОНА (З ДИЗАЙНОМ СКЛА ТА НЕОНУ) ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
@@ -62,16 +62,39 @@ function renderCyberButtons() {
 
         const b = document.createElement('button');
         b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
-        b.style.marginBottom = "8px";
-        b.style.width = "100%";
         b.innerHTML = neonizeEmoji(btn.text);
         
         // Поки кнопки "мертві" (Етап 1), вони просто світяться
         b.onclick = () => console.log("Натиснуто: " + btn.text);
 
         if (btn.location === 'main') {
+            // РОЗМІР І ДИЗАЙН ДЛЯ ГОЛОВНОГО МЕНЮ (Прозоро-дзеркальний Неон)
+            b.style.width = "auto";
+            b.style.minWidth = "220px";
+            b.style.maxWidth = "80%";
+            b.style.padding = "14px 24px";
+            b.style.fontSize = "16px";
+            b.style.borderRadius = "16px"; // Трохи кругліші для преміуму
+            b.style.marginBottom = "15px";
+            
+            // МАГІЯ СКЛА (Glassmorphism)
+            b.style.background = "rgba(15, 15, 15, 0.4)"; // Прозорий фон
+            b.style.backdropFilter = "blur(12px)"; // Зеркальне розмиття
+            b.style.WebkitBackdropFilter = "blur(12px)"; // Підтримка для iPhone
+            
+            // МАГІЯ НЕОНУ (Рамка і світіння)
+            b.style.border = "1.5px solid rgba(188, 19, 254, 0.6)"; 
+            b.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(188, 19, 254, 0.2), 0 0 15px rgba(188, 19, 254, 0.4)"; 
+            b.style.color = "#fff";
+            b.style.textShadow = "0 0 10px #bc13fe";
+            b.style.transition = "all 0.3s ease";
+            
             if (mainGrid) mainGrid.appendChild(b);
         } else if (btn.location === 'burger') {
+            // ДИЗАЙН БУРГЕРА (Ідеальний, не чіпаємо, просто на всю ширину)
+            b.style.width = "100%";
+            b.style.marginBottom = "8px";
+            
             if (isOwnerBtn && ownerNav) {
                 ownerNav.appendChild(b);
                 ownerCount++;
@@ -113,7 +136,7 @@ function setupAccordion(container, count) {
     }
 }
 
-// --- НОВИНКА: НАВІГАЦІЯ СТОРІНОК (КРОК 5) ---
+// --- НАВІГАЦІЯ СТОРІНОК ---
 function openCyberPage(pageId) {
     const data = cyberPages[pageId];
     if (!data) return;
@@ -138,7 +161,7 @@ function closeDynamicPage() {
     document.body.style.backgroundImage = bg ? `url('${bg}')` : 'none';
 }
 
-// --- ТВОЇ ОРИГІНАЛЬНІ ФУНКЦІЇ ПІШЛИ ДАЛІ ---
+// --- ТВОЇ ОРИГІНАЛЬНІ ФУНКЦІЇ ---
 function toggleSettings() { document.getElementById('settings-menu').classList.toggle('hidden'); }
 function triggerBgUpload() { document.getElementById('bg-upload').click(); toggleSettings(); }
 
@@ -501,7 +524,7 @@ function sendMessage() {
     }, 600);
 }
 
-// --- ІНІЦІАЛІЗАЦІЯ ПРИ ЗАВАНТАЖЕННІ (Щоб кнопки малювалися відразу) ---
+// --- ІНІЦІАЛІЗАЦІЯ ПРИ ЗАВАНТАЖЕННІ ---
 window.onload = () => {
     renderCyberButtons();
 };
