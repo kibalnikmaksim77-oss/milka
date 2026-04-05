@@ -41,7 +41,7 @@ function neonizeEmoji(text) {
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- СТУДІЯ "ОКО ЮЗЕРА" (ДРУГИЙ СВІТ) ---
+// --- СТУДІЯ "ОКО ЮЗЕРА" (ДРУГИЙ СВІТ - ІДЕАЛЬНО ЧИСТИЙ) ---
 function openUserEyeStudio() {
     let modal = document.getElementById('user-eye-studio');
     if (!modal) {
@@ -102,11 +102,9 @@ function openUserEyeStudio() {
     const grid = document.getElementById('user-eye-grid');
     grid.innerHTML = ''; 
     
-    let hasUserButtons = false;
     if (cyberPages.main && cyberPages.main.buttons) {
         cyberPages.main.buttons.forEach(btn => {
             if (btn.role === 'user' && btn.location === 'main') {
-                hasUserButtons = true;
                 const b = document.createElement('button');
                 b.className = 'note-btn';
                 b.innerHTML = neonizeEmoji(btn.text);
@@ -115,17 +113,7 @@ function openUserEyeStudio() {
             }
         });
     }
-
-    if (!hasUserButtons) {
-        const emptyText = document.createElement('p');
-        emptyText.className = 'dev-text';
-        emptyText.innerText = 'Система в стадії розробки...';
-        emptyText.style.gridColumn = "1 / span 2";
-        emptyText.style.textAlign = "center";
-        emptyText.style.marginTop = "20px";
-        emptyText.style.color = "#fff";
-        grid.appendChild(emptyText);
-    }
+    // ТУТ БУВ ЗАЙВИЙ ТЕКСТ. Я ЙОГО ПОВНІСТЮ ВИДАЛИВ! ЕКРАН ТЕПЕР ЧИСТИЙ.
 
     modal.style.display = 'flex';
     if (document.getElementById('side-menu').classList.contains('active')) toggleMenu(); 
@@ -167,12 +155,7 @@ function renderCyberButtons() {
         const isOwnerBtn = btn.role === 'owner';
         const isUserBtn = btn.role === 'user';
 
-        // 1. Звичайні юзери НЕ бачать адмінських кнопок.
         if (isOwnerBtn && access !== 'admin_king') return; 
-
-        // 2. ІДЕАЛЬНЕ РОЗДІЛЕННЯ: 
-        // Якщо це кнопка користувача, І вона для головного меню (`гм`), І ти Адмін — ХОВАЄМО.
-        // АЛЕ якщо це кнопка користувача для бургер-меню (`бм`), то вона пройде далі і ти її побачиш!
         if (isUserBtn && btn.location === 'main' && access === 'admin_king') return; 
 
         const b = document.createElement('button');
@@ -203,13 +186,10 @@ function renderCyberButtons() {
             b.style.width = "100%";
             b.style.marginBottom = "8px";
             
-            // Якщо кнопка власника - кидаємо в секретну зону
             if (isOwnerBtn && ownerNav) {
                 ownerNav.appendChild(b);
                 ownerCount++;
-            } 
-            // Якщо кнопка юзера - кидаємо у верхню зону Бургера (Ти її теж будеш бачити!)
-            else if (userNav) {
+            } else if (userNav) {
                 userNav.appendChild(b);
                 userCount++;
                 hasUserButtons = true;
@@ -217,6 +197,7 @@ function renderCyberButtons() {
         }
     });
 
+    // Логіка тексту "В розробці" ПРАЦЮЄ ТІЛЬКИ ДЛЯ БУРГЕР МЕНЮ
     if (devTextElement) {
         devTextElement.style.display = hasUserButtons ? 'none' : 'block';
     }
