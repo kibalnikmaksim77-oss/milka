@@ -1,4 +1,4 @@
-Body {
+body {
     margin: 0; padding: 0; background-color: #080808;
     color: #fff; font-family: 'Segoe UI', sans-serif;
     overflow: hidden; width: 100vw; height: 100vh;
@@ -36,6 +36,48 @@ Body {
     justify-content: flex-start; gap: 15px; overflow-y: auto; 
 }
 
+/* --- НОВЕ: ТЕРМІНАЛЬНІ ВІКНА ТА СИМЕТРІЯ ШАПКИ --- */
+#dynamic-terminal-page {
+    position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+    background-color: #050505; background-image: none !important;
+    z-index: 500; display: flex; flex-direction: column; overflow: hidden;
+}
+
+.terminal-header {
+    position: relative; height: 60px; padding: 0 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(188, 19, 254, 0.3);
+}
+
+.terminal-burger {
+    display: flex; flex-direction: column; justify-content: center; 
+    width: 24px; height: 24px; cursor: pointer; z-index: 10;
+}
+.terminal-burger span {
+    display: block; width: 100%; height: 2px; background: #bc13fe; 
+    margin: 3px 0; box-shadow: 0 0 10px #bc13fe;
+}
+
+.terminal-title {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    color: #bc13fe; font-size: 16px; font-weight: bold; 
+    text-shadow: 0 0 10px #bc13fe; text-transform: uppercase; letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.terminal-right-controls { display: flex; align-items: center; gap: 15px; height: 100%; z-index: 10; }
+
+.close-cross-btn {
+    color: #ff4d4d; font-size: 22px; font-weight: bold; cursor: pointer;
+    text-shadow: 0 0 10px #ff4d4d; display: flex; align-items: center; justify-content: center;
+}
+
+.terminal-content {
+    flex-grow: 1; padding: 20px; overflow-y: auto; display: grid; 
+    grid-template-columns: repeat(2, 1fr); gap: 12px; align-content: start;
+}
+
+/* --- ГОЛОВНЕ МЕНЮ ТА НАЛАШТУВАННЯ --- */
 #burger-btn {
     position: absolute; top: 20px; left: 20px; cursor: pointer; z-index: 50; padding: 5px;
     display: flex; flex-direction: column; justify-content: center; height: 24px;
@@ -44,28 +86,45 @@ Body {
     display: block; width: 24px; height: 2px; background: #bc13fe; margin: 3px 0; box-shadow: 0 0 10px #bc13fe;
 }
 
-#settings-btn {
-    position: absolute; top: 20px; right: 20px; cursor: pointer; z-index: 50; padding: 5px 10px;
-    color: #bc13fe; font-size: 26px; font-weight: bold; text-shadow: 0 0 10px #bc13fe; user-select: none;
-    display: flex; align-items: center; justify-content: center; height: 24px; line-height: 0; 
+#settings-btn, .admin-dots {
+    cursor: pointer; z-index: 600; color: #bc13fe; font-size: 26px; font-weight: bold; 
+    text-shadow: 0 0 10px #bc13fe; user-select: none; display: flex; align-items: center; justify-content: center; line-height: 0; 
 }
+#settings-btn { position: absolute; top: 20px; right: 20px; padding: 5px 10px; height: 24px; }
 
 #settings-menu {
     position: absolute; top: 55px; right: 20px; background: rgba(15, 15, 15, 0.95); border: 1px solid #bc13fe;
-    border-radius: 8px; z-index: 101; box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
+    border-radius: 8px; z-index: 1000; box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
     display: flex; flex-direction: column; overflow: hidden;
 }
 
 .settings-item {
     background: transparent; border: none; color: #bc13fe; padding: 12px 15px; font-size: 12px; font-weight: bold;
-    cursor: pointer; text-align: left; border-bottom: 1px solid #222; display: flex; align-items: center;
+    cursor: pointer; text-align: left; border-bottom: 1px solid #222; display: flex; align-items: center; white-space: nowrap;
 }
 .settings-item:last-child { border-bottom: none; }
 .settings-item:hover { background: rgba(188, 19, 254, 0.1); }
 
+/* --- НОВЕ: РЕЖИМ КОНСТРУКТОРА (СТРІЛКИ) --- */
+.btn-wrapper { position: relative; width: 100%; margin-bottom: 8px; }
+.btn-wrapper.grid-item { margin-bottom: 0; }
+
+.edit-controls {
+    position: absolute; top: -12px; right: 0; display: flex; gap: 4px;
+    background: rgba(188, 19, 254, 0.9); padding: 4px 8px; border-radius: 8px; 
+    border: 1px solid #fff; z-index: 1000; box-shadow: 0 0 15px #bc13fe;
+}
+.edit-btn {
+    background: #000; border: 1px solid #fff; color: #fff; border-radius: 4px;
+    width: 24px; height: 24px; font-size: 14px; display: flex; 
+    align-items: center; justify-content: center; cursor: pointer; font-weight: bold;
+}
+.edit-btn:active { background: #fff; color: #000; }
+
+/* --- БУРГЕР-МЕНЮ ТА ХАТИНКА --- */
 #side-menu {
     position: fixed; top: 0; left: 0; width: 170px; height: 100%; background: #0f0f0f; border-right: 1px solid #bc13fe;
-    z-index: 100; transition: 0.4s ease; transform: translateX(-100%);
+    z-index: 2000; transition: 0.4s ease; transform: translateX(-100%);
 }
 #side-menu.active { transform: translateX(0); }
 
@@ -74,13 +133,25 @@ Body {
     color: #bc13fe; font-size: 12px; font-weight: bold;
 }
 .menu-content { padding: 10px; }
+
+/* Кнопка Хатинка */
+.home-btn-burger {
+    background: transparent !important; border: 1px solid #bc13fe !important; 
+    color: #fff; font-size: 22px !important; padding: 8px !important; 
+    display: flex; align-items: center; justify-content: center; 
+    cursor: pointer; margin-bottom: 15px !important; box-shadow: 0 0 8px rgba(188,19,254,0.2); border-radius: 6px;
+}
+.home-btn-burger:active { background: rgba(188, 19, 254, 0.2) !important; }
+
 .dev-text { color: #444; font-size: 10px; text-align: center; }
 .menu-item {
     width: 100%; padding: 10px; background: #151515; border: 1px solid #bc13fe; color: #bc13fe;
-    border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer;
+    border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-bottom: 5px;
 }
+.secret-btn { background: rgba(188, 19, 254, 0.15); }
 .divider { height: 1px; background: #222; margin: 15px 0; }
 
+/* --- ЧАТ ТА ІНШІ СТИЛІ (ТВІЙ ОРИГІНАЛ) --- */
 #chat-modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: #050505; z-index: 200; display: flex; flex-direction: column;
@@ -207,15 +278,17 @@ Body {
 .delete-btn.confirm { background: rgba(188, 19, 254, 0.2); border: 1px solid #bc13fe; color: #bc13fe; box-shadow: 0 0 10px rgba(188,19,254,0.4); text-shadow: 0 0 5px #bc13fe; }
 .delete-btn:active { transform: scale(0.95); }
 
-/* СТИЛІ ДЛЯ НЕОНОВИХ КНОПОК ПАМ'ЯТОК */
+/* СТИЛІ ДЛЯ НЕОНОВИХ КНОПОК ПАМ'ЯТОК / МЕНЮ */
 .notes-list-container {
     display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
 }
 .note-btn {
-    background: rgba(15, 15, 15, 0.8); border: 1px solid #bc13fe; color: #fff;
-    padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: bold;
-    cursor: pointer; box-shadow: 0 0 5px rgba(188, 19, 254, 0.4);
-    transition: 0.2s; text-shadow: 0 0 5px #bc13fe; display: inline-block;
+    width: 100%; padding: 14px 10px; font-size: 14px; border-radius: 16px; 
+    background: rgba(15, 15, 15, 0.4); backdrop-filter: blur(12px); 
+    border: 1.5px solid rgba(188, 19, 254, 0.6); color: #fff; 
+    text-shadow: 0 0 10px #bc13fe; cursor: pointer; transition: 0.2s;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5); display: inline-block;
 }
 .note-btn:hover { background: rgba(188, 19, 254, 0.2); box-shadow: 0 0 10px rgba(188, 19, 254, 0.8); }
 .note-btn:active { transform: scale(0.95); }
+        
