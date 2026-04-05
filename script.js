@@ -41,20 +41,106 @@ function neonizeEmoji(text) {
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- МАЛЮВАННЯ КНОПОК З ПИТОНА (З ДИЗАЙНОМ СКЛА ТА НЕОНУ) ---
+// --- СТУДІЯ "ОКО ЮЗЕРА" (З ЧЕРВОНИМ ХРЕСТОМ) ---
+function openUserEyeStudio() {
+    let modal = document.getElementById('user-eye-studio');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'user-eye-studio';
+        modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background-size:cover; background-position:top center; background-repeat:no-repeat; display:flex; flex-direction:column; align-items:center; background-color:#080808;";
+        
+        // Панель управління студією
+        const header = document.createElement('div');
+        header.style.cssText = "position:absolute; top:20px; left:20px; right:20px; display:flex; justify-content:space-between; align-items:center; z-index:10000;";
+        
+        // ЧЕРВОНИЙ ХРЕСТ ЗАМІСТЬ ТЕКСТУ
+        const backBtn = document.createElement('div');
+        backBtn.innerHTML = "❌";
+        backBtn.style.cssText = "color:#ff4d4d; font-weight:bold; cursor:pointer; text-shadow:0 0 10px #ff4d4d; font-size: 20px; padding: 5px;";
+        backBtn.onclick = () => modal.style.display = 'none';
+        
+        const title = document.createElement('div');
+        title.innerHTML = "👁️ ОКО ЮЗЕРА";
+        title.style.cssText = "color:#bc13fe; font-weight:bold; text-shadow:0 0 10px #bc13fe; font-size: 14px;";
+
+        header.appendChild(backBtn);
+        header.appendChild(title);
+        modal.appendChild(header);
+
+        // Сітка для юзерських кнопок
+        const grid = document.createElement('div');
+        grid.id = 'user-eye-grid';
+        grid.style.cssText = "position:absolute; top:50%; width:90%; height:38%; display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; align-content:start; overflow-y:auto;";
+        modal.appendChild(grid);
+
+        document.body.appendChild(modal);
+    }
+    
+    modal.style.backgroundImage = document.body.style.backgroundImage || 'none';
+    
+    const grid = document.getElementById('user-eye-grid');
+    grid.innerHTML = ''; 
+    
+    let hasUserButtons = false;
+    if (cyberPages.main && cyberPages.main.buttons) {
+        cyberPages.main.buttons.forEach(btn => {
+            if (btn.role === 'user' && btn.location === 'main') {
+                hasUserButtons = true;
+                const b = document.createElement('button');
+                b.className = 'note-btn';
+                b.innerHTML = neonizeEmoji(btn.text);
+                b.style.cssText = "width:100%; padding:14px 10px; font-size:14px; border-radius:16px; background:rgba(15, 15, 15, 0.4); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1.5px solid rgba(188, 19, 254, 0.6); box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 0 10px rgba(188,19,254,0.2), 0 0 15px rgba(188,19,254,0.4); color:#fff; text-shadow:0 0 10px #bc13fe; margin:0;";
+                grid.appendChild(b);
+            }
+        });
+    }
+
+    if (!hasUserButtons) {
+        const emptyText = document.createElement('p');
+        emptyText.className = 'dev-text';
+        emptyText.innerText = 'Система в стадії розробки...';
+        emptyText.style.gridColumn = "1 / span 2";
+        emptyText.style.textAlign = "center";
+        emptyText.style.marginTop = "20px";
+        emptyText.style.color = "#fff";
+        grid.appendChild(emptyText);
+    }
+
+    modal.style.display = 'flex';
+    if (document.getElementById('side-menu').classList.contains('active')) toggleMenu();
+}
+
+// --- МАЛЮВАННЯ КНОПОК ТА СІТКИ ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
     const ownerNav = document.getElementById('owner-view'); 
+    const adminSection = document.getElementById('admin-view');
     
+    if (access === 'admin_king' && adminSection && !document.getElementById('trigger-eye-btn')) {
+        const eyeBtn = document.createElement('button');
+        eyeBtn.id = 'trigger-eye-btn';
+        eyeBtn.className = 'menu-item secret-btn';
+        eyeBtn.innerHTML = '👁️ Око Юзера';
+        eyeBtn.style.marginTop = "15px";
+        eyeBtn.style.backgroundColor = "rgba(188, 19, 254, 0.15)";
+        eyeBtn.onclick = openUserEyeStudio;
+        adminSection.insertBefore(eyeBtn, ownerNav);
+    }
+
     if (!cyberPages.main) return;
 
     let userCount = 0;
     let ownerCount = 0;
-
-    // Знаходимо текст про розробку, щоб керувати ним
     const devTextElement = userNav ? userNav.querySelector('.dev-text') : null;
     let hasUserButtons = false;
+
+    if (mainGrid) {
+        mainGrid.style.display = "grid";
+        mainGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
+        mainGrid.style.gap = "12px";
+        mainGrid.style.alignContent = "start";
+    }
 
     cyberPages.main.buttons.forEach(btn => {
         const isOwnerBtn = btn.role === 'owner';
@@ -64,25 +150,17 @@ function renderCyberButtons() {
         b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
         b.innerHTML = neonizeEmoji(btn.text);
         
-        // Поки кнопки "мертві" (Етап 1), вони просто світяться
         b.onclick = () => console.log("Натиснуто: " + btn.text);
 
         if (btn.location === 'main') {
-            // РОЗМІР І ДИЗАЙН ДЛЯ ГОЛОВНОГО МЕНЮ (Прозоро-дзеркальний Неон)
-            b.style.width = "auto";
-            b.style.minWidth = "220px";
-            b.style.maxWidth = "80%";
-            b.style.padding = "14px 24px";
-            b.style.fontSize = "16px";
-            b.style.borderRadius = "16px"; // Трохи кругліші для преміуму
-            b.style.marginBottom = "15px";
-            
-            // МАГІЯ СКЛА (Glassmorphism)
-            b.style.background = "rgba(15, 15, 15, 0.4)"; // Прозорий фон
-            b.style.backdropFilter = "blur(12px)"; // Зеркальне розмиття
-            b.style.WebkitBackdropFilter = "blur(12px)"; // Підтримка для iPhone
-            
-            // МАГІЯ НЕОНУ (Рамка і світіння)
+            b.style.width = "100%";
+            b.style.margin = "0"; 
+            b.style.padding = "14px 10px";
+            b.style.fontSize = "14px";
+            b.style.borderRadius = "16px"; 
+            b.style.background = "rgba(15, 15, 15, 0.4)"; 
+            b.style.backdropFilter = "blur(12px)"; 
+            b.style.WebkitBackdropFilter = "blur(12px)"; 
             b.style.border = "1.5px solid rgba(188, 19, 254, 0.6)"; 
             b.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(188, 19, 254, 0.2), 0 0 15px rgba(188, 19, 254, 0.4)"; 
             b.style.color = "#fff";
@@ -91,7 +169,6 @@ function renderCyberButtons() {
             
             if (mainGrid) mainGrid.appendChild(b);
         } else if (btn.location === 'burger') {
-            // ДИЗАЙН БУРГЕРА (Ідеальний, не чіпаємо, просто на всю ширину)
             b.style.width = "100%";
             b.style.marginBottom = "8px";
             
@@ -106,13 +183,8 @@ function renderCyberButtons() {
         }
     });
 
-    // Магія зникнення тексту "Система в стадії розробки..."
     if (devTextElement) {
-        if (hasUserButtons) {
-            devTextElement.style.display = 'none';
-        } else {
-            devTextElement.style.display = 'block';
-        }
+        devTextElement.style.display = hasUserButtons ? 'none' : 'block';
     }
 
     if (userNav) setupAccordion(userNav, userCount);
