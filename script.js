@@ -41,7 +41,7 @@ function neonizeEmoji(text) {
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- СТУДІЯ "ОКО ЮЗЕРА" (З ЧЕРВОНИМ ХРЕСТОМ) ---
+// --- СТУДІЯ "ОКО ЮЗЕРА" ---
 function openUserEyeStudio() {
     let modal = document.getElementById('user-eye-studio');
     if (!modal) {
@@ -49,25 +49,47 @@ function openUserEyeStudio() {
         modal.id = 'user-eye-studio';
         modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background-size:cover; background-position:top center; background-repeat:no-repeat; display:flex; flex-direction:column; align-items:center; background-color:#080808;";
         
-        // Панель управління студією
         const header = document.createElement('div');
         header.style.cssText = "position:absolute; top:20px; left:20px; right:20px; display:flex; justify-content:space-between; align-items:center; z-index:10000;";
         
-        // ЧЕРВОНИЙ ХРЕСТ ЗАМІСТЬ ТЕКСТУ
         const backBtn = document.createElement('div');
         backBtn.innerHTML = "❌";
         backBtn.style.cssText = "color:#ff4d4d; font-weight:bold; cursor:pointer; text-shadow:0 0 10px #ff4d4d; font-size: 20px; padding: 5px;";
-        backBtn.onclick = () => modal.style.display = 'none';
         
         const title = document.createElement('div');
         title.innerHTML = "👁️ ОКО ЮЗЕРА";
-        title.style.cssText = "color:#bc13fe; font-weight:bold; text-shadow:0 0 10px #bc13fe; font-size: 14px;";
+        title.style.cssText = "color:#bc13fe; font-weight:bold; text-shadow:0 0 10px #bc13fe; font-size: 14px; position:absolute; left:50%; transform:translateX(-50%);";
+
+        const rightContainer = document.createElement('div');
+        rightContainer.style.position = 'relative';
+
+        const eyeSettingsBtn = document.createElement('div');
+        eyeSettingsBtn.innerHTML = "⋮";
+        eyeSettingsBtn.style.cssText = "cursor:pointer; padding:5px 10px; color:#bc13fe; font-size:26px; font-weight:bold; text-shadow:0 0 10px #bc13fe; user-select:none; display:flex; align-items:center; justify-content:center; height:24px; line-height:0;";
+        
+        const eyeSettingsMenu = document.createElement('div');
+        eyeSettingsMenu.style.cssText = "position:absolute; top:40px; right:0; background:rgba(15,15,15,0.95); border:1px solid #bc13fe; border-radius:8px; z-index:10051; box-shadow:0 0 15px rgba(188,19,254,0.3); display:none; flex-direction:column; overflow:hidden;";
+        
+        const editBtn = document.createElement('button');
+        editBtn.innerHTML = "✏️ Редагування";
+        editBtn.style.cssText = "background:transparent; border:none; color:#bc13fe; padding:12px 15px; font-size:12px; font-weight:bold; cursor:pointer; text-align:left; display:flex; align-items:center; white-space:nowrap;";
+        editBtn.onclick = () => {
+            alert("🛠 Режим редагування: Функція зменшення та переміщення кнопок буде додана в наступному оновленні!");
+            eyeSettingsMenu.style.display = 'none';
+        };
+
+        eyeSettingsBtn.onclick = () => { eyeSettingsMenu.style.display = eyeSettingsMenu.style.display === 'none' ? 'flex' : 'none'; };
+        backBtn.onclick = () => { modal.style.display = 'none'; eyeSettingsMenu.style.display = 'none'; };
+
+        eyeSettingsMenu.appendChild(editBtn);
+        rightContainer.appendChild(eyeSettingsBtn);
+        rightContainer.appendChild(eyeSettingsMenu);
 
         header.appendChild(backBtn);
         header.appendChild(title);
+        header.appendChild(rightContainer);
         modal.appendChild(header);
 
-        // Сітка для юзерських кнопок
         const grid = document.createElement('div');
         grid.id = 'user-eye-grid';
         grid.style.cssText = "position:absolute; top:50%; width:90%; height:38%; display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; align-content:start; overflow-y:auto;";
@@ -107,10 +129,10 @@ function openUserEyeStudio() {
     }
 
     modal.style.display = 'flex';
-    if (document.getElementById('side-menu').classList.contains('active')) toggleMenu();
+    if (document.getElementById('side-menu').classList.contains('active')) toggleMenu(); 
 }
 
-// --- МАЛЮВАННЯ КНОПОК ТА СІТКИ ---
+// --- МАЛЮВАННЯ КНОПОК ТА СІТКИ (Grid Layout) ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
@@ -125,7 +147,7 @@ function renderCyberButtons() {
         eyeBtn.style.marginTop = "15px";
         eyeBtn.style.backgroundColor = "rgba(188, 19, 254, 0.15)";
         eyeBtn.onclick = openUserEyeStudio;
-        adminSection.insertBefore(eyeBtn, ownerNav);
+        adminSection.insertBefore(eyeBtn, ownerNav); 
     }
 
     if (!cyberPages.main) return;
@@ -139,12 +161,18 @@ function renderCyberButtons() {
         mainGrid.style.display = "grid";
         mainGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
         mainGrid.style.gap = "12px";
-        mainGrid.style.alignContent = "start";
+        mainGrid.style.alignContent = "start"; 
     }
 
     cyberPages.main.buttons.forEach(btn => {
         const isOwnerBtn = btn.role === 'owner';
+        const isUserBtn = btn.role === 'user';
+
+        // 1. Ховаємо адмінські кнопки від звичайних юзерів
         if (isOwnerBtn && access !== 'admin_king') return; 
+
+        // 2. ІДЕАЛЬНЕ РОЗДІЛЕННЯ: Ховаємо юзерські кнопки з Головного екрана Адміна!
+        if (isUserBtn && btn.location === 'main' && access === 'admin_king') return;
 
         const b = document.createElement('button');
         b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
@@ -158,9 +186,11 @@ function renderCyberButtons() {
             b.style.padding = "14px 10px";
             b.style.fontSize = "14px";
             b.style.borderRadius = "16px"; 
+            
             b.style.background = "rgba(15, 15, 15, 0.4)"; 
             b.style.backdropFilter = "blur(12px)"; 
             b.style.WebkitBackdropFilter = "blur(12px)"; 
+            
             b.style.border = "1.5px solid rgba(188, 19, 254, 0.6)"; 
             b.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(188, 19, 254, 0.2), 0 0 15px rgba(188, 19, 254, 0.4)"; 
             b.style.color = "#fff";
