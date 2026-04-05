@@ -41,25 +41,24 @@ function neonizeEmoji(text) {
     return text.replace(emojiRegex, '<span style="filter: drop-shadow(0 0 5px #bc13fe);">$1</span>');
 }
 
-// --- СТУДІЯ "ОКО ЮЗЕРА" ---
+// --- СТУДІЯ "ОКО ЮЗЕРА" (ДРУГИЙ СВІТ) ---
 function openUserEyeStudio() {
     let modal = document.getElementById('user-eye-studio');
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'user-eye-studio';
-        modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background-size:cover; background-position:top center; background-repeat:no-repeat; display:flex; flex-direction:column; align-items:center; background-color:#080808;";
+        modal.className = 'neon-border'; 
+        modal.style.cssText = "position:absolute; top:10px; left:10px; right:10px; bottom:10px; z-index:9999; background-size:cover; background-position:top center; background-repeat:no-repeat; display:flex; flex-direction:column; align-items:center; background-color:#080808; overflow:hidden;";
         
         const header = document.createElement('div');
         header.style.cssText = "position:absolute; top:20px; left:20px; right:20px; display:flex; justify-content:space-between; align-items:center; z-index:10000;";
         
+        // ЗЛІВА: ХРЕСТ ДЛЯ ВИХОДУ
         const backBtn = document.createElement('div');
         backBtn.innerHTML = "❌";
-        backBtn.style.cssText = "color:#ff4d4d; font-weight:bold; cursor:pointer; text-shadow:0 0 10px #ff4d4d; font-size: 20px; padding: 5px;";
+        backBtn.style.cssText = "color:#ff4d4d; font-weight:bold; cursor:pointer; text-shadow:0 0 10px #ff4d4d; font-size: 20px; padding: 5px; line-height: 0;";
         
-        const title = document.createElement('div');
-        title.innerHTML = "👁️ ОКО ЮЗЕРА";
-        title.style.cssText = "color:#bc13fe; font-weight:bold; text-shadow:0 0 10px #bc13fe; font-size: 14px; position:absolute; left:50%; transform:translateX(-50%);";
-
+        // СПРАВА: 3 КРАПКИ
         const rightContainer = document.createElement('div');
         rightContainer.style.position = 'relative';
 
@@ -86,7 +85,6 @@ function openUserEyeStudio() {
         rightContainer.appendChild(eyeSettingsMenu);
 
         header.appendChild(backBtn);
-        header.appendChild(title);
         header.appendChild(rightContainer);
         modal.appendChild(header);
 
@@ -98,6 +96,7 @@ function openUserEyeStudio() {
         document.body.appendChild(modal);
     }
     
+    // Синхронізуємо фон
     modal.style.backgroundImage = document.body.style.backgroundImage || 'none';
     
     const grid = document.getElementById('user-eye-grid');
@@ -132,7 +131,7 @@ function openUserEyeStudio() {
     if (document.getElementById('side-menu').classList.contains('active')) toggleMenu(); 
 }
 
-// --- МАЛЮВАННЯ КНОПОК ТА СІТКИ (Grid Layout) ---
+// --- МАЛЮВАННЯ КНОПОК ТА СІТКИ (Ідеальне розділення) ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
@@ -168,11 +167,13 @@ function renderCyberButtons() {
         const isOwnerBtn = btn.role === 'owner';
         const isUserBtn = btn.role === 'user';
 
-        // 1. Ховаємо адмінські кнопки від звичайних юзерів
+        // 1. Звичайні юзери НЕ бачать адмінських кнопок.
         if (isOwnerBtn && access !== 'admin_king') return; 
 
-        // 2. ІДЕАЛЬНЕ РОЗДІЛЕННЯ: Ховаємо юзерські кнопки з Головного екрана Адміна!
-        if (isUserBtn && btn.location === 'main' && access === 'admin_king') return;
+        // 2. ІДЕАЛЬНЕ РОЗДІЛЕННЯ: 
+        // Якщо це кнопка користувача, І вона для головного меню (`гм`), І ти Адмін — ХОВАЄМО.
+        // АЛЕ якщо це кнопка користувача для бургер-меню (`бм`), то вона пройде далі і ти її побачиш!
+        if (isUserBtn && btn.location === 'main' && access === 'admin_king') return; 
 
         const b = document.createElement('button');
         b.className = isOwnerBtn ? 'menu-item secret-btn' : 'note-btn';
@@ -202,10 +203,13 @@ function renderCyberButtons() {
             b.style.width = "100%";
             b.style.marginBottom = "8px";
             
+            // Якщо кнопка власника - кидаємо в секретну зону
             if (isOwnerBtn && ownerNav) {
                 ownerNav.appendChild(b);
                 ownerCount++;
-            } else if (userNav) {
+            } 
+            // Якщо кнопка юзера - кидаємо у верхню зону Бургера (Ти її теж будеш бачити!)
+            else if (userNav) {
                 userNav.appendChild(b);
                 userCount++;
                 hasUserButtons = true;
