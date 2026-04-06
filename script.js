@@ -2,7 +2,6 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 const userId = tg.initDataUnsafe?.user?.id || 'guest';
-const BG_KEY = `milka_bg_${userId}`;
 const CHAT_KEY = `milka_chat_${userId}`;
 const CABINET_KEY = `cabinet_active_${userId}`;
 const NOTES_KEY = `milka_notes_${userId}`;
@@ -20,8 +19,8 @@ let cyberPages = {
 };
 let isEditMode = false;
 let navStack = []; 
+let originalOrder = []; 
 
-// --- РОЗШИФРОВКА БАЗИ (ВИПРАВЛЕНО ЕМОДЗІ) ---
 if (encodedData) {
     try {
         let decodedString;
@@ -37,20 +36,18 @@ if (encodedData) {
     }
 }
 
-// --- ФОН ---
 const initGlobalBg = cyberPages.pages_bg && cyberPages.pages_bg['global'];
 if (initGlobalBg) { 
     document.body.style.backgroundImage = `url('${initGlobalBg}')`; 
 } else if (globalBg) { 
     document.body.style.backgroundImage = `url('${globalBg}')`; 
 } else {
-    const savedBg = localStorage.getItem(BG_KEY);
+    const savedBg = localStorage.getItem(`milka_bg_${userId}`);
     if (savedBg) { 
         document.body.style.backgroundImage = `url('${savedBg}')`; 
     }
 }
 
-// --- КАБІНЕТ АДМІНА ---
 if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) {
@@ -63,27 +60,23 @@ if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
 }
 
 // --- СУЧАСНИЙ ЕКСТРАКТОР ЕМОДЗІ ---
-function neonizeEmoji(text) {
-    let firstSpace = text.indexOf(' ');
-    if (firstSpace === -1) {
-        return text; 
-    }
-    let emoji = text.substring(0, firstSpace);
-    let rest = text.substring(firstSpace + 1);
-    return `<span style="filter: drop-shadow(0 0 10px #bc13fe); font-size: 1.2em;">${emoji}</span> ${rest}`;
-}
+function processEmojiInText(text) {
+    const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/u;
+    const match = text.match(emojiRegex);
 
-function extractOnlyEmoji(text) {
-    const match = text.match(/(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/u);
     if (match) {
-        return match[0];
-    } else {
-        return '💠';
+        const emoji = match[0];
+        const restOfText = text.substring(emoji.length).trim();
+        return `<span class="emoji">${emoji}</span> ${restOfText}`;
     }
+    return text;
 }
 
-// --- НАВІГАЦІЯ ---
 function goHome() {
+    if (isEditMode) {
+        alert("⚠️ Вихід заблоковано. Спочатку збережіть або відмініть зміни в Режимі Конструктора.");
+        return;
+    }
     navStack = []; 
     const terminal = document.getElementById('dynamic-terminal-page');
     if (terminal) {
@@ -100,6 +93,10 @@ function goHome() {
 }
 
 function goBack() {
+    if (isEditMode) {
+        alert("⚠️ Повернення заблоковано. Спочатку збережіть або відмініть зміни в Режимі Конструктора.");
+        return;
+    }
     navStack.pop(); 
     if (navStack.length > 0) { 
         renderTerminal(); 
@@ -109,14 +106,16 @@ function goBack() {
 }
 
 function openTerminalPage(pageTitle) {
-    if(pageTitle.includes('Око Юзера') || pageTitle.includes('Milka Bot') || pageTitle === '🏠') {
+    if (isEditMode) {
+        return;
+    }
+    if (pageTitle.includes('Око Юзера') || pageTitle.includes('Milka Bot') || pageTitle === '🏠') {
         return;
     }
     navStack.push(pageTitle); 
     renderTerminal();
 }
 
-// --- ТЕРМІНАЛ ---
 function renderTerminal() {
     if (navStack.length === 0) {
         return;
@@ -189,11 +188,8 @@ function renderTerminal() {
             
             const b = document.createElement('button');
             b.className = 'cyber-btn';
-            if (btn.role === 'owner') {
-                b.classList.add('secret-btn');
-            }
             
-            b.innerHTML = neonizeEmoji(btn.text);
+            b.innerHTML = processEmojiInText(btn.text);
             b.onclick = () => openTerminalPage(btn.text);
             
             wrapper.appendChild(b);
@@ -203,7 +199,6 @@ function renderTerminal() {
     }
 }
 
-// --- ОКО ЮЗЕРА ---
 function openUserEyeStudio() {
     let modal = document.getElementById('user-eye-studio');
     const adminView = document.getElementById('admin-view'); 
@@ -244,12 +239,15 @@ function openUserEyeStudio() {
     document.body.appendChild(modal);
 
     document.getElementById('close-eye-btn').onclick = () => {
+        if (isEditMode) {
+            alert("⚠️ Закриття заблоковано. Спочатку збережіть або відмініть зміни.");
+            return;
+        }
         modal.remove();
         hideContextMenu();
         if (adminView) {
             adminView.style.display = 'block'; 
         }
-        isEditMode = false; 
     };
     
     if (adminView) {
@@ -281,7 +279,7 @@ function openUserEyeStudio() {
                 
                 const b = document.createElement('button');
                 b.className = 'cyber-btn';
-                b.innerHTML = neonizeEmoji(btn.text);
+                b.innerHTML = processEmojiInText(btn.text);
                 b.onclick = () => openTerminalPage(btn.text);
                 
                 wrapper.appendChild(b);
@@ -299,7 +297,6 @@ function openUserEyeStudio() {
     }
 }
 
-// --- ДИНАМІЧНЕ МЕНЮ НАЛАШТУВАНЬ ---
 let currentLocationForSave = 'main';
 
 function toggleContextMenu(event, type, loc) {
@@ -314,33 +311,44 @@ function toggleContextMenu(event, type, loc) {
     currentLocationForSave = loc;
     
     if (isEditMode) {
-        menu.innerHTML = `
-            <button class="settings-item" onclick="saveLayout()">
-                <span class="icon-neon" style="border:none;">💾</span> Зберегти порядок
-            </button>
-            <button class="settings-item" onclick="cancelEditMode()">
-                <span class="icon-neon icon-trash"></span> Вийти без збереження
-            </button>
-        `;
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'settings-item';
+        saveBtn.innerHTML = '<span class="icon-neon" style="border:none;">💾</span> Зберегти порядок';
+        saveBtn.onclick = () => saveLayout(type);
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'settings-item';
+        cancelBtn.innerHTML = '<span class="icon-neon icon-trash"></span> Відмінити зміни';
+        cancelBtn.onclick = () => cancelDragAndDrop(type);
+        
+        menu.appendChild(saveBtn);
+        menu.appendChild(cancelBtn);
     } else {
         if (type === 'user_eye') {
-            menu.innerHTML = `
-                <button class="settings-item" onclick="toggleEditMode()">
-                    🛠 Режим Конструктора
-                </button>
-            `;
+            const editBtn = document.createElement('button');
+            editBtn.className = 'settings-item';
+            editBtn.innerHTML = '🛠 Режим Конструктора';
+            editBtn.onclick = () => toggleEditMode(type);
+            menu.appendChild(editBtn);
         } else {
-            menu.innerHTML = `
-                <button class="settings-item" onclick="triggerBgUpload()">
-                    <span class="icon-neon icon-frame"></span> Встановити фон
-                </button>
-                <button class="settings-item" onclick="resetBackground()">
-                    <span class="icon-neon icon-trash"></span> Видалити фон
-                </button>
-                <button class="settings-item" onclick="toggleEditMode()">
-                    🛠 Режим Конструктора
-                </button>
-            `;
+            const bgBtn = document.createElement('button');
+            bgBtn.className = 'settings-item';
+            bgBtn.innerHTML = '<span class="icon-neon icon-frame"></span> Встановити фон';
+            bgBtn.onclick = () => triggerBgUpload();
+            
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'settings-item';
+            resetBtn.innerHTML = '<span class="icon-neon icon-trash"></span> Видалити фон';
+            resetBtn.onclick = () => resetBackground();
+            
+            const editBtn = document.createElement('button');
+            editBtn.className = 'settings-item';
+            editBtn.innerHTML = '🛠 Режим Конструктора';
+            editBtn.onclick = () => toggleEditMode(type);
+            
+            menu.appendChild(bgBtn);
+            menu.appendChild(resetBtn);
+            menu.appendChild(editBtn);
         }
     }
 
@@ -357,45 +365,73 @@ function hideContextMenu() {
     }
 }
 
-function toggleEditMode() {
+function toggleEditMode(type) {
     isEditMode = true;
     hideContextMenu();
-    renderCyberButtons(); 
     
-    if (document.getElementById('user-eye-studio')) {
-        openUserEyeStudio();
+    originalOrder = [];
+    let wrappers = [];
+    if (type === 'user_eye') {
+        const grid = document.getElementById('user-eye-grid');
+        if (grid) wrappers = grid.querySelectorAll('.btn-wrapper');
+    } else {
+        const grid1 = document.getElementById('terminal-buttons-container');
+        const grid2 = document.getElementById('user-commands-safe-zone');
+        if (grid1) wrappers = grid1.querySelectorAll('.btn-wrapper');
+        else if (grid2) wrappers = grid2.querySelectorAll('.btn-wrapper');
     }
-    if (navStack.length > 0) {
-        renderTerminal();
-    }
-    alert("🛠 Режим Конструктора УВІМКНЕНО. Затисніть та перетягніть кнопку пальцем, потім натисніть 3 крапки щоб зберегти.");
+    
+    wrappers.forEach(w => originalOrder.push(w));
+
+    alert("🛠 Режим Конструктора УВІМКНЕНО.\nПеретягніть кнопки. Потім натисніть 3 крапки -> Зберегти порядок.");
 }
 
-function cancelEditMode() {
-    isEditMode = false;
-    hideContextMenu();
-    renderCyberButtons();
-    
-    if (document.getElementById('user-eye-studio')) {
-        openUserEyeStudio();
-    }
-    if (navStack.length > 0) {
-        renderTerminal();
-    }
-}
-
-function saveLayout() {
+function cancelDragAndDrop(type) {
     isEditMode = false;
     hideContextMenu();
     
-    let wrappers = document.querySelectorAll(`.btn-wrapper[data-loc="${currentLocationForSave}"]`);
-    let newOrder = Array.from(wrappers).map(w => w.dataset.id);
+    const container = (type === 'user_eye') 
+        ? document.querySelector('#user-eye-grid > div') || document.getElementById('user-eye-grid') 
+        : document.getElementById('terminal-buttons-container') || document.getElementById('user-commands-safe-zone');
     
+    if (container) {
+        container.innerHTML = '';
+        originalOrder.forEach(wrapper => {
+            wrapper.style.opacity = '1';
+            wrapper.style.transform = 'scale(1)';
+            container.appendChild(wrapper);
+        });
+    }
+    
+    alert("❌ Зміни порядку відмінено.");
+}
+
+function saveLayout(type) {
+    isEditMode = false;
+    hideContextMenu();
+    
+    let wrappers = [];
+    let loc = currentLocationForSave;
+    
+    if (type === 'user_eye') {
+        wrappers = document.querySelectorAll('#user-eye-grid .btn-wrapper');
+    } else {
+        wrappers = document.querySelectorAll(`.btn-wrapper[data-loc="${loc}"]`);
+    }
+
+    const newOrderIds = Array.from(wrappers).map(w => w.dataset.id);
+    
+    wrappers.forEach(w => {
+        w.style.opacity = '1';
+        w.style.transform = 'scale(1)';
+        w.style.zIndex = '1';
+    });
+
     tg.HapticFeedback.impactOccurred('heavy');
     tg.sendData(JSON.stringify({ 
         action: "reorder", 
-        loc: currentLocationForSave, 
-        new_order: newOrder 
+        loc: loc, 
+        new_order: newOrderIds 
     }));
 }
 
@@ -473,10 +509,10 @@ function makeDraggable(wrapper) {
         
         this.style.opacity = '1';
         draggedEl = null;
+        // Кнопка залишається на місці, поки не натиснуть 3 крапки -> Зберегти
     });
 }
 
-// --- МАЛЮВАННЯ ГМ ТА БУРГЕРА ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
@@ -502,6 +538,7 @@ function renderCyberButtons() {
         homeBtn.id = 'home-btn-burger';
         homeBtn.innerHTML = '🏠';
         homeBtn.className = 'cyber-btn home-btn-burger';
+        homeBtn.style.justifyContent = 'center';
         homeBtn.onclick = goHome;
         menuContent.insertBefore(homeBtn, menuContent.firstChild);
     }
@@ -510,7 +547,8 @@ function renderCyberButtons() {
         const eyeBtn = document.createElement('button');
         eyeBtn.id = 'trigger-eye-btn';
         eyeBtn.className = 'cyber-btn secret-btn';
-        eyeBtn.innerHTML = neonizeEmoji('👁️ Око Юзера');
+        eyeBtn.style.marginBottom = '10px';
+        eyeBtn.innerHTML = processEmojiInText('👁️ Око Юзера');
         eyeBtn.onclick = openUserEyeStudio;
         ownerNav.appendChild(eyeBtn); 
     }
@@ -543,18 +581,17 @@ function renderCyberButtons() {
 
 function createButtonElement(btn, location, container) {
     const wrapper = document.createElement('div');
-    wrapper.className = `btn-wrapper`;
+    wrapper.className = `btn-wrapper ${location === 'main' ? 'grid-item' : ''}`;
     wrapper.dataset.id = btn.text;
     wrapper.dataset.loc = location;
     
     const b = document.createElement('button');
     b.className = 'cyber-btn';
-    
     if (btn.role === 'owner') {
         b.classList.add('secret-btn');
     }
     
-    b.innerHTML = neonizeEmoji(btn.text);
+    b.innerHTML = processEmojiInText(btn.text);
     b.onclick = () => openTerminalPage(btn.text);
     
     wrapper.appendChild(b);
@@ -631,7 +668,7 @@ function closeApp() {
 }
 
 // =======================================================================
-// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (ПОВНІСТЮ РОЗГОРНУТО ЯК В ОРИГІНАЛІ) ---
+// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (ПОВНІСТЮ РОЗГОРНУТО) ---
 // =======================================================================
 
 const chatInput = document.getElementById('chat-input');
@@ -664,41 +701,22 @@ function applyFormat(type, event) {
     }
 
     switch(type) {
-        case 'bold': 
-            document.execCommand('bold'); 
-            break;
-        case 'italic': 
-            document.execCommand('italic'); 
-            break;
-        case 'strikethrough': 
-            document.execCommand('strikeThrough'); 
-            break;
-        case 'underline': 
-            document.execCommand('underline'); 
-            break;
-        case 'monospaced': 
-            document.execCommand('fontName', false, 'monospace'); 
-            break;
+        case 'bold': document.execCommand('bold'); break;
+        case 'italic': document.execCommand('italic'); break;
+        case 'strikethrough': document.execCommand('strikeThrough'); break;
+        case 'underline': document.execCommand('underline'); break;
+        case 'monospaced': document.execCommand('fontName', false, 'monospace'); break;
         case 'link':
             let url = prompt("Введіть посилання (URL):");
-            if (url) {
-                document.execCommand('createLink', false, url);
-            }
+            if (url) document.execCommand('createLink', false, url);
             break;
-        case 'plain': 
-            document.execCommand('removeFormat'); 
-            break;
+        case 'plain': document.execCommand('removeFormat'); break;
         case 'codeBlock':
             const text = selection.toString();
             let codeTitle = prompt("Введіть назву для коду (наприклад, index.html):", "Код");
             
-            if (codeTitle === null) { 
-                formatMenu.classList.add('hidden'); 
-                return; 
-            }
-            if (codeTitle.trim() === '') { 
-                codeTitle = "Код"; 
-            }
+            if (codeTitle === null) { formatMenu.classList.add('hidden'); return; }
+            if (codeTitle.trim() === '') { codeTitle = "Код"; }
 
             const codeHTML = `
             <div class="custom-code-block" contenteditable="false">
@@ -719,14 +737,10 @@ function applyFormat(type, event) {
 
 function copyMyCode(btn) {
     const pre = btn.parentElement.nextElementSibling;
-    
     navigator.clipboard.writeText(pre.innerText).then(() => {
         const originalText = btn.innerText;
         btn.innerText = '✅ Скопійовано!';
-        
-        setTimeout(() => { 
-            btn.innerText = originalText; 
-        }, 2000);
+        setTimeout(() => { btn.innerText = originalText; }, 2000);
     });
 }
 
@@ -734,9 +748,7 @@ let pendingMedia = [];
 
 function handleAttachment(event) {
     const files = event.target.files;
-    if (!files.length) {
-        return;
-    }
+    if (!files.length) return;
     
     for(let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -745,15 +757,9 @@ function handleAttachment(event) {
         reader.onload = function(e) {
             const dataUrl = e.target.result;
             const isVideo = file.type.startsWith('video/');
-            
-            pendingMedia.push({ 
-                type: isVideo ? 'video' : 'image', 
-                src: dataUrl 
-            });
-            
+            pendingMedia.push({ type: isVideo ? 'video' : 'image', src: dataUrl });
             renderMediaPreview();
         }
-        
         reader.readAsDataURL(file);
     }
     event.target.value = ""; 
@@ -763,11 +769,7 @@ function renderMediaPreview() {
     const container = document.getElementById('media-preview-container');
     container.innerHTML = '';
     
-    if (pendingMedia.length === 0) { 
-        container.classList.add('hidden'); 
-        return; 
-    }
-    
+    if (pendingMedia.length === 0) { container.classList.add('hidden'); return; }
     container.classList.remove('hidden');
     
     pendingMedia.forEach((media, index) => {
@@ -779,7 +781,6 @@ function renderMediaPreview() {
         } else {
             div.innerHTML = `<img src="${media.src}"><div class="preview-remove" onclick="removePendingMedia(${index})">❌</div>`;
         }
-        
         container.appendChild(div);
     });
 }
@@ -795,9 +796,7 @@ const deleteConfirmModal = document.getElementById('delete-confirm-modal');
 
 if (document.getElementById('btn-cancel-delete')) {
     document.getElementById('btn-cancel-delete').addEventListener('click', () => {
-        if (deleteConfirmModal) {
-            deleteConfirmModal.classList.add('hidden');
-        }
+        if (deleteConfirmModal) deleteConfirmModal.classList.add('hidden');
         msgToDeleteId = null;
         msgToDeleteDiv = null;
     });
@@ -809,9 +808,7 @@ if (document.getElementById('btn-confirm-delete')) {
             deleteMsgFromHistory(msgToDeleteId);
             msgToDeleteDiv.remove();
         }
-        if (deleteConfirmModal) {
-            deleteConfirmModal.classList.add('hidden');
-        }
+        if (deleteConfirmModal) deleteConfirmModal.classList.add('hidden');
         msgToDeleteId = null;
         msgToDeleteDiv = null;
     });
@@ -819,9 +816,7 @@ if (document.getElementById('btn-confirm-delete')) {
 
 function loadChatHistory() {
     const box = document.getElementById('chat-messages');
-    if (!box) {
-        return;
-    }
+    if (!box) return;
     
     box.innerHTML = ''; 
     let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
@@ -830,9 +825,7 @@ function loadChatHistory() {
         appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.'); 
     } else {
         history.forEach(item => {
-            if (!item.id) {
-                item.id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
-            }
+            if (!item.id) item.id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
             appendMsgDOM(item.sender, item.text, item.id);
         });
         localStorage.setItem(CHAT_KEY, JSON.stringify(history));
@@ -867,9 +860,7 @@ function updateMsg(id, newHtml) {
 
 function appendMsgDOM(sender, htmlText, id) {
     const box = document.getElementById('chat-messages');
-    if (!box) {
-        return;
-    }
+    if (!box) return;
     
     const div = document.createElement('div');
     div.classList.add('msg', sender);
@@ -883,15 +874,11 @@ function appendMsgDOM(sender, htmlText, id) {
         pressTimer = setTimeout(() => {
             msgToDeleteId = id;
             msgToDeleteDiv = div;
-            if (deleteConfirmModal) {
-                deleteConfirmModal.classList.remove('hidden');
-            }
+            if (deleteConfirmModal) deleteConfirmModal.classList.remove('hidden');
         }, 800); 
     };
     
-    const cancelPress = () => { 
-        clearTimeout(pressTimer); 
-    };
+    const cancelPress = () => { clearTimeout(pressTimer); };
 
     div.addEventListener('mousedown', startPress);
     div.addEventListener('touchstart', startPress);
@@ -959,9 +946,7 @@ function sendMessage() {
     const htmlText = chatInput.innerHTML.trim(); 
     const rawText = chatInput.innerText.trim();
 
-    if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div') && pendingMedia.length === 0) {
-        return;
-    }
+    if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div') && pendingMedia.length === 0) return;
     
     if (awaitingNote) {
         const tempDiv = document.createElement('div');
