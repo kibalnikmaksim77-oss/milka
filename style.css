@@ -53,7 +53,8 @@ body {
     padding-bottom: 25px;
 }
 
-#user-commands-safe-zone {
+#user-commands-safe-zone,
+.eye-safe-zone {
     position: absolute; 
     top: 50%; 
     width: 90%; 
@@ -66,7 +67,7 @@ body {
     overflow-y: auto; 
 }
 
-/* --- ЄДИНИЙ СТИЛЬ КНОПОК --- */
+/* --- ЄДИНИЙ СТИЛЬ КНОПОК (ЯК У MILKA BOT) --- */
 .cyber-btn {
     width: 100%; 
     padding: 14px 10px; 
@@ -98,7 +99,7 @@ body {
     background: rgba(188, 19, 254, 0.15) !important; 
 }
 
-/* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА (ВИПРАВЛЕНО НА ЧОРНИЙ ФОН) --- */
+/* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА (ГЛУХИЙ ЧОРНИЙ ФОН) --- */
 #dynamic-terminal-page, 
 #user-eye-studio {
     background-color: #050505; 
@@ -108,6 +109,12 @@ body {
     overflow: hidden;
 }
 
+/* Прибираємо старе розмиття (blur) */
+#dynamic-terminal-page::before, 
+#user-eye-studio::before {
+    display: none;
+}
+
 .terminal-header {
     position: relative; 
     height: 60px; 
@@ -115,7 +122,7 @@ body {
     display: flex; 
     justify-content: space-between; 
     align-items: center;
-    border-bottom: 1px solid rgba(188, 19, 254, 0.3); 
+    border-bottom: none; /* ЛІНІЮ ПРИБРАНО */
     flex-shrink: 0;
 }
 
@@ -139,11 +146,7 @@ body {
 }
 
 .terminal-title { 
-    position: absolute; 
-    left: 50%; 
-    transform: translateX(-50%); 
-    font-size: 26px; 
-    display: none; /* Приховано за твоїм ТЗ */
+    display: none; /* ЕМОДЗІ ПО ЦЕНТРУ ПРИБРАНО */
 }
 
 .terminal-right-controls { 
@@ -236,7 +239,7 @@ body {
     line-height: 0; 
 }
 
-/* --- ФІКСОВАНЕ КОНТЕКСТНЕ МЕНЮ --- */
+/* --- ФІКСОВАНЕ КОНТЕКСТНЕ МЕНЮ (ПРАВОРУЧ ВІД 3 КРАПОК) --- */
 #context-menu {
     position: fixed; 
     background: rgba(15, 15, 15, 0.95); 
@@ -361,7 +364,7 @@ body {
     display: none !important; 
 }
 
-/* --- ЧАТ ТА ІНШІ СТИЛІ --- */
+/* --- ЧАТ ТА ІНШІ СТИЛІ (ТВІЙ ОРИГІНАЛ) --- */
 #chat-modal {
     position: fixed; 
     top: 0; 
