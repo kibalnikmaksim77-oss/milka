@@ -14,9 +14,15 @@ body {
 }
 
 @keyframes neonPulse {
-    0% { box-shadow: 0 0 5px rgba(188, 19, 254, 0.4), inset 0 0 2px rgba(188, 19, 254, 0.2); }
-    50% { box-shadow: 0 0 20px rgba(188, 19, 254, 0.8), inset 0 0 10px rgba(188, 19, 254, 0.5); }
-    100% { box-shadow: 0 0 5px rgba(188, 19, 254, 0.4), inset 0 0 2px rgba(188, 19, 254, 0.2); }
+    0% { 
+        box-shadow: 0 0 5px rgba(188, 19, 254, 0.4), inset 0 0 2px rgba(188, 19, 254, 0.2); 
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(188, 19, 254, 0.8), inset 0 0 10px rgba(188, 19, 254, 0.5); 
+    }
+    100% { 
+        box-shadow: 0 0 5px rgba(188, 19, 254, 0.4), inset 0 0 2px rgba(188, 19, 254, 0.2); 
+    }
 }
 
 .neon-border {
@@ -67,32 +73,32 @@ body {
     overflow-y: auto; 
 }
 
-/* --- ЄДИНИЙ СТИЛЬ КНОПОК (ЯК Milka Bot) --- */
-.cyber-btn, .menu-item, .note-btn {
+/* --- ЄДИНИЙ СТИЛЬ КНОПОК 1 В 1 ЯК "Milka Bot" --- */
+.cyber-btn {
     width: 100%; 
-    padding: 10px; 
-    background: #151515; 
+    padding: 12px 10px; 
+    font-size: 14px; 
+    border-radius: 12px; 
+    background: rgba(188, 19, 254, 0.15); 
     border: 1px solid #bc13fe; 
     color: #bc13fe;
-    border-radius: 6px; 
     font-weight: bold; 
-    font-size: 11px; 
     cursor: pointer; 
     margin-bottom: 5px;
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    gap: 5px;
+    gap: 8px;
     text-shadow: 0 0 5px #bc13fe;
-    transition: 0.2s;
+    box-shadow: 0 0 8px rgba(188, 19, 254, 0.2);
+    transition: transform 0.1s, opacity 0.2s, background 0.2s;
 }
 
-.cyber-btn:hover, .menu-item:hover, .note-btn:hover { 
-    background: rgba(188, 19, 254, 0.2); 
-    box-shadow: 0 0 10px rgba(188, 19, 254, 0.8); 
+.cyber-btn:hover { 
+    background: rgba(188, 19, 254, 0.3); 
 }
 
-.cyber-btn:active, .menu-item:active, .note-btn:active { 
+.cyber-btn:active { 
     transform: scale(0.95); 
 }
 
@@ -100,14 +106,14 @@ body {
     background: rgba(188, 19, 254, 0.15) !important; 
 }
 
-/* ШРИФТ ДЛЯ СУЧАСНИХ ЕМОДЗІ */
-.cyber-btn span.emoji, .menu-item span.emoji, .note-btn span.emoji {
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+/* Шрифт для сучасних емодзі */
+.cyber-btn span.emoji {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", sans-serif;
     font-size: 1.2em;
     filter: drop-shadow(0 0 5px #bc13fe);
 }
 
-/* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА --- */
+/* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА (ГЛУХИЙ ЧОРНИЙ ФОН) --- */
 #dynamic-terminal-page, 
 #user-eye-studio {
     background-color: #050505; 
@@ -117,6 +123,11 @@ body {
     overflow: hidden;
 }
 
+#dynamic-terminal-page::before, 
+#user-eye-studio::before {
+    display: none; 
+}
+
 .terminal-header {
     position: relative; 
     height: 60px; 
@@ -124,7 +135,7 @@ body {
     display: flex; 
     justify-content: space-between; 
     align-items: center;
-    border-bottom: none; /* ПРИБРАВ ЛІНІЮ */
+    border-bottom: none !important; /* ЛІНІЮ СТРОГО ПРИБРАНО */
     flex-shrink: 0;
 }
 
@@ -148,7 +159,7 @@ body {
 }
 
 .terminal-title { 
-    display: none; /* ПРИБРАВ ЕМОДЗІ ПО ЦЕНТРУ */
+    display: none; 
 }
 
 .terminal-right-controls { 
@@ -243,8 +254,6 @@ body {
 
 #context-menu {
     position: fixed; 
-    top: 60px; 
-    right: 20px; 
     background: rgba(15, 15, 15, 0.95); 
     border: 1px solid #bc13fe;
     border-radius: 8px; 
@@ -278,58 +287,15 @@ body {
     background: rgba(188, 19, 254, 0.1); 
 }
 
-/* --- СЕНСОРНИЙ КОНСТРУКТОР (Drag & Drop) --- */
+/* --- КОНСТРУКТОР (Drag & Drop) --- */
 .btn-wrapper { 
     position: relative; 
     width: 100%; 
-    margin-bottom: 8px; 
-    transition: transform 0.2s, opacity 0.2s;
+    transition: transform 0.2s; 
 }
 
 .btn-wrapper.grid-item { 
     margin-bottom: 0; 
-}
-
-.edit-controls { 
-    position: absolute; 
-    top: -12px; 
-    right: 0; 
-    display: flex; 
-    gap: 4px; 
-    background: rgba(188, 19, 254, 0.9); 
-    padding: 4px 8px; 
-    border-radius: 8px; 
-    border: 1px solid #fff; 
-    z-index: 1000; 
-    box-shadow: 0 0 15px #bc13fe; 
-}
-
-.edit-btn { 
-    background: #000; 
-    border: 1px solid #fff; 
-    color: #fff; 
-    border-radius: 4px; 
-    width: 24px; 
-    height: 24px; 
-    font-size: 14px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    cursor: pointer; 
-    font-weight: bold; 
-}
-
-.edit-btn:active { 
-    background: #fff; 
-    color: #000; 
-}
-
-.draggable-item { 
-    cursor: grab; 
-}
-
-.draggable-item:active { 
-    cursor: grabbing; 
 }
 
 /* --- БУРГЕР-МЕНЮ ТА ХАТИНКА --- */
@@ -388,7 +354,7 @@ body {
     display: none !important; 
 }
 
-/* --- ЧАТ ТА ІНШІ СТИЛІ (ТВІЙ ОРИГІНАЛ) --- */
+/* --- ЧАТ ТА ІНШІ СТИЛІ (ТВІЙ ОРИГІНАЛ, РОЗГОРНУТО) --- */
 #chat-modal {
     position: fixed; 
     top: 0; 
@@ -705,7 +671,8 @@ body {
     transform: translate(-50%, -50%) rotate(-45deg); 
 }
 
-#delete-confirm-modal {
+#delete-confirm-modal,
+#save-layout-modal {
     position: fixed; 
     top: 0; 
     left: 0; 
@@ -773,5 +740,4 @@ body {
     flex-wrap: wrap; 
     gap: 8px; 
     margin-top: 10px;
-    }
-    
+}
