@@ -67,31 +67,32 @@ body {
     overflow-y: auto; 
 }
 
-/* --- ЄДИНИЙ СТИЛЬ КНОПОК (ЯК У MILKA BOT) --- */
-.cyber-btn {
+/* --- ЄДИНИЙ СТИЛЬ КНОПОК (ЯК Milka Bot) --- */
+.cyber-btn, .menu-item, .note-btn {
     width: 100%; 
-    padding: 14px 10px; 
-    font-size: 14px; 
-    border-radius: 16px; 
-    background: rgba(15, 15, 15, 0.5); 
-    backdrop-filter: blur(12px); 
-    border: 1.5px solid rgba(188, 19, 254, 0.6); 
-    color: #fff; 
-    text-shadow: 0 0 10px #bc13fe; 
+    padding: 10px; 
+    background: #151515; 
+    border: 1px solid #bc13fe; 
+    color: #bc13fe;
+    border-radius: 6px; 
+    font-weight: bold; 
+    font-size: 11px; 
     cursor: pointer; 
+    margin-bottom: 5px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 5px;
+    text-shadow: 0 0 5px #bc13fe;
     transition: 0.2s;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 0 10px rgba(188,19,254,0.2);
-    display: block; 
-    margin: 0; 
-    text-align: center;
 }
 
-.cyber-btn:hover { 
+.cyber-btn:hover, .menu-item:hover, .note-btn:hover { 
     background: rgba(188, 19, 254, 0.2); 
     box-shadow: 0 0 10px rgba(188, 19, 254, 0.8); 
 }
 
-.cyber-btn:active { 
+.cyber-btn:active, .menu-item:active, .note-btn:active { 
     transform: scale(0.95); 
 }
 
@@ -99,7 +100,14 @@ body {
     background: rgba(188, 19, 254, 0.15) !important; 
 }
 
-/* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА (ГЛУХИЙ ЧОРНИЙ ФОН) --- */
+/* ШРИФТ ДЛЯ СУЧАСНИХ ЕМОДЗІ */
+.cyber-btn span.emoji, .menu-item span.emoji, .note-btn span.emoji {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    font-size: 1.2em;
+    filter: drop-shadow(0 0 5px #bc13fe);
+}
+
+/* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА --- */
 #dynamic-terminal-page, 
 #user-eye-studio {
     background-color: #050505; 
@@ -109,12 +117,6 @@ body {
     overflow: hidden;
 }
 
-/* Прибираємо старе розмиття (blur) */
-#dynamic-terminal-page::before, 
-#user-eye-studio::before {
-    display: none;
-}
-
 .terminal-header {
     position: relative; 
     height: 60px; 
@@ -122,7 +124,7 @@ body {
     display: flex; 
     justify-content: space-between; 
     align-items: center;
-    border-bottom: none; /* ЛІНІЮ ПРИБРАНО */
+    border-bottom: none; /* ПРИБРАВ ЛІНІЮ */
     flex-shrink: 0;
 }
 
@@ -146,7 +148,7 @@ body {
 }
 
 .terminal-title { 
-    display: none; /* ЕМОДЗІ ПО ЦЕНТРУ ПРИБРАНО */
+    display: none; /* ПРИБРАВ ЕМОДЗІ ПО ЦЕНТРУ */
 }
 
 .terminal-right-controls { 
@@ -239,9 +241,10 @@ body {
     line-height: 0; 
 }
 
-/* --- ФІКСОВАНЕ КОНТЕКСТНЕ МЕНЮ (ПРАВОРУЧ ВІД 3 КРАПОК) --- */
 #context-menu {
     position: fixed; 
+    top: 60px; 
+    right: 20px; 
     background: rgba(15, 15, 15, 0.95); 
     border: 1px solid #bc13fe;
     border-radius: 8px; 
@@ -280,11 +283,45 @@ body {
     position: relative; 
     width: 100%; 
     margin-bottom: 8px; 
-    transition: transform 0.2s, opacity 0.2s; 
+    transition: transform 0.2s, opacity 0.2s;
 }
 
 .btn-wrapper.grid-item { 
     margin-bottom: 0; 
+}
+
+.edit-controls { 
+    position: absolute; 
+    top: -12px; 
+    right: 0; 
+    display: flex; 
+    gap: 4px; 
+    background: rgba(188, 19, 254, 0.9); 
+    padding: 4px 8px; 
+    border-radius: 8px; 
+    border: 1px solid #fff; 
+    z-index: 1000; 
+    box-shadow: 0 0 15px #bc13fe; 
+}
+
+.edit-btn { 
+    background: #000; 
+    border: 1px solid #fff; 
+    color: #fff; 
+    border-radius: 4px; 
+    width: 24px; 
+    height: 24px; 
+    font-size: 14px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    font-weight: bold; 
+}
+
+.edit-btn:active { 
+    background: #fff; 
+    color: #000; 
 }
 
 .draggable-item { 
@@ -339,19 +376,6 @@ body {
     color: #444; 
     font-size: 10px; 
     text-align: center; 
-}
-
-.menu-item {
-    width: 100%; 
-    padding: 10px; 
-    background: #151515; 
-    border: 1px solid #bc13fe; 
-    color: #bc13fe;
-    border-radius: 6px; 
-    font-weight: bold; 
-    font-size: 11px; 
-    cursor: pointer; 
-    margin-bottom: 5px;
 }
 
 .divider { 
@@ -681,8 +705,7 @@ body {
     transform: translate(-50%, -50%) rotate(-45deg); 
 }
 
-#delete-confirm-modal,
-#save-layout-modal {
+#delete-confirm-modal {
     position: fixed; 
     top: 0; 
     left: 0; 
@@ -750,29 +773,5 @@ body {
     flex-wrap: wrap; 
     gap: 8px; 
     margin-top: 10px;
-}
-
-.note-btn {
-    width: 100%; 
-    padding: 14px 10px; 
-    font-size: 14px; 
-    border-radius: 16px; 
-    background: rgba(15, 15, 15, 0.4); 
-    backdrop-filter: blur(12px); 
-    border: 1.5px solid rgba(188, 19, 254, 0.6); 
-    color: #fff; 
-    text-shadow: 0 0 10px #bc13fe; 
-    cursor: pointer; 
-    transition: 0.2s;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5); 
-    display: inline-block;
-}
-
-.note-btn:hover { 
-    background: rgba(188, 19, 254, 0.2); 
-    box-shadow: 0 0 10px rgba(188, 19, 254, 0.8); 
-}
-
-.note-btn:active { 
-    transform: scale(0.95); 
-}
+    }
+    
