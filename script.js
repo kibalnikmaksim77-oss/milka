@@ -11,16 +11,12 @@ const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 const encodedData = urlParams.get('cd'); 
 
-let cyberPages = { 
-    main: { buttons: [] }, 
-    burger: { buttons: [] }, 
-    pages: {}, 
-    pages_bg: {} 
-};
+let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {} };
 let isEditMode = false;
 let navStack = []; 
 let originalOrder = []; 
 
+// --- РОЗШИФРОВКА БАЗИ ---
 if (encodedData) {
     try {
         let decodedString;
@@ -36,6 +32,7 @@ if (encodedData) {
     }
 }
 
+// --- ФОН ---
 const initGlobalBg = cyberPages.pages_bg && cyberPages.pages_bg['global'];
 if (initGlobalBg) { 
     document.body.style.backgroundImage = `url('${initGlobalBg}')`; 
@@ -48,6 +45,7 @@ if (initGlobalBg) {
     }
 }
 
+// --- КАБІНЕТ АДМІНА ---
 if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) {
@@ -72,9 +70,10 @@ function processEmojiInText(text) {
     return text;
 }
 
+// --- НАВІГАЦІЯ ---
 function goHome() {
     if (isEditMode) {
-        alert("⚠️ Вихід заблоковано. Спочатку збережіть або відмініть зміни в Режимі Конструктора.");
+        alert("⚠️ Вихід заблоковано. Спочатку збережіть або відмініть зміни в Режимі Конструктора (натисніть 3 крапки).");
         return;
     }
     navStack = []; 
@@ -106,35 +105,26 @@ function goBack() {
 }
 
 function openTerminalPage(pageTitle) {
-    if (isEditMode) {
-        return;
-    }
-    if (pageTitle.includes('Око Юзера') || pageTitle.includes('Milka Bot') || pageTitle === '🏠') {
-        return;
-    }
+    if (isEditMode) return; 
+    if(pageTitle.includes('Око Юзера') || pageTitle.includes('Milka Bot') || pageTitle === '🏠') return;
+    
     navStack.push(pageTitle); 
     renderTerminal();
 }
 
+// --- ТЕРМІНАЛ ---
 function renderTerminal() {
-    if (navStack.length === 0) {
-        return;
-    }
-    
+    if (navStack.length === 0) return;
     const currentPage = navStack[navStack.length - 1]; 
     
     document.getElementById('app-container').classList.add('hidden');
     hideContextMenu();
     
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu.classList.contains('active')) {
-        toggleMenu();
-    }
+    if (sideMenu.classList.contains('active')) toggleMenu();
     
     let terminal = document.getElementById('dynamic-terminal-page');
-    if (terminal) {
-        terminal.remove(); 
-    }
+    if (terminal) terminal.remove(); 
     
     terminal = document.createElement('div');
     terminal.id = 'dynamic-terminal-page';
@@ -171,15 +161,10 @@ function renderTerminal() {
     terminal.classList.remove('hidden');
 
     const contentContainer = document.getElementById('terminal-buttons-container');
-    contentContainer.style.display = "grid";
-    contentContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
-    contentContainer.style.gap = "15px";
 
     if (cyberPages.pages && cyberPages.pages[currentPage]) {
         cyberPages.pages[currentPage].buttons.forEach(btn => {
-            if (btn.role === 'owner' && access !== 'admin_king') {
-                return;
-            }
+            if (btn.role === 'owner' && access !== 'admin_king') return;
             
             const wrapper = document.createElement('div');
             wrapper.className = 'btn-wrapper';
@@ -188,8 +173,9 @@ function renderTerminal() {
             
             const b = document.createElement('button');
             b.className = 'cyber-btn';
+            if (btn.role === 'owner') b.classList.add('secret-btn');
             
-            b.innerHTML = processEmojiInText(btn.text);
+            b.innerHTML = processEmojiInText(btn.text); 
             b.onclick = () => openTerminalPage(btn.text);
             
             wrapper.appendChild(b);
@@ -199,13 +185,12 @@ function renderTerminal() {
     }
 }
 
+// --- ОКО ЮЗЕРА ---
 function openUserEyeStudio() {
     let modal = document.getElementById('user-eye-studio');
     const adminView = document.getElementById('admin-view'); 
 
-    if (modal) {
-        modal.remove();
-    }
+    if (modal) modal.remove();
 
     modal = document.createElement('div');
     modal.id = 'user-eye-studio';
@@ -245,14 +230,10 @@ function openUserEyeStudio() {
         }
         modal.remove();
         hideContextMenu();
-        if (adminView) {
-            adminView.style.display = 'block'; 
-        }
+        if (adminView) adminView.style.display = 'block'; 
     };
     
-    if (adminView) {
-        adminView.style.display = 'none';
-    }
+    if (adminView) adminView.style.display = 'none';
 
     const globalBgValue = cyberPages.pages_bg && cyberPages.pages_bg['global'];
     if (globalBgValue) {
@@ -292,11 +273,10 @@ function openUserEyeStudio() {
     modal.style.display = 'flex';
     
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu.classList.contains('active')) {
-        toggleMenu();
-    }
+    if (sideMenu.classList.contains('active')) toggleMenu();
 }
 
+// --- ДИНАМІЧНЕ МЕНЮ НАЛАШТУВАНЬ (3 КРАПКИ) ---
 let currentLocationForSave = 'main';
 
 function toggleContextMenu(event, type, loc) {
@@ -313,12 +293,12 @@ function toggleContextMenu(event, type, loc) {
     if (isEditMode) {
         const saveBtn = document.createElement('button');
         saveBtn.className = 'settings-item';
-        saveBtn.innerHTML = '<span class="icon-neon" style="border:none;">💾</span> Зберегти порядок';
+        saveBtn.innerHTML = '💾 Зберегти порядок';
         saveBtn.onclick = () => saveLayout(type);
         
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'settings-item';
-        cancelBtn.innerHTML = '<span class="icon-neon icon-trash"></span> Відмінити зміни';
+        cancelBtn.innerHTML = '❌ Відмінити зміни';
         cancelBtn.onclick = () => cancelDragAndDrop(type);
         
         menu.appendChild(saveBtn);
@@ -354,15 +334,13 @@ function toggleContextMenu(event, type, loc) {
 
     const rect = event.target.getBoundingClientRect();
     menu.style.top = (rect.bottom + 5) + 'px';
-    menu.style.right = '20px'; 
+    menu.style.right = (window.innerWidth - rect.right) + 'px'; 
     menu.classList.remove('hidden');
 }
 
 function hideContextMenu() {
     const menu = document.getElementById('context-menu');
-    if(menu) {
-        menu.classList.add('hidden');
-    }
+    if(menu) menu.classList.add('hidden');
 }
 
 function toggleEditMode(type) {
@@ -372,7 +350,7 @@ function toggleEditMode(type) {
     originalOrder = [];
     let wrappers = [];
     if (type === 'user_eye') {
-        const grid = document.getElementById('user-eye-grid');
+        const grid = document.querySelector('#user-eye-grid > div');
         if (grid) wrappers = grid.querySelectorAll('.btn-wrapper');
     } else {
         const grid1 = document.getElementById('terminal-buttons-container');
@@ -383,7 +361,7 @@ function toggleEditMode(type) {
     
     wrappers.forEach(w => originalOrder.push(w));
 
-    alert("🛠 Режим Конструктора УВІМКНЕНО.\nПеретягніть кнопки. Потім натисніть 3 крапки -> Зберегти порядок.");
+    alert("🛠 Режим Конструктора УВІМКНЕНО.\nПеретягніть кнопки пальцем. Потім натисніть 3 крапки і виберіть 'Зберегти порядок'.");
 }
 
 function cancelDragAndDrop(type) {
@@ -391,19 +369,17 @@ function cancelDragAndDrop(type) {
     hideContextMenu();
     
     const container = (type === 'user_eye') 
-        ? document.querySelector('#user-eye-grid > div') || document.getElementById('user-eye-grid') 
+        ? document.querySelector('#user-eye-grid > div') 
         : document.getElementById('terminal-buttons-container') || document.getElementById('user-commands-safe-zone');
     
     if (container) {
         container.innerHTML = '';
         originalOrder.forEach(wrapper => {
-            wrapper.style.opacity = '1';
-            wrapper.style.transform = 'scale(1)';
+            wrapper.style.display = '';
             container.appendChild(wrapper);
         });
     }
-    
-    alert("❌ Зміни порядку відмінено.");
+    alert("❌ Зміни скасовано.");
 }
 
 function saveLayout(type) {
@@ -420,99 +396,118 @@ function saveLayout(type) {
     }
 
     const newOrderIds = Array.from(wrappers).map(w => w.dataset.id);
-    
-    wrappers.forEach(w => {
-        w.style.opacity = '1';
-        w.style.transform = 'scale(1)';
-        w.style.zIndex = '1';
-    });
 
     tg.HapticFeedback.impactOccurred('heavy');
-    tg.sendData(JSON.stringify({ 
-        action: "reorder", 
-        loc: loc, 
-        new_order: newOrderIds 
-    }));
+    tg.sendData(JSON.stringify({ action: "reorder", loc: loc, new_order: newOrderIds }));
 }
 
-// --- СПРАВЖНІЙ СЕНСОРНИЙ DRAG & DROP ІЗ ПРИВИДОМ ---
+// =======================================================================
+// --- ІДЕАЛЬНИЙ ПЛАВНИЙ DRAG & DROP (ЯК НА ВІДЕО) ---
+// =======================================================================
 let draggedEl = null;
-let dragGhost = null;
+let placeholder = null; 
+let ghostEl = null;
+let offsetX = 0, offsetY = 0;
 
 function makeDraggable(wrapper) {
     wrapper.addEventListener('touchstart', function(e) {
-        if (!isEditMode || access !== 'admin_king') {
-            return;
-        }
-        
-        draggedEl = this;
+        if (!isEditMode || access !== 'admin_king') return;
         tg.HapticFeedback.impactOccurred('medium');
 
-        dragGhost = this.cloneNode(true);
-        dragGhost.style.position = 'fixed';
-        dragGhost.style.pointerEvents = 'none';
-        dragGhost.style.zIndex = '999999';
-        dragGhost.style.opacity = '0.8';
-        dragGhost.style.width = this.offsetWidth + 'px';
-        dragGhost.style.transform = 'scale(1.05)';
-
+        draggedEl = this;
+        let rect = draggedEl.getBoundingClientRect();
         let touch = e.touches[0];
-        dragGhost.style.left = (touch.clientX - this.offsetWidth / 2) + 'px';
-        dragGhost.style.top = (touch.clientY - this.offsetHeight / 2) + 'px';
         
-        document.body.appendChild(dragGhost);
-        this.style.opacity = '0.3'; 
+        // Розраховуємо, де саме палець торкнувся кнопки
+        offsetX = touch.clientX - rect.left;
+        offsetY = touch.clientY - rect.top;
+
+        // Створюємо порожню рамку (placeholder), яка розсуватиме сітку
+        placeholder = document.createElement('div');
+        placeholder.className = 'btn-wrapper grid-item';
+        placeholder.style.width = rect.width + 'px';
+        placeholder.style.height = rect.height + 'px';
+        placeholder.style.border = '1px dashed #bc13fe';
+        placeholder.style.borderRadius = '12px';
+        placeholder.style.background = 'rgba(188, 19, 254, 0.1)';
+        placeholder.dataset.loc = draggedEl.dataset.loc;
         
+        draggedEl.parentNode.insertBefore(placeholder, draggedEl);
+
+        // Створюємо "привида", який буде плавно літати за пальцем
+        ghostEl = draggedEl.cloneNode(true);
+        ghostEl.style.position = 'fixed';
+        ghostEl.style.left = rect.left + 'px';
+        ghostEl.style.top = rect.top + 'px';
+        ghostEl.style.width = rect.width + 'px';
+        ghostEl.style.height = rect.height + 'px';
+        ghostEl.style.zIndex = '999999';
+        ghostEl.style.opacity = '0.9';
+        ghostEl.style.pointerEvents = 'none'; // Щоб палець бачив елементи під ним
+        ghostEl.style.transform = 'scale(1.05)';
+        ghostEl.style.boxShadow = '0 10px 25px rgba(188, 19, 254, 0.6)';
+        
+        document.body.appendChild(ghostEl);
+
+        // Ховаємо оригінальну кнопку
+        draggedEl.style.display = 'none';
+
     }, {passive: false});
 
     wrapper.addEventListener('touchmove', function(e) {
-        if (!draggedEl || !dragGhost) {
-            return;
-        }
-        
-        e.preventDefault(); 
+        if (!draggedEl || !ghostEl || !placeholder) return;
+        e.preventDefault(); // Забороняємо скрол екрану
+
         let touch = e.touches[0];
+        
+        // Привид плавно летить точно під пальцем
+        ghostEl.style.left = (touch.clientX - offsetX) + 'px';
+        ghostEl.style.top = (touch.clientY - offsetY) + 'px';
 
-        dragGhost.style.left = (touch.clientX - draggedEl.offsetWidth / 2) + 'px';
-        dragGhost.style.top = (touch.clientY - draggedEl.offsetHeight / 2) + 'px';
-
+        // Тимчасово ховаємо привида, щоб визначити, яка кнопка під ним
+        ghostEl.style.display = 'none'; 
         let target = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (!target) {
-            return;
-        }
+        ghostEl.style.display = ''; 
+
+        if (!target) return;
+
+        let targetWrapper = target.closest('.btn-wrapper:not(.placeholder)');
         
-        let targetWrapper = target.closest('.btn-wrapper');
-        
-        if (targetWrapper && targetWrapper !== draggedEl && targetWrapper.dataset.loc === draggedEl.dataset.loc) {
-            let rect = targetWrapper.getBoundingClientRect();
-            let mid = rect.top + rect.height / 2;
-            let parent = draggedEl.parentNode;
+        // Якщо навели на іншу кнопку — порожня рамка перестрибує туди
+        if (targetWrapper && targetWrapper.dataset.loc === draggedEl.dataset.loc && targetWrapper !== draggedEl) {
+            let targetRect = targetWrapper.getBoundingClientRect();
+            let midY = targetRect.top + targetRect.height / 2;
             
-            if (touch.clientY < mid) {
-                parent.insertBefore(draggedEl, targetWrapper);
+            if (touch.clientY < midY) {
+                targetWrapper.parentNode.insertBefore(placeholder, targetWrapper);
             } else {
-                parent.insertBefore(draggedEl, targetWrapper.nextSibling);
+                targetWrapper.parentNode.insertBefore(placeholder, targetWrapper.nextSibling);
             }
             tg.HapticFeedback.selectionChanged();
         }
     }, {passive: false});
 
     wrapper.addEventListener('touchend', function(e) {
-        if (!draggedEl) {
-            return;
-        }
+        if (!draggedEl || !placeholder) return;
         
-        if (dragGhost) {
-            dragGhost.remove();
-            dragGhost = null;
-        }
+        // Повертаємо оригінальну кнопку на місце порожньої рамки
+        placeholder.parentNode.insertBefore(draggedEl, placeholder);
+        draggedEl.style.display = ''; 
         
-        this.style.opacity = '1';
+        // Видаляємо рамку та літаючого привида
+        placeholder.remove();
+        if (ghostEl) ghostEl.remove();
+        
         draggedEl = null;
-        // Кнопка залишається на місці, поки не натиснуть 3 крапки -> Зберегти
+        placeholder = null;
+        ghostEl = null;
+        
+        tg.HapticFeedback.impactOccurred('light');
     });
 }
+// =======================================================================
 
+// --- МАЛЮВАННЯ ГМ ТА БУРГЕРА ---
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
@@ -524,21 +519,16 @@ function renderCyberButtons() {
         mainGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
     }
     
-    if (userNav) {
-        userNav.innerHTML = '';
-    }
-    if (ownerNav) {
-        ownerNav.innerHTML = '';
-    }
+    if (userNav) userNav.innerHTML = '';
+    if (ownerNav) ownerNav.innerHTML = '';
 
     const menuContent = document.querySelector('.menu-content');
     
     if (menuContent && !document.getElementById('home-btn-burger')) {
         const homeBtn = document.createElement('button');
         homeBtn.id = 'home-btn-burger';
-        homeBtn.innerHTML = '🏠';
+        homeBtn.innerHTML = processEmojiInText('🏠');
         homeBtn.className = 'cyber-btn home-btn-burger';
-        homeBtn.style.justifyContent = 'center';
         homeBtn.onclick = goHome;
         menuContent.insertBefore(homeBtn, menuContent.firstChild);
     }
@@ -556,25 +546,17 @@ function renderCyberButtons() {
     if (cyberPages.main && cyberPages.main.buttons) {
         cyberPages.main.buttons.forEach((btn) => {
             if (access === 'admin_king') {
-                if (btn.role === 'owner') {
-                    createButtonElement(btn, 'main', mainGrid);
-                }
+                if (btn.role === 'owner') createButtonElement(btn, 'main', mainGrid);
             } else {
-                if (btn.role === 'user') {
-                    createButtonElement(btn, 'main', mainGrid);
-                }
+                if (btn.role === 'user') createButtonElement(btn, 'main', mainGrid);
             }
         });
     }
     
     if (cyberPages.burger && cyberPages.burger.buttons) {
         cyberPages.burger.buttons.forEach((btn) => {
-            if(btn.role === 'owner' && ownerNav) {
-                createButtonElement(btn, 'burger', ownerNav);
-            }
-            if(btn.role === 'user' && userNav) {
-                createButtonElement(btn, 'burger', userNav);
-            }
+            if(btn.role === 'owner' && ownerNav) createButtonElement(btn, 'burger', ownerNav);
+            if(btn.role === 'user' && userNav) createButtonElement(btn, 'burger', userNav);
         });
     }
 }
@@ -587,9 +569,7 @@ function createButtonElement(btn, location, container) {
     
     const b = document.createElement('button');
     b.className = 'cyber-btn';
-    if (btn.role === 'owner') {
-        b.classList.add('secret-btn');
-    }
+    if (btn.role === 'owner') b.classList.add('secret-btn');
     
     b.innerHTML = processEmojiInText(btn.text);
     b.onclick = () => openTerminalPage(btn.text);
@@ -597,78 +577,50 @@ function createButtonElement(btn, location, container) {
     wrapper.appendChild(b);
     makeDraggable(wrapper);
     
-    if(container) {
-        container.appendChild(wrapper);
-    }
+    if(container) container.appendChild(wrapper);
 }
 
 function triggerBgUpload() { 
     const bgUpload = document.getElementById('bg-upload');
-    if (bgUpload) {
-        bgUpload.click(); 
-    }
+    if (bgUpload) bgUpload.click(); 
     hideContextMenu(); 
 }
 
 function changeBackground(event) {
     const file = event.target.files[0];
-    if (!file) {
-        return;
-    }
+    if (!file) return;
     
     if (access === 'admin_king') {
         let currentPage = 'global';
-        if (navStack.length > 0) { 
-            currentPage = navStack[navStack.length - 1]; 
-        }
+        if (navStack.length > 0) currentPage = navStack[navStack.length - 1]; 
         
-        tg.sendData(JSON.stringify({ 
-            action: "request_photo", 
-            page: currentPage 
-        }));
-        
+        tg.sendData(JSON.stringify({ action: "request_photo", page: currentPage }));
         alert(`🦾 Сигнал передано Питону! \n\nВідправ фото боту в повідомлення. Воно встановиться для сторінки: ${currentPage}`);
-        
-        setTimeout(() => { 
-            tg.close(); 
-        }, 500);
+        setTimeout(() => { tg.close(); }, 500);
     }
 }
 
 function resetBackground() {
     if (access === 'admin_king') {
         let currentPage = 'global';
-        if (navStack.length > 0) { 
-            currentPage = navStack[navStack.length - 1]; 
-        }
+        if (navStack.length > 0) currentPage = navStack[navStack.length - 1]; 
         
-        tg.sendData(JSON.stringify({ 
-            action: "reset_bg", 
-            page: currentPage 
-        }));
-        
+        tg.sendData(JSON.stringify({ action: "reset_bg", page: currentPage }));
         alert(`🧹 Фон для сторінки ${currentPage} видалено!`);
-        
-        setTimeout(() => { 
-            tg.close(); 
-        }, 500);
+        setTimeout(() => { tg.close(); }, 500);
     }
     hideContextMenu();
 }
 
 function toggleMenu() { 
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu) {
-        sideMenu.classList.toggle('active'); 
-    }
+    if (sideMenu) sideMenu.classList.toggle('active'); 
 }
 
-function closeApp() { 
-    tg.close(); 
-}
+function closeApp() { tg.close(); }
 
 // =======================================================================
-// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (ПОВНІСТЮ РОЗГОРНУТО) ---
+// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (ТВІЙ ОРИГІНАЛ - БЕЗ ЗМІН) ---
 // =======================================================================
 
 const chatInput = document.getElementById('chat-input');
@@ -687,18 +639,13 @@ if (chatInput) {
 }
 
 function toggleFormatMenu() { 
-    if (formatMenu) {
-        formatMenu.classList.toggle('hidden'); 
-    }
+    if (formatMenu) formatMenu.classList.toggle('hidden'); 
 }
 
 function applyFormat(type, event) {
     event.preventDefault(); 
     const selection = window.getSelection();
-    
-    if (!selection.rangeCount) {
-        return;
-    }
+    if (!selection.rangeCount) return;
 
     switch(type) {
         case 'bold': document.execCommand('bold'); break;
@@ -714,9 +661,8 @@ function applyFormat(type, event) {
         case 'codeBlock':
             const text = selection.toString();
             let codeTitle = prompt("Введіть назву для коду (наприклад, index.html):", "Код");
-            
             if (codeTitle === null) { formatMenu.classList.add('hidden'); return; }
-            if (codeTitle.trim() === '') { codeTitle = "Код"; }
+            if (codeTitle.trim() === '') codeTitle = "Код"; 
 
             const codeHTML = `
             <div class="custom-code-block" contenteditable="false">
@@ -729,10 +675,7 @@ function applyFormat(type, event) {
             document.execCommand('insertHTML', false, codeHTML);
             break;
     }
-    
-    if (formatMenu) {
-        formatMenu.classList.add('hidden');
-    }
+    if (formatMenu) formatMenu.classList.add('hidden');
 }
 
 function copyMyCode(btn) {
@@ -753,7 +696,6 @@ function handleAttachment(event) {
     for(let i = 0; i < files.length; i++) {
         const file = files[i];
         const reader = new FileReader();
-        
         reader.onload = function(e) {
             const dataUrl = e.target.result;
             const isVideo = file.type.startsWith('video/');
@@ -768,14 +710,12 @@ function handleAttachment(event) {
 function renderMediaPreview() {
     const container = document.getElementById('media-preview-container');
     container.innerHTML = '';
-    
     if (pendingMedia.length === 0) { container.classList.add('hidden'); return; }
-    container.classList.remove('hidden');
     
+    container.classList.remove('hidden');
     pendingMedia.forEach((media, index) => {
         const div = document.createElement('div');
         div.className = 'preview-item';
-        
         if (media.type === 'video') {
             div.innerHTML = `<video src="${media.src}"></video><div class="preview-remove" onclick="removePendingMedia(${index})">❌</div>`;
         } else {
@@ -820,7 +760,6 @@ function loadChatHistory() {
     
     box.innerHTML = ''; 
     let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
-    
     if (history.length === 0) { 
         appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.'); 
     } else {
@@ -850,7 +789,6 @@ function updateMsg(id, newHtml) {
         msgDiv.innerHTML = newHtml;
         let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
         let msgIndex = history.findIndex(m => m.id === id);
-        
         if (msgIndex !== -1) {
             history[msgIndex].text = newHtml;
             localStorage.setItem(CHAT_KEY, JSON.stringify(history));
@@ -868,7 +806,6 @@ function appendMsgDOM(sender, htmlText, id) {
     div.dataset.id = id;
 
     let pressTimer;
-    
     const startPress = (e) => {
         if (e.type === 'click' && e.button !== 0) return;
         pressTimer = setTimeout(() => {
@@ -914,13 +851,10 @@ window.generateNotesListHTML = function(msgId) {
     let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
     let keys = Object.keys(notes);
     let buttonsHtml = '<div class="notes-list-container">';
-    
     keys.forEach(key => {
         buttonsHtml += `<button class="cyber-btn" onclick="openNoteFromButton('${key.replace(/'/g, "\\'")}', '${msgId}')">${key}</button>`;
     });
-    
     buttonsHtml += '</div>';
-    
     return `🗄 <b>Ваші збережені пам'ятки:</b><br><span style="font-size:12px; color:#aaa;">Натисніть на кнопку, щоб розгорнути код:</span>` + buttonsHtml;
 };
 
@@ -973,7 +907,6 @@ function sendMessage() {
     }
 
     let mediaHtml = '';
-    
     pendingMedia.forEach(media => {
         if (media.type === 'video') { 
             mediaHtml += `<video src="${media.src}" controls></video><br>`; 
@@ -1002,7 +935,6 @@ function sendMessage() {
             let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
             let keys = Object.keys(notes);
             const msgId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
-            
             if (keys.length === 0) {
                 appendMsg('bot', `📭 Ваша кібер-пам'ять наразі порожня.`, msgId);
             } else {
@@ -1012,7 +944,6 @@ function sendMessage() {
         else if (lowerText.startsWith("пам'ятка ") || lowerText.startsWith("пам’ятка ")) {
             const reqTitle = lowerText.replace(/пам['’]ятка /g, "").trim();
             let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
-            
             if (notes[reqTitle]) { 
                 appendMsg('bot', `📂 Ось ваш код:<br>` + notes[reqTitle]); 
             } else { 
@@ -1022,17 +953,13 @@ function sendMessage() {
         else if (lowerText === 'кабінет') {
             localStorage.setItem(CABINET_KEY, 'true');
             const settingsBtn = document.getElementById('settings-btn');
-            if (settingsBtn) {
-                settingsBtn.classList.remove('hidden');
-            }
+            if (settingsBtn) settingsBtn.classList.remove('hidden');
             appendMsg('bot', 'Режим власника активний.');
         } 
         else if (lowerText === 'вихід') {
             localStorage.removeItem(CABINET_KEY);
             const settingsBtn = document.getElementById('settings-btn');
-            if (settingsBtn) {
-                settingsBtn.classList.add('hidden');
-            }
+            if (settingsBtn) settingsBtn.classList.add('hidden');
             appendMsg('bot', 'Режим користувача.');
         } 
         else if (lowerText === 'очистити') {
