@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Milka Mini App</title>
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=13">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -14,7 +14,7 @@
                 <span></span><span></span><span></span>
             </div>
 
-            <div id="settings-btn" class="hidden" onclick="toggleContextMenu(event, 'main')">⋮</div>
+            <div id="settings-btn" class="hidden" onclick="toggleContextMenu(event, 'main', 'main')">⋮</div>
 
             <input type="file" id="bg-upload" accept="image/*" class="hidden" onchange="changeBackground(event)">
 
@@ -34,7 +34,7 @@
             
             <div id="admin-view" class="hidden">
                 <div class="divider"></div>
-                <button class="menu-item secret-btn cyber-btn" onclick="openChat()">⚡ Milka Bot</button>
+                <button class="cyber-btn secret-btn" onclick="openChat()">⚡ Milka Bot</button>
                 <div id="owner-view" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
             </div>
         </div>
@@ -76,16 +76,6 @@
             <div class="delete-modal-buttons">
                 <button id="btn-cancel-delete" class="delete-btn cancel">Скасувати</button>
                 <button id="btn-confirm-delete" class="delete-btn confirm">Видалити</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="save-layout-modal" class="hidden">
-        <div class="delete-modal-box neon-border">
-            <p>🛠 Зберегти новий порядок кнопок?</p>
-            <div class="delete-modal-buttons">
-                <button id="btn-cancel-layout" class="delete-btn cancel">Скасувати</button>
-                <button id="btn-confirm-layout" class="delete-btn confirm">Зберегти</button>
             </div>
         </div>
     </div>
