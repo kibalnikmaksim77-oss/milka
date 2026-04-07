@@ -65,7 +65,7 @@ function openTerminalPage(pageTitle) {
 }
 
 // =======================================================================
-// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (РОБОЧИЙ СТІЛ ДЛЯ ВСІХ) ---
+// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (ЗЧИТУВАННЯ З БАЗИ ПИТОНА) ---
 // =======================================================================
 function applyAbsolutePosition(wrapper, index, loc) {
     wrapper.style.position = 'absolute';
@@ -74,11 +74,11 @@ function applyAbsolutePosition(wrapper, index, loc) {
 
     let foundCoord = null;
     
-    // ПРІОРИТЕТ 1: Дані з Питона (глобально для всіх)
+    // ПРІОРИТЕТ 1: База Питона (для всіх)
     if (cyberPages.pages_coords && cyberPages.pages_coords[loc] && cyberPages.pages_coords[loc][wrapper.dataset.id]) {
         foundCoord = cyberPages.pages_coords[loc][wrapper.dataset.id];
     } 
-    // ПРІОРИТЕТ 2: Локальні незбережені зміни
+    // ПРІОРИТЕТ 2: Локальна пам'ять
     else {
         let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
         if (localLayout[loc] && localLayout[loc][wrapper.dataset.id]) {
@@ -142,8 +142,11 @@ function makeDraggable(wrapper) {
         tg.HapticFeedback.impactOccurred('light');
 
         let parentRect = this.parentNode.getBoundingClientRect();
-        this.style.left = (parseFloat(this.style.left) / parentRect.width * 100) + '%';
-        this.style.top = (parseFloat(this.style.top) / parentRect.height * 100) + '%';
+        let leftPx = parseFloat(this.style.left);
+        let topPx = parseFloat(this.style.top);
+
+        this.style.left = (leftPx / parentRect.width * 100) + '%';
+        this.style.top = (topPx / parentRect.height * 100) + '%';
     });
 }
 
@@ -167,14 +170,14 @@ function saveLayout(type) {
         newOrderIds.push(w.dataset.id);
     });
 
-    // Зберігаємо локально
+    // Зберігаємо локально для миттєвого ефекту
     let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
     localLayout[loc] = coordsData;
     localStorage.setItem('milka_coords_' + userId, JSON.stringify(localLayout));
 
     tg.HapticFeedback.impactOccurred('heavy');
 
-    // ВІДПРАВЛЯЄМО ПИТОНУ (ДЛЯ ВСІХ ЮЗЕРІВ)
+    // ВІДПРАВЛЯЄМО ПИТОНУ (ДЛЯ ВСІХ І НАЗАВЖДИ)
     tg.sendData(JSON.stringify({ 
         action: "reorder", 
         loc: loc, 
