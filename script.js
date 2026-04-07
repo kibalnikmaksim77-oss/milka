@@ -21,7 +21,11 @@ if (encodedData) {
         try { decodedString = decodeURIComponent(encodedData); } 
         catch (e) { decodedString = decodeURIComponent(escape(atob(encodedData))); }
         const parsed = JSON.parse(decodedString);
-        cyberPages = { ...cyberPages, ...parsed };
+        if (parsed.main) cyberPages.main = parsed.main;
+        if (parsed.burger) cyberPages.burger = parsed.burger;
+        if (parsed.pages) cyberPages.pages = parsed.pages;
+        if (parsed.pages_bg) cyberPages.pages_bg = parsed.pages_bg;
+        if (parsed.pages_coords) cyberPages.pages_coords = parsed.pages_coords;
     } catch (e) { console.error("Помилка декодування бази", e); }
 }
 
@@ -65,7 +69,7 @@ function openTerminalPage(pageTitle) {
 }
 
 // =======================================================================
-// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ ---
+// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (ЗЧИТУВАННЯ З БАЗИ ПИТОНА) ---
 // =======================================================================
 function applyAbsolutePosition(wrapper, index, loc) {
     wrapper.style.position = 'absolute';
@@ -74,12 +78,9 @@ function applyAbsolutePosition(wrapper, index, loc) {
 
     let foundCoord = null;
     
-    // ПРІОРИТЕТ 1: Дані з бази даних Питона
     if (cyberPages.pages_coords && cyberPages.pages_coords[loc] && cyberPages.pages_coords[loc][wrapper.dataset.id]) {
         foundCoord = cyberPages.pages_coords[loc][wrapper.dataset.id];
-    } 
-    // ПРІОРИТЕТ 2: Локальна пам'ять
-    else {
+    } else {
         let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
         if (localLayout[loc] && localLayout[loc][wrapper.dataset.id]) {
             foundCoord = localLayout[loc][wrapper.dataset.id];
@@ -90,10 +91,11 @@ function applyAbsolutePosition(wrapper, index, loc) {
         wrapper.style.left = foundCoord.left;
         wrapper.style.top = foundCoord.top;
     } else {
+        // Щоб нові кнопки не налізали на шапку з бургер-меню (top: 80px)
         let isRightCol = index % 2 !== 0;
         let row = Math.floor(index / 2);
         wrapper.style.left = isRightCol ? '52%' : '3%';
-        wrapper.style.top = (row * 60) + 'px';
+        wrapper.style.top = (80 + row * 60) + 'px';
     }
 }
 
@@ -103,14 +105,10 @@ function makeDraggable(wrapper) {
     wrapper.addEventListener('touchstart', function(e) {
         if (!isEditMode || access !== 'admin_king') return;
         tg.HapticFeedback.impactOccurred('medium');
-
         let rect = this.getBoundingClientRect();
-        let parentRect = this.parentNode.getBoundingClientRect();
         let touch = e.touches[0];
-
         offsetX = touch.clientX - rect.left;
         offsetY = touch.clientY - rect.top;
-
         this.style.zIndex = '9999';
         this.style.boxShadow = '0 0 20px #bc13fe';
         this.style.opacity = '0.9';
@@ -121,7 +119,6 @@ function makeDraggable(wrapper) {
         e.preventDefault(); 
         let touch = e.touches[0];
         let parentRect = this.parentNode.getBoundingClientRect();
-
         let newLeft = touch.clientX - parentRect.left - offsetX;
         let newTop = touch.clientY - parentRect.top - offsetY;
 
@@ -186,20 +183,6 @@ function saveLayout(type) {
     alert("✅ Позиції збережено для всіх користувачів!");
 }
 
-function cancelDragAndDrop(type) {
-    isEditMode = false;
-    hideContextMenu();
-    if (currentLocationForSave === 'main') {
-        if (document.getElementById('user-eye-studio')) openUserEyeStudio();
-        else renderCyberButtons();
-    } else {
-        renderTerminal();
-    }
-    alert("❌ Зміни позицій скасовано.");
-}
-
-// =======================================================================
-
 function renderTerminal() {
     if (navStack.length === 0) return;
     const currentPage = navStack[navStack.length - 1]; 
@@ -215,8 +198,10 @@ function renderTerminal() {
     terminal = document.createElement('div');
     terminal.id = 'dynamic-terminal-page';
     terminal.className = 'neon-border';
-    // ПРОЗОРИЙ ФОН
-    terminal.style.backgroundColor = 'transparent';
+    // ЕФЕКТ ТЕМНОГО СКЛА
+    terminal.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
+    terminal.style.backdropFilter = 'blur(10px)';
+    terminal.style.webkitBackdropFilter = 'blur(10px)';
     document.body.appendChild(terminal);
     
     let dotsHtml = '';
@@ -235,7 +220,7 @@ function renderTerminal() {
                 <div class="close-cross-btn" onclick="goBack()">❌</div>
             </div>
         </div>
-        <div class="terminal-content" id="terminal-buttons-container" style="background:transparent;"></div>
+        <div class="terminal-content" id="terminal-buttons-container" style="background:transparent; position:relative; width:100%; height:100%;"></div>
     `;
     
     const pageBg = cyberPages.pages_bg && cyberPages.pages_bg[currentPage];
@@ -254,14 +239,14 @@ function renderTerminal() {
             wrapper.dataset.loc = currentPage; 
             
             const b = document.createElement('button');
-            // НЕОНОВИЙ ПРОЗОРИЙ СТИЛЬ КНОПКИ
-            b.className = 'cyber-btn';
+            b.className = 'cyber-btn' + (btn.role === 'owner' ? ' secret-btn' : '');
+            
+            // НЕОНОВА НАПІВПРОЗОРА КНОПКА
             b.style.background = 'rgba(21, 21, 21, 0.5)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
             b.style.boxShadow = '0 0 10px rgba(188, 19, 254, 0.4)';
             
-            if (btn.role === 'owner') b.classList.add('secret-btn');
             b.innerHTML = btn.text; 
             b.onclick = () => openTerminalPage(btn.text);
             
@@ -282,8 +267,10 @@ function openUserEyeStudio() {
     modal = document.createElement('div');
     modal.id = 'user-eye-studio';
     modal.className = 'neon-border'; 
-    // ПРОЗОРИЙ ФОН
-    modal.style.backgroundColor = 'transparent';
+    // ЕФЕКТ ТЕМНОГО СКЛА
+    modal.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
+    modal.style.backdropFilter = 'blur(10px)';
+    modal.style.webkitBackdropFilter = 'blur(10px)';
     
     let dotsHtml = '';
     if (access === 'admin_king') {
@@ -335,8 +322,9 @@ function openUserEyeStudio() {
                 wrapper.dataset.loc = 'main';
                 
                 const b = document.createElement('button');
-                // НЕОНОВИЙ ПРОЗОРИЙ СТИЛЬ КНОПКИ
                 b.className = 'cyber-btn';
+                
+                // НЕОНОВА НАПІВПРОЗОРА КНОПКА
                 b.style.background = 'rgba(21, 21, 21, 0.5)';
                 b.style.border = '1px solid #bc13fe';
                 b.style.color = '#bc13fe';
@@ -428,6 +416,18 @@ function toggleEditMode(type) {
     alert("🛠 Вільне Переміщення УВІМКНЕНО.\nПеретягуйте кнопки куди завгодно. Потім натисніть 3 крапки і виберіть 'Зберегти позиції'.");
 }
 
+function cancelDragAndDrop(type) {
+    isEditMode = false;
+    hideContextMenu();
+    if (currentLocationForSave === 'main') {
+        if (document.getElementById('user-eye-studio')) openUserEyeStudio();
+        else renderCyberButtons();
+    } else {
+        renderTerminal();
+    }
+    alert("❌ Зміни скасовано.");
+}
+
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
@@ -482,18 +482,12 @@ function createButtonElement(btn, location, container, index) {
     wrapper.dataset.loc = location;
     
     const b = document.createElement('button');
-    b.className = 'cyber-btn';
-    if (btn.role === 'owner') b.classList.add('secret-btn');
+    b.className = 'cyber-btn' + (btn.role === 'owner' ? ' secret-btn' : '');
     b.innerHTML = btn.text;
     b.onclick = () => openTerminalPage(btn.text);
     
     wrapper.appendChild(b);
-    
-    if (location !== 'burger') {
-        makeDraggable(wrapper);
-        applyAbsolutePosition(wrapper, index, location);
-    }
-    
+    if (location !== 'burger') { makeDraggable(wrapper); applyAbsolutePosition(wrapper, index, location); }
     if(container) container.appendChild(wrapper);
 }
 
@@ -526,14 +520,11 @@ function resetBackground() {
     hideContextMenu();
 }
 
-function toggleMenu() { 
-    const sideMenu = document.getElementById('side-menu');
-    if (sideMenu) sideMenu.classList.toggle('active'); 
-}
+function toggleMenu() { document.getElementById('side-menu')?.classList.toggle('active'); }
 function closeApp() { tg.close(); }
 
 // =======================================================================
-// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ ---
+// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (БЕЗ УРІЗАНЬ) ---
 // =======================================================================
 const chatInput = document.getElementById('chat-input');
 const formatTrigger = document.getElementById('format-trigger');
@@ -545,21 +536,19 @@ if (chatInput) {
         else { if(formatTrigger) formatTrigger.classList.add('hidden'); if(formatMenu) formatMenu.classList.add('hidden'); }
     });
 }
-
 function toggleFormatMenu() { if (formatMenu) formatMenu.classList.toggle('hidden'); }
 
 function applyFormat(type, event) {
     event.preventDefault(); 
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
-
     switch(type) {
         case 'bold': document.execCommand('bold'); break;
         case 'italic': document.execCommand('italic'); break;
         case 'strikethrough': document.execCommand('strikeThrough'); break;
         case 'underline': document.execCommand('underline'); break;
         case 'monospaced': document.execCommand('fontName', false, 'monospace'); break;
-        case 'link': let url = prompt("Введіть посилання (URL):"); if (url) document.execCommand('createLink', false, url); break;
+        case 'link': let url = prompt("Введіть посилання:"); if (url) document.execCommand('createLink', false, url); break;
         case 'plain': document.execCommand('removeFormat'); break;
         case 'codeBlock':
             const text = selection.toString();
