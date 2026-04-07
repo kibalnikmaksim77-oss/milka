@@ -11,7 +11,7 @@ const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 const encodedData = urlParams.get('cd'); 
 
-let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {} };
+let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {} };
 let isEditMode = false;
 let navStack = []; 
 
@@ -48,7 +48,7 @@ function goHome() {
     document.getElementById('app-container').classList.remove('hidden');
     hideContextMenu();
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu.classList.contains('active')) toggleMenu();
+    if (sideMenu && sideMenu.classList.contains('active')) toggleMenu();
 }
 
 function goBack() {
@@ -65,7 +65,7 @@ function openTerminalPage(pageTitle) {
 }
 
 // =======================================================================
-// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (РОБОЧИЙ СТІЛ) ---
+// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ ---
 // =======================================================================
 function applyAbsolutePosition(wrapper, index, loc) {
     wrapper.style.position = 'absolute';
@@ -74,11 +74,11 @@ function applyAbsolutePosition(wrapper, index, loc) {
 
     let foundCoord = null;
     
-    // ПРІОРИТЕТ 1: Дані з бази даних (Python), якщо вони там є
+    // ПРІОРИТЕТ 1: Дані з бази даних Питона
     if (cyberPages.pages_coords && cyberPages.pages_coords[loc] && cyberPages.pages_coords[loc][wrapper.dataset.id]) {
         foundCoord = cyberPages.pages_coords[loc][wrapper.dataset.id];
     } 
-    // ПРІОРИТЕТ 2: Локальна пам'ять (тимчасово)
+    // ПРІОРИТЕТ 2: Локальна пам'ять
     else {
         let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
         if (localLayout[loc] && localLayout[loc][wrapper.dataset.id]) {
@@ -90,11 +90,10 @@ function applyAbsolutePosition(wrapper, index, loc) {
         wrapper.style.left = foundCoord.left;
         wrapper.style.top = foundCoord.top;
     } else {
-        // По замовчуванню в 2 колонки
         let isRightCol = index % 2 !== 0;
         let row = Math.floor(index / 2);
         wrapper.style.left = isRightCol ? '52%' : '3%';
-        wrapper.style.top = (row * 50) + 'px';
+        wrapper.style.top = (row * 60) + 'px';
     }
 }
 
@@ -146,15 +145,10 @@ function makeDraggable(wrapper) {
         let leftPx = parseFloat(this.style.left);
         let topPx = parseFloat(this.style.top);
 
-        // Фіксуємо у відсотках
         this.style.left = (leftPx / parentRect.width * 100) + '%';
         this.style.top = (topPx / parentRect.height * 100) + '%';
     });
 }
-
-// =======================================================================
-// --- ЛОГІКА ЗБЕРЕЖЕННЯ ТА ВІДПРАВКИ ПИТОНУ ---
-// =======================================================================
 
 function saveLayout(type) {
     isEditMode = false;
@@ -176,22 +170,20 @@ function saveLayout(type) {
         newOrderIds.push(w.dataset.id);
     });
 
-    // 1. Зберігаємо локально для миттєвого ефекту
     let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
     localLayout[loc] = coordsData;
     localStorage.setItem('milka_coords_' + userId, JSON.stringify(localLayout));
 
     tg.HapticFeedback.impactOccurred('heavy');
 
-    // 2. ВІДПРАВЛЯЄМО ПИТОНУ (ДЛЯ ВСІХ І НАЗАВЖДИ)
     tg.sendData(JSON.stringify({ 
         action: "reorder", 
         loc: loc, 
-        coords: coordsData, // Python повинен це зберегти!
+        coords: coordsData, 
         new_order: newOrderIds 
     }));
 
-    alert("✅ Дизайн збережено та відправлено в систему!");
+    alert("✅ Позиції збережено для всіх користувачів!");
 }
 
 function cancelDragAndDrop(type) {
@@ -215,7 +207,7 @@ function renderTerminal() {
     document.getElementById('app-container').classList.add('hidden');
     hideContextMenu();
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu.classList.contains('active')) toggleMenu();
+    if (sideMenu && sideMenu.classList.contains('active')) toggleMenu();
     
     let terminal = document.getElementById('dynamic-terminal-page');
     if (terminal) terminal.remove(); 
@@ -223,6 +215,8 @@ function renderTerminal() {
     terminal = document.createElement('div');
     terminal.id = 'dynamic-terminal-page';
     terminal.className = 'neon-border';
+    // ПРОЗОРИЙ ФОН
+    terminal.style.backgroundColor = 'transparent';
     document.body.appendChild(terminal);
     
     let dotsHtml = '';
@@ -241,7 +235,7 @@ function renderTerminal() {
                 <div class="close-cross-btn" onclick="goBack()">❌</div>
             </div>
         </div>
-        <div class="terminal-content" id="terminal-buttons-container"></div>
+        <div class="terminal-content" id="terminal-buttons-container" style="background:transparent;"></div>
     `;
     
     const pageBg = cyberPages.pages_bg && cyberPages.pages_bg[currentPage];
@@ -260,7 +254,13 @@ function renderTerminal() {
             wrapper.dataset.loc = currentPage; 
             
             const b = document.createElement('button');
+            // НЕОНОВИЙ ПРОЗОРИЙ СТИЛЬ КНОПКИ
             b.className = 'cyber-btn';
+            b.style.background = 'rgba(21, 21, 21, 0.5)';
+            b.style.border = '1px solid #bc13fe';
+            b.style.color = '#bc13fe';
+            b.style.boxShadow = '0 0 10px rgba(188, 19, 254, 0.4)';
+            
             if (btn.role === 'owner') b.classList.add('secret-btn');
             b.innerHTML = btn.text; 
             b.onclick = () => openTerminalPage(btn.text);
@@ -282,6 +282,8 @@ function openUserEyeStudio() {
     modal = document.createElement('div');
     modal.id = 'user-eye-studio';
     modal.className = 'neon-border'; 
+    // ПРОЗОРИЙ ФОН
+    modal.style.backgroundColor = 'transparent';
     
     let dotsHtml = '';
     if (access === 'admin_king') {
@@ -305,6 +307,7 @@ function openUserEyeStudio() {
     const grid = document.createElement('div');
     grid.id = 'user-eye-grid';
     grid.className = 'eye-safe-zone';
+    grid.style.background = 'transparent';
     modal.appendChild(grid);
     document.body.appendChild(modal);
 
@@ -332,7 +335,13 @@ function openUserEyeStudio() {
                 wrapper.dataset.loc = 'main';
                 
                 const b = document.createElement('button');
+                // НЕОНОВИЙ ПРОЗОРИЙ СТИЛЬ КНОПКИ
                 b.className = 'cyber-btn';
+                b.style.background = 'rgba(21, 21, 21, 0.5)';
+                b.style.border = '1px solid #bc13fe';
+                b.style.color = '#bc13fe';
+                b.style.boxShadow = '0 0 10px rgba(188, 19, 254, 0.4)';
+                
                 b.innerHTML = btn.text;
                 b.onclick = () => openTerminalPage(btn.text);
                 
@@ -347,11 +356,14 @@ function openUserEyeStudio() {
 
     modal.style.display = 'flex';
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu.classList.contains('active')) toggleMenu();
+    if (sideMenu && sideMenu.classList.contains('active')) toggleMenu();
 }
+
+let currentLocationForSave = 'main';
 
 function toggleContextMenu(event, type, loc) {
     const menu = document.getElementById('context-menu');
+    if (!menu) return;
     if (!menu.classList.contains('hidden')) { menu.classList.add('hidden'); return; }
     
     menu.innerHTML = '';
@@ -521,7 +533,7 @@ function toggleMenu() {
 function closeApp() { tg.close(); }
 
 // =======================================================================
-// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (БЕЗ ЗМІН) ---
+// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ ---
 // =======================================================================
 const chatInput = document.getElementById('chat-input');
 const formatTrigger = document.getElementById('format-trigger');
@@ -529,8 +541,8 @@ const formatMenu = document.getElementById('format-menu');
 
 if (chatInput) {
     chatInput.addEventListener('input', () => {
-        if (chatInput.innerText.trim().length > 0) { formatTrigger.classList.remove('hidden'); } 
-        else { formatTrigger.classList.add('hidden'); formatMenu.classList.add('hidden'); }
+        if (chatInput.innerText.trim().length > 0) { if(formatTrigger) formatTrigger.classList.remove('hidden'); } 
+        else { if(formatTrigger) formatTrigger.classList.add('hidden'); if(formatMenu) formatMenu.classList.add('hidden'); }
     });
 }
 
@@ -582,7 +594,8 @@ function handleAttachment(event) {
 }
 
 function renderMediaPreview() {
-    const container = document.getElementById('media-preview-container'); container.innerHTML = '';
+    const container = document.getElementById('media-preview-container'); if(!container) return;
+    container.innerHTML = '';
     if (pendingMedia.length === 0) { container.classList.add('hidden'); return; }
     container.classList.remove('hidden');
     pendingMedia.forEach((media, index) => {
@@ -616,7 +629,7 @@ function appendMsgDOM(sender, htmlText, id) {
     box.appendChild(div); box.scrollTop = box.scrollHeight;
 }
 function appendMsg(sender, htmlText, forcedId = null) { const id = forcedId || Date.now().toString(); appendMsgDOM(sender, htmlText, id); saveMsgToHistory(sender, htmlText, id); return id; }
-function openChat() { toggleMenu(); document.getElementById('app-container').classList.add('hidden'); document.getElementById('chat-modal').classList.remove('hidden'); loadChatHistory(); }
+function openChat() { if(typeof toggleMenu === 'function') toggleMenu(); document.getElementById('app-container').classList.add('hidden'); document.getElementById('chat-modal').classList.remove('hidden'); loadChatHistory(); }
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); document.getElementById('app-container').classList.remove('hidden'); }
 
 window.generateNotesListHTML = function(msgId) {
@@ -640,19 +653,19 @@ function sendMessage() {
         const tempDiv = document.createElement('div'); tempDiv.innerHTML = htmlText; const codeHeaderSpan = tempDiv.querySelector('.code-header span:first-child');
         if (codeHeaderSpan) { const noteTitle = codeHeaderSpan.innerText.trim(); let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {}; notes[noteTitle.toLowerCase()] = htmlText; localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); appendMsg('bot', `💾 Код <b>${noteTitle}</b> збережено!`); } 
         else { appendMsg('bot', `❌ Помилка формату.`); }
-        awaitingNote = false; chatInput.innerHTML = ''; pendingMedia = []; renderMediaPreview(); formatTrigger.classList.add('hidden'); formatMenu.classList.add('hidden'); return; 
+        awaitingNote = false; chatInput.innerHTML = ''; pendingMedia = []; renderMediaPreview(); if(formatTrigger) formatTrigger.classList.add('hidden'); if(formatMenu) formatMenu.classList.add('hidden'); return; 
     }
 
     let mediaHtml = ''; pendingMedia.forEach(media => { if (media.type === 'video') { mediaHtml += `<video src="${media.src}" controls></video><br>`; } else { mediaHtml += `<img src="${media.src}"><br>`; } });
     const finalMessageHtml = mediaHtml + htmlText; appendMsg('user', finalMessageHtml);
-    chatInput.innerHTML = ''; pendingMedia = []; renderMediaPreview(); formatTrigger.classList.add('hidden'); formatMenu.classList.add('hidden');
+    chatInput.innerHTML = ''; pendingMedia = []; renderMediaPreview(); if(formatTrigger) formatTrigger.classList.add('hidden'); if(formatMenu) formatMenu.classList.add('hidden');
     
     setTimeout(() => {
         const lowerText = rawText.toLowerCase();
         if (lowerText === '+пам\'ятка') { awaitingNote = true; appendMsg('bot', 'Відправ текст у вигляді кода.'); } 
         else if (lowerText === 'пам\'ятки') { let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {}; let keys = Object.keys(notes); const msgId = Date.now().toString(); if (keys.length === 0) { appendMsg('bot', `📭 Порожньо.`, msgId); } else { appendMsg('bot', generateNotesListHTML(msgId), msgId); } }
-        else if (lowerText === 'кабінет') { localStorage.setItem(CABINET_KEY, 'true'); document.getElementById('settings-btn').classList.remove('hidden'); appendMsg('bot', 'Власник активний.'); } 
-        else if (lowerText === 'вихід') { localStorage.removeItem(CABINET_KEY); document.getElementById('settings-btn').classList.add('hidden'); appendMsg('bot', 'Користувач.'); } 
+        else if (lowerText === 'кабінет') { localStorage.setItem(CABINET_KEY, 'true'); if(document.getElementById('settings-btn')) document.getElementById('settings-btn').classList.remove('hidden'); appendMsg('bot', 'Власник активний.'); } 
+        else if (lowerText === 'вихід') { localStorage.removeItem(CABINET_KEY); if(document.getElementById('settings-btn')) document.getElementById('settings-btn').classList.add('hidden'); appendMsg('bot', 'Користувач.'); } 
         else if (lowerText === 'очистити') { localStorage.removeItem(CHAT_KEY); document.getElementById('chat-messages').innerHTML = ''; appendMsg('bot', '🧹 Очищено.'); } 
     }, 600);
 }
