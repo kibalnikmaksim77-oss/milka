@@ -48,7 +48,7 @@ function goHome() {
     document.getElementById('app-container').classList.remove('hidden');
     hideContextMenu();
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu.classList.contains('active')) toggleMenu();
+    if (sideMenu && sideMenu.classList.contains('active')) toggleMenu();
 }
 
 function goBack() {
@@ -65,7 +65,7 @@ function openTerminalPage(pageTitle) {
 }
 
 // =======================================================================
-// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (ЗЧИТУВАННЯ З БАЗИ ПИТОНА) ---
+// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (ЗЧИТУВАННЯ З БАЗИ) ---
 // =======================================================================
 function applyAbsolutePosition(wrapper, index, loc) {
     wrapper.style.position = 'absolute';
@@ -74,7 +74,7 @@ function applyAbsolutePosition(wrapper, index, loc) {
 
     let foundCoord = null;
     
-    // ПРІОРИТЕТ 1: База Питона (для всіх)
+    // ПРІОРИТЕТ 1: Дані з бази даних (Python), тепер вони приходять усім юзерам
     if (cyberPages.pages_coords && cyberPages.pages_coords[loc] && cyberPages.pages_coords[loc][wrapper.dataset.id]) {
         foundCoord = cyberPages.pages_coords[loc][wrapper.dataset.id];
     } 
@@ -93,7 +93,7 @@ function applyAbsolutePosition(wrapper, index, loc) {
         let isRightCol = index % 2 !== 0;
         let row = Math.floor(index / 2);
         wrapper.style.left = isRightCol ? '52%' : '3%';
-        wrapper.style.top = (row * 50) + 'px';
+        wrapper.style.top = (row * 60) + 'px';
     }
 }
 
@@ -170,14 +170,8 @@ function saveLayout(type) {
         newOrderIds.push(w.dataset.id);
     });
 
-    // Зберігаємо локально для миттєвого ефекту
-    let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
-    localLayout[loc] = coordsData;
-    localStorage.setItem('milka_coords_' + userId, JSON.stringify(localLayout));
-
     tg.HapticFeedback.impactOccurred('heavy');
 
-    // ВІДПРАВЛЯЄМО ПИТОНУ (ДЛЯ ВСІХ І НАЗАВЖДИ)
     tg.sendData(JSON.stringify({ 
         action: "reorder", 
         loc: loc, 
@@ -209,7 +203,7 @@ function renderTerminal() {
     document.getElementById('app-container').classList.add('hidden');
     hideContextMenu();
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu.classList.contains('active')) toggleMenu();
+    if (sideMenu && sideMenu.classList.contains('active')) toggleMenu();
     
     let terminal = document.getElementById('dynamic-terminal-page');
     if (terminal) terminal.remove(); 
@@ -341,11 +335,14 @@ function openUserEyeStudio() {
 
     modal.style.display = 'flex';
     const sideMenu = document.getElementById('side-menu');
-    if (sideMenu.classList.contains('active')) toggleMenu();
+    if (sideMenu && sideMenu.classList.contains('active')) toggleMenu();
 }
+
+let currentLocationForSave = 'main';
 
 function toggleContextMenu(event, type, loc) {
     const menu = document.getElementById('context-menu');
+    if (!menu) return;
     if (!menu.classList.contains('hidden')) { menu.classList.add('hidden'); return; }
     
     menu.innerHTML = '';
@@ -523,8 +520,8 @@ const formatMenu = document.getElementById('format-menu');
 
 if (chatInput) {
     chatInput.addEventListener('input', () => {
-        if (chatInput.innerText.trim().length > 0) { formatTrigger.classList.remove('hidden'); } 
-        else { formatTrigger.classList.add('hidden'); formatMenu.classList.add('hidden'); }
+        if (chatInput.innerText.trim().length > 0) { if(formatTrigger) formatTrigger.classList.remove('hidden'); } 
+        else { if(formatTrigger) formatTrigger.classList.add('hidden'); if(formatMenu) formatMenu.classList.add('hidden'); }
     });
 }
 
@@ -534,7 +531,6 @@ function applyFormat(type, event) {
     event.preventDefault(); 
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
-
     switch(type) {
         case 'bold': document.execCommand('bold'); break;
         case 'italic': document.execCommand('italic'); break;
@@ -576,7 +572,8 @@ function handleAttachment(event) {
 }
 
 function renderMediaPreview() {
-    const container = document.getElementById('media-preview-container'); container.innerHTML = '';
+    const container = document.getElementById('media-preview-container'); if(!container) return;
+    container.innerHTML = '';
     if (pendingMedia.length === 0) { container.classList.add('hidden'); return; }
     container.classList.remove('hidden');
     pendingMedia.forEach((media, index) => {
@@ -610,7 +607,7 @@ function appendMsgDOM(sender, htmlText, id) {
     box.appendChild(div); box.scrollTop = box.scrollHeight;
 }
 function appendMsg(sender, htmlText, forcedId = null) { const id = forcedId || Date.now().toString(); appendMsgDOM(sender, htmlText, id); saveMsgToHistory(sender, htmlText, id); return id; }
-function openChat() { toggleMenu(); document.getElementById('app-container').classList.add('hidden'); document.getElementById('chat-modal').classList.remove('hidden'); loadChatHistory(); }
+function openChat() { if(typeof toggleMenu === 'function') toggleMenu(); document.getElementById('app-container').classList.add('hidden'); document.getElementById('chat-modal').classList.remove('hidden'); loadChatHistory(); }
 function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); document.getElementById('app-container').classList.remove('hidden'); }
 
 window.generateNotesListHTML = function(msgId) {
@@ -629,24 +626,21 @@ let awaitingNote = false;
 function sendMessage() {
     const htmlText = chatInput.innerHTML.trim(); const rawText = chatInput.innerText.trim();
     if (!rawText && !htmlText.includes('<img') && !htmlText.includes('<div') && pendingMedia.length === 0) return;
-    
     if (awaitingNote) {
         const tempDiv = document.createElement('div'); tempDiv.innerHTML = htmlText; const codeHeaderSpan = tempDiv.querySelector('.code-header span:first-child');
         if (codeHeaderSpan) { const noteTitle = codeHeaderSpan.innerText.trim(); let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {}; notes[noteTitle.toLowerCase()] = htmlText; localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); appendMsg('bot', `💾 Код <b>${noteTitle}</b> збережено!`); } 
         else { appendMsg('bot', `❌ Помилка формату.`); }
-        awaitingNote = false; chatInput.innerHTML = ''; pendingMedia = []; renderMediaPreview(); formatTrigger.classList.add('hidden'); formatMenu.classList.add('hidden'); return; 
+        awaitingNote = false; chatInput.innerHTML = ''; pendingMedia = []; renderMediaPreview(); if(formatTrigger) formatTrigger.classList.add('hidden'); if(formatMenu) formatMenu.classList.add('hidden'); return; 
     }
-
     let mediaHtml = ''; pendingMedia.forEach(media => { if (media.type === 'video') { mediaHtml += `<video src="${media.src}" controls></video><br>`; } else { mediaHtml += `<img src="${media.src}"><br>`; } });
     const finalMessageHtml = mediaHtml + htmlText; appendMsg('user', finalMessageHtml);
-    chatInput.innerHTML = ''; pendingMedia = []; renderMediaPreview(); formatTrigger.classList.add('hidden'); formatMenu.classList.add('hidden');
-    
+    chatInput.innerHTML = ''; pendingMedia = []; renderMediaPreview(); if(formatTrigger) formatTrigger.classList.add('hidden'); if(formatMenu) formatMenu.classList.add('hidden');
     setTimeout(() => {
         const lowerText = rawText.toLowerCase();
         if (lowerText === '+пам\'ятка') { awaitingNote = true; appendMsg('bot', 'Відправ текст у вигляді кода.'); } 
         else if (lowerText === 'пам\'ятки') { let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {}; let keys = Object.keys(notes); const msgId = Date.now().toString(); if (keys.length === 0) { appendMsg('bot', `📭 Порожньо.`, msgId); } else { appendMsg('bot', generateNotesListHTML(msgId), msgId); } }
-        else if (lowerText === 'кабінет') { localStorage.setItem(CABINET_KEY, 'true'); document.getElementById('settings-btn').classList.remove('hidden'); appendMsg('bot', 'Власник активний.'); } 
-        else if (lowerText === 'вихід') { localStorage.removeItem(CABINET_KEY); document.getElementById('settings-btn').classList.add('hidden'); appendMsg('bot', 'Користувач.'); } 
+        else if (lowerText === 'кабінет') { localStorage.setItem(CABINET_KEY, 'true'); if(document.getElementById('settings-btn')) document.getElementById('settings-btn').classList.remove('hidden'); appendMsg('bot', 'Власник активний.'); } 
+        else if (lowerText === 'вихід') { localStorage.removeItem(CABINET_KEY); if(document.getElementById('settings-btn')) document.getElementById('settings-btn').classList.add('hidden'); appendMsg('bot', 'Користувач.'); } 
         else if (lowerText === 'очистити') { localStorage.removeItem(CHAT_KEY); document.getElementById('chat-messages').innerHTML = ''; appendMsg('bot', '🧹 Очищено.'); } 
     }, 600);
 }
