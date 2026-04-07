@@ -24,43 +24,43 @@ body {
 
 #app-container { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 25px; }
 
+/* ЗОНИ ТЕРМІНАЛІВ ТЕПЕР МАЮТЬ position: relative ДЛЯ ВІЛЬНОГО ПЕРЕМІЩЕННЯ */
 #user-commands-safe-zone, .eye-safe-zone {
     position: absolute; top: 50%; width: 90%; height: 38%; 
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 15px; overflow-y: auto; 
+    overflow-y: auto; overflow-x: hidden;
 }
 
-/* --- ЄДИНИЙ СТИЛЬ КНОПОК 1 В 1 ЯК "Milka Bot" --- */
+.terminal-content { 
+    position: relative; flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; 
+}
+
+/* --- ЄДИНИЙ СТИЛЬ КНОПОК ЯК "Milka Bot" + СУЧАСНІ ЕМОДЗІ --- */
 .cyber-btn {
     width: 100%; 
-    padding: 10px; /* МАЛЕНЬКИЙ РОЗМІР */
+    padding: 10px; 
     font-size: 11px; 
     border-radius: 6px; 
     background: #151515; 
     border: 1px solid #bc13fe; 
-    color: #bc13fe; /* ФІОЛЕТОВИЙ ТЕКСТ */
+    color: #bc13fe; 
     font-weight: bold; 
     cursor: pointer; 
     margin-bottom: 5px;
     display: flex; 
     align-items: center; 
-    justify-content: center; /* ТЕКСТ ПО ЦЕНТРУ */
+    justify-content: center; 
     gap: 5px;
     text-shadow: 0 0 5px #bc13fe;
     box-shadow: 0 0 5px rgba(188, 19, 254, 0.2);
     transition: transform 0.1s, opacity 0.2s;
+    /* Оцей рядок змушує всі емодзі бути кольоровими і цілими */
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", sans-serif;
 }
 
 .cyber-btn:hover { background: rgba(188, 19, 254, 0.2); box-shadow: 0 0 10px rgba(188, 19, 254, 0.8); }
 .cyber-btn:active { transform: scale(0.95); }
 
 .secret-btn { background: rgba(188, 19, 254, 0.15) !important; }
-
-/* ШРИФТ ДЛЯ СУЧАСНИХ ЕМОДЗІ */
-.cyber-btn span.emoji {
-    font-family: "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", "Android Emoji", sans-serif;
-    font-size: 1.2em;
-    filter: drop-shadow(0 0 5px #bc13fe);
-}
 
 /* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА --- */
 #dynamic-terminal-page, #user-eye-studio {
@@ -72,7 +72,7 @@ body {
 .terminal-header {
     position: relative; height: 60px; padding: 0 20px;
     display: flex; justify-content: space-between; align-items: center;
-    border-bottom: none; /* ЖОДНИХ ЛІНІЙ */
+    border-bottom: none; 
     flex-shrink: 0;
 }
 
@@ -84,8 +84,6 @@ body {
 .terminal-right-controls { display: flex; align-items: center; gap: 15px; height: 100%; z-index: 10; }
 .admin-dots { cursor: pointer; color: #bc13fe; font-size: 26px; font-weight: bold; text-shadow: 0 0 10px #bc13fe; user-select: none; display: flex; align-items: center; justify-content: center; line-height: 0; height: 24px; padding: 5px; z-index: 9999; }
 .close-cross-btn { color: #ff4d4d; font-size: 22px; font-weight: bold; cursor: pointer; text-shadow: 0 0 10px #ff4d4d; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 5px; z-index: 9999;}
-
-.terminal-content { flex-grow: 1; padding: 20px; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-content: start; }
 
 /* --- МЕНЮ НАЛАШТУВАНЬ --- */
 #burger-btn { position: absolute; top: 20px; left: 20px; cursor: pointer; z-index: 50; padding: 5px; display: flex; flex-direction: column; justify-content: center; height: 24px; }
@@ -101,10 +99,6 @@ body {
 .settings-item:last-child { border-bottom: none; }
 .settings-item:hover { background: rgba(188, 19, 254, 0.1); }
 
-/* --- DRAG AND DROP --- */
-.btn-wrapper { position: relative; width: 100%; }
-.btn-wrapper.grid-item { margin-bottom: 0; }
-
 /* --- БУРГЕР-МЕНЮ --- */
 #side-menu { position: fixed; top: 0; left: 0; width: 170px; height: 100%; background: #0f0f0f; border-right: 1px solid #bc13fe; z-index: 999999; transition: 0.4s ease; transform: translateX(-100%); }
 #side-menu.active { transform: translateX(0); }
@@ -115,7 +109,7 @@ body {
 .divider { height: 1px; background: #222; margin: 15px 0; }
 .hidden { display: none !important; }
 
-/* --- ЧАТ ТА ІНШІ СТИЛІ --- */
+/* --- ЧАТ --- */
 #chat-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 200; display: flex; flex-direction: column; }
 .chat-header { position: relative; padding: 15px 20px; background: #0a0a0a; border-bottom: 2px solid #bc13fe; display: flex; justify-content: space-between; align-items: center; z-index: 400; }
 .neon-title { text-shadow: 0 0 10px #bc13fe; font-weight: bold; }
