@@ -14,7 +14,6 @@ const encodedData = urlParams.get('cd');
 let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {} };
 let isEditMode = false;
 let navStack = []; 
-let originalOrder = []; 
 
 if (encodedData) {
     try {
@@ -41,20 +40,8 @@ if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     if (settingsBtn) settingsBtn.classList.remove('hidden');
 }
 
-// --- ЕКСТРАКТОР ЕМОДЗІ ---
-function processEmojiInText(text) {
-    const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/u;
-    const match = text.match(emojiRegex);
-    if (match) {
-        const emoji = match[0];
-        const restOfText = text.substring(emoji.length).trim();
-        return `<span class="emoji">${emoji}</span> ${restOfText}`;
-    }
-    return text;
-}
-
 function goHome() {
-    if (isEditMode) { alert("⚠️ Вихід заблоковано. Спочатку збережіть або відмініть зміни."); return; }
+    if (isEditMode) { alert("⚠️ Спочатку збережіть або відмініть зміни."); return; }
     navStack = []; 
     const terminal = document.getElementById('dynamic-terminal-page');
     if (terminal) { terminal.classList.add('hidden'); terminal.remove(); }
@@ -65,7 +52,7 @@ function goHome() {
 }
 
 function goBack() {
-    if (isEditMode) { alert("⚠️ Повернення заблоковано. Спочатку збережіть або відмініть зміни."); return; }
+    if (isEditMode) { alert("⚠️ Спочатку збережіть або відмініть зміни."); return; }
     navStack.pop(); 
     if (navStack.length > 0) renderTerminal(); else goHome(); 
 }
@@ -76,6 +63,88 @@ function openTerminalPage(pageTitle) {
     navStack.push(pageTitle); 
     renderTerminal();
 }
+
+// =======================================================================
+// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (РОБОЧИЙ СТІЛ) ---
+// =======================================================================
+function applyAbsolutePosition(wrapper, index, loc) {
+    wrapper.style.position = 'absolute';
+    wrapper.style.width = '45%'; // Кнопки займають майже половину екрана
+    wrapper.style.margin = '0';
+
+    let savedLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
+    
+    if (savedLayout[loc] && savedLayout[loc][wrapper.dataset.id]) {
+        // Якщо кнопка вже була переміщена раніше - ставимо її на збережене місце
+        wrapper.style.left = savedLayout[loc][wrapper.dataset.id].left;
+        wrapper.style.top = savedLayout[loc][wrapper.dataset.id].top;
+    } else {
+        // Якщо це нова кнопка, розставляємо їх у дві колонки по замовчуванню
+        let isRightCol = index % 2 !== 0;
+        let row = Math.floor(index / 2);
+        wrapper.style.left = isRightCol ? '52%' : '3%';
+        wrapper.style.top = (row * 50) + 'px'; // Відступ між рядами
+    }
+}
+
+function makeDraggable(wrapper) {
+    let offsetX = 0, offsetY = 0;
+
+    wrapper.addEventListener('touchstart', function(e) {
+        if (!isEditMode || access !== 'admin_king') return;
+        tg.HapticFeedback.impactOccurred('medium');
+
+        let rect = this.getBoundingClientRect();
+        let parentRect = this.parentNode.getBoundingClientRect();
+        let touch = e.touches[0];
+
+        offsetX = touch.clientX - rect.left;
+        offsetY = touch.clientY - rect.top;
+
+        this.style.zIndex = '9999';
+        this.style.boxShadow = '0 0 20px #bc13fe';
+        this.style.opacity = '0.9';
+    }, {passive: false});
+
+    wrapper.addEventListener('touchmove', function(e) {
+        if (!isEditMode || access !== 'admin_king') return;
+        e.preventDefault(); // Зупиняє скрол сторінки при тязі
+        let touch = e.touches[0];
+        let parentRect = this.parentNode.getBoundingClientRect();
+
+        // Кнопка вільно летить рівно за пальцем
+        let newLeft = touch.clientX - parentRect.left - offsetX;
+        let newTop = touch.clientY - parentRect.top - offsetY;
+
+        // Не даємо кнопці вилетіти за межі екрана
+        if (newLeft < 0) newLeft = 0;
+        if (newTop < 0) newTop = 0;
+        if (newLeft + this.offsetWidth > parentRect.width) newLeft = parentRect.width - this.offsetWidth;
+        if (newTop + this.offsetHeight > parentRect.height) newTop = parentRect.height - this.offsetHeight;
+
+        this.style.left = newLeft + 'px';
+        this.style.top = newTop + 'px';
+    }, {passive: false});
+
+    wrapper.addEventListener('touchend', function(e) {
+        if (!isEditMode || access !== 'admin_king') return;
+        this.style.zIndex = '1';
+        this.style.boxShadow = '0 0 5px rgba(188, 19, 254, 0.2)';
+        this.style.opacity = '1';
+        tg.HapticFeedback.impactOccurred('light');
+
+        // Зберігаємо позицію у відсотках, щоб вона не зламалась, якщо телефон перевернути
+        let parentRect = this.parentNode.getBoundingClientRect();
+        let leftPx = parseFloat(this.style.left);
+        let topPx = parseFloat(this.style.top);
+
+        this.style.left = (leftPx / parentRect.width * 100) + '%';
+        this.style.top = (topPx / parentRect.height * 100) + '%';
+        
+        // КНОПКА ЗАЛИШАЄТЬСЯ ТАМ, ДЕ ЇЇ КИНУЛИ!
+    });
+}
+// =======================================================================
 
 function renderTerminal() {
     if (navStack.length === 0) return;
@@ -118,8 +187,10 @@ function renderTerminal() {
     terminal.classList.remove('hidden');
 
     const contentContainer = document.getElementById('terminal-buttons-container');
+
     if (cyberPages.pages && cyberPages.pages[currentPage]) {
-        cyberPages.pages[currentPage].buttons.forEach(btn => {
+        let visibleIndex = 0;
+        cyberPages.pages[currentPage].buttons.forEach((btn) => {
             if (btn.role === 'owner' && access !== 'admin_king') return;
             const wrapper = document.createElement('div');
             wrapper.className = 'btn-wrapper';
@@ -129,12 +200,14 @@ function renderTerminal() {
             const b = document.createElement('button');
             b.className = 'cyber-btn';
             if (btn.role === 'owner') b.classList.add('secret-btn');
-            b.innerHTML = processEmojiInText(btn.text);
+            b.innerHTML = btn.text; 
             b.onclick = () => openTerminalPage(btn.text);
             
             wrapper.appendChild(b);
             makeDraggable(wrapper);
+            applyAbsolutePosition(wrapper, visibleIndex, currentPage);
             contentContainer.appendChild(wrapper);
+            visibleIndex++;
         });
     }
 }
@@ -186,29 +259,26 @@ function openUserEyeStudio() {
     if (globalBgValue) { modal.style.backgroundImage = `url('${globalBgValue}')`; modal.style.backgroundSize = 'cover'; }
     
     grid.innerHTML = ''; 
-    const safeZoneGrid = document.createElement('div');
-    safeZoneGrid.style.display = "grid";
-    safeZoneGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
-    safeZoneGrid.style.gap = "15px";
-    safeZoneGrid.style.width = "100%";
-    grid.appendChild(safeZoneGrid);
 
     if (cyberPages.main && cyberPages.main.buttons) {
-        cyberPages.main.buttons.forEach(btn => {
+        let visibleIndex = 0;
+        cyberPages.main.buttons.forEach((btn) => {
             if (btn.role === 'user' && btn.location === 'main') {
                 const wrapper = document.createElement('div');
-                wrapper.className = 'btn-wrapper grid-item';
+                wrapper.className = 'btn-wrapper';
                 wrapper.dataset.id = btn.text;
                 wrapper.dataset.loc = 'main';
                 
                 const b = document.createElement('button');
                 b.className = 'cyber-btn';
-                b.innerHTML = processEmojiInText(btn.text);
+                b.innerHTML = btn.text;
                 b.onclick = () => openTerminalPage(btn.text);
                 
                 wrapper.appendChild(b);
                 makeDraggable(wrapper);
-                safeZoneGrid.appendChild(wrapper);
+                applyAbsolutePosition(wrapper, visibleIndex, 'main');
+                grid.appendChild(wrapper);
+                visibleIndex++;
             }
         });
     }
@@ -230,7 +300,7 @@ function toggleContextMenu(event, type, loc) {
     if (isEditMode) {
         const saveBtn = document.createElement('button');
         saveBtn.className = 'settings-item';
-        saveBtn.innerHTML = '💾 Зберегти порядок';
+        saveBtn.innerHTML = '💾 Зберегти позиції';
         saveBtn.onclick = () => saveLayout(type);
         
         const cancelBtn = document.createElement('button');
@@ -244,23 +314,23 @@ function toggleContextMenu(event, type, loc) {
         if (type === 'user_eye') {
             const editBtn = document.createElement('button');
             editBtn.className = 'settings-item';
-            editBtn.innerHTML = '🛠 Режим Конструктора';
+            editBtn.innerHTML = '🛠 Вільне Переміщення';
             editBtn.onclick = () => toggleEditMode(type);
             menu.appendChild(editBtn);
         } else {
             const bgBtn = document.createElement('button');
             bgBtn.className = 'settings-item';
-            bgBtn.innerHTML = '<span class="icon-neon icon-frame"></span> Встановити фон';
+            bgBtn.innerHTML = '🖼 Встановити фон';
             bgBtn.onclick = () => triggerBgUpload();
             
             const resetBtn = document.createElement('button');
             resetBtn.className = 'settings-item';
-            resetBtn.innerHTML = '<span class="icon-neon icon-trash"></span> Видалити фон';
+            resetBtn.innerHTML = '🗑 Видалити фон';
             resetBtn.onclick = () => resetBackground();
             
             const editBtn = document.createElement('button');
             editBtn.className = 'settings-item';
-            editBtn.innerHTML = '🛠 Режим Конструктора';
+            editBtn.innerHTML = '🛠 Вільне Переміщення';
             editBtn.onclick = () => toggleEditMode(type);
             
             menu.appendChild(bgBtn);
@@ -283,162 +353,60 @@ function hideContextMenu() {
 function toggleEditMode(type) {
     isEditMode = true;
     hideContextMenu();
-    
-    originalOrder = [];
-    let wrappers = [];
-    if (type === 'user_eye') {
-        const grid = document.querySelector('#user-eye-grid > div');
-        if (grid) wrappers = grid.querySelectorAll('.btn-wrapper');
-    } else {
-        const grid1 = document.getElementById('terminal-buttons-container');
-        const grid2 = document.getElementById('user-commands-safe-zone');
-        if (grid1) wrappers = grid1.querySelectorAll('.btn-wrapper');
-        else if (grid2) wrappers = grid2.querySelectorAll('.btn-wrapper');
-    }
-    
-    wrappers.forEach(w => originalOrder.push(w));
-    alert("🛠 Режим Конструктора УВІМКНЕНО.\nПеретягніть кнопки пальцем. Потім натисніть 3 крапки і виберіть 'Зберегти порядок'.");
+    alert("🛠 Вільне Переміщення УВІМКНЕНО.\nПеретягуйте кнопки куди завгодно (як на робочому столі). Потім натисніть 3 крапки і виберіть 'Зберегти позиції'.");
 }
 
 function cancelDragAndDrop(type) {
     isEditMode = false;
     hideContextMenu();
     
-    const container = (type === 'user_eye') 
-        ? document.querySelector('#user-eye-grid > div') 
-        : document.getElementById('terminal-buttons-container') || document.getElementById('user-commands-safe-zone');
-    
-    if (container) {
-        container.innerHTML = '';
-        originalOrder.forEach(wrapper => {
-            wrapper.style.display = 'block';
-            container.appendChild(wrapper);
-        });
+    // Перезавантажуємо поточну сторінку, щоб скинути незбережені координати
+    if (currentLocationForSave === 'main') {
+        if (document.getElementById('user-eye-studio')) openUserEyeStudio();
+        else renderCyberButtons();
+    } else {
+        renderTerminal();
     }
-    alert("❌ Зміни скасовано.");
+    alert("❌ Зміни позицій скасовано.");
 }
 
 function saveLayout(type) {
     isEditMode = false;
     hideContextMenu();
     
-    let wrappers = [];
     let loc = currentLocationForSave;
-    
-    if (type === 'user_eye') {
-        wrappers = document.querySelectorAll('#user-eye-grid .btn-wrapper');
-    } else {
-        wrappers = document.querySelectorAll(`.btn-wrapper[data-loc="${loc}"]`);
-    }
+    let wrappers = [];
+    if (type === 'user_eye') wrappers = document.querySelectorAll('#user-eye-grid .btn-wrapper');
+    else wrappers = document.querySelectorAll(`.btn-wrapper[data-loc="${loc}"]`);
 
-    const newOrderIds = Array.from(wrappers).map(w => w.dataset.id);
-    tg.HapticFeedback.impactOccurred('heavy');
-    tg.sendData(JSON.stringify({ action: "reorder", loc: loc, new_order: newOrderIds }));
-}
+    let savedLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
+    if (!savedLayout[loc]) savedLayout[loc] = {};
 
-// =======================================================================
-// --- СПРАВЖНІЙ ПЛАВНИЙ ПОЛІТ ЗА ПАЛЬЦЕМ ---
-// =======================================================================
-let draggedEl = null;
-let placeholder = null;
-let ghostEl = null;
-let offsetX = 0, offsetY = 0;
+    let newOrderIds = [];
 
-function makeDraggable(wrapper) {
-    wrapper.addEventListener('touchstart', function(e) {
-        if (!isEditMode || access !== 'admin_king') return;
-        tg.HapticFeedback.impactOccurred('medium');
-
-        draggedEl = this;
-        let rect = draggedEl.getBoundingClientRect();
-        let touch = e.touches[0];
-        offsetX = touch.clientX - rect.left;
-        offsetY = touch.clientY - rect.top;
-
-        // Красива рамка, куди впаде кнопка
-        placeholder = document.createElement('div');
-        placeholder.className = 'btn-wrapper grid-item';
-        placeholder.style.width = rect.width + 'px';
-        placeholder.style.height = rect.height + 'px';
-        placeholder.style.border = '1px solid rgba(188, 19, 254, 0.2)'; // Елегантна лінія
-        placeholder.style.borderRadius = '6px';
-        placeholder.style.background = 'rgba(188, 19, 254, 0.05)';
-        placeholder.dataset.loc = draggedEl.dataset.loc;
-        draggedEl.parentNode.insertBefore(placeholder, draggedEl);
-
-        // Привид, що літає
-        ghostEl = draggedEl.cloneNode(true);
-        ghostEl.style.position = 'fixed';
-        ghostEl.style.left = rect.left + 'px';
-        ghostEl.style.top = rect.top + 'px';
-        ghostEl.style.width = rect.width + 'px';
-        ghostEl.style.height = rect.height + 'px';
-        ghostEl.style.zIndex = '999999';
-        ghostEl.style.opacity = '0.9';
-        ghostEl.style.pointerEvents = 'none'; 
-        ghostEl.style.transform = 'scale(1.05)';
-        ghostEl.style.boxShadow = '0 10px 25px rgba(188, 19, 254, 0.6)';
-        document.body.appendChild(ghostEl);
-
-        draggedEl.style.display = 'none'; // Ховаємо оригінал
-    }, {passive: false});
-
-    wrapper.addEventListener('touchmove', function(e) {
-        if (!draggedEl || !ghostEl || !placeholder) return;
-        e.preventDefault(); 
-        let touch = e.touches[0];
-        
-        ghostEl.style.left = (touch.clientX - offsetX) + 'px';
-        ghostEl.style.top = (touch.clientY - offsetY) + 'px';
-
-        ghostEl.style.display = 'none'; 
-        let target = document.elementFromPoint(touch.clientX, touch.clientY);
-        ghostEl.style.display = ''; 
-
-        if (!target) return;
-        let targetWrapper = target.closest('.btn-wrapper:not(.placeholder)');
-        
-        if (targetWrapper && targetWrapper.dataset.loc === draggedEl.dataset.loc && targetWrapper !== draggedEl) {
-            let targetRect = targetWrapper.getBoundingClientRect();
-            let midY = targetRect.top + targetRect.height / 2;
-            if (touch.clientY < midY) {
-                targetWrapper.parentNode.insertBefore(placeholder, targetWrapper);
-            } else {
-                targetWrapper.parentNode.insertBefore(placeholder, targetWrapper.nextSibling);
-            }
-            tg.HapticFeedback.selectionChanged();
-        }
-    }, {passive: false});
-
-    wrapper.addEventListener('touchend', function(e) {
-        if (!draggedEl || !placeholder) return;
-        
-        // ВАЖЛИВО: Ставимо кнопку НА МІСЦЕ рамки
-        placeholder.parentNode.insertBefore(draggedEl, placeholder);
-        draggedEl.style.display = 'flex'; // Повертаємо видимість
-        
-        placeholder.remove();
-        if (ghostEl) ghostEl.remove();
-        
-        draggedEl = null;
-        placeholder = null;
-        ghostEl = null;
-        
-        tg.HapticFeedback.impactOccurred('light');
+    // Зберігаємо координати локально
+    wrappers.forEach(w => {
+        savedLayout[loc][w.dataset.id] = {
+            left: w.style.left,
+            top: w.style.top
+        };
+        newOrderIds.push(w.dataset.id);
     });
+
+    localStorage.setItem('milka_coords_' + userId, JSON.stringify(savedLayout));
+
+    tg.HapticFeedback.impactOccurred('heavy');
+    // Відправляємо список в Питон, щоб він не видав помилку бази
+    tg.sendData(JSON.stringify({ action: "reorder", loc: loc, new_order: newOrderIds }));
+    alert("✅ Позиції кнопок успішно збережено!");
 }
-// =======================================================================
 
 function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
     const ownerNav = document.getElementById('owner-view'); 
     
-    if (mainGrid) {
-        mainGrid.innerHTML = '';
-        mainGrid.style.display = "grid";
-        mainGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
-    }
+    if (mainGrid) mainGrid.innerHTML = '';
     if (userNav) userNav.innerHTML = '';
     if (ownerNav) ownerNav.innerHTML = '';
 
@@ -446,7 +414,7 @@ function renderCyberButtons() {
     if (menuContent && !document.getElementById('home-btn-burger')) {
         const homeBtn = document.createElement('button');
         homeBtn.id = 'home-btn-burger';
-        homeBtn.innerHTML = processEmojiInText('🏠');
+        homeBtn.innerHTML = '🏠';
         homeBtn.className = 'cyber-btn';
         homeBtn.onclick = goHome;
         menuContent.insertBefore(homeBtn, menuContent.firstChild);
@@ -456,44 +424,49 @@ function renderCyberButtons() {
         const eyeBtn = document.createElement('button');
         eyeBtn.id = 'trigger-eye-btn';
         eyeBtn.className = 'cyber-btn secret-btn';
-        eyeBtn.innerHTML = processEmojiInText('👁️ Око Юзера');
+        eyeBtn.innerHTML = '👁️ Око Юзера';
         eyeBtn.onclick = openUserEyeStudio;
         ownerNav.appendChild(eyeBtn); 
     }
 
     if (cyberPages.main && cyberPages.main.buttons) {
+        let visibleIndex = 0;
         cyberPages.main.buttons.forEach((btn) => {
             if (access === 'admin_king') {
-                if (btn.role === 'owner') createButtonElement(btn, 'main', mainGrid);
+                if (btn.role === 'owner') { createButtonElement(btn, 'main', mainGrid, visibleIndex); visibleIndex++; }
             } else {
-                if (btn.role === 'user') createButtonElement(btn, 'main', mainGrid);
+                if (btn.role === 'user') { createButtonElement(btn, 'main', mainGrid, visibleIndex); visibleIndex++; }
             }
         });
     }
     
     if (cyberPages.burger && cyberPages.burger.buttons) {
         cyberPages.burger.buttons.forEach((btn) => {
-            if(btn.role === 'owner' && ownerNav) createButtonElement(btn, 'burger', ownerNav);
-            if(btn.role === 'user' && userNav) createButtonElement(btn, 'burger', userNav);
+            if(btn.role === 'owner' && ownerNav) createButtonElement(btn, 'burger', ownerNav, 0);
+            if(btn.role === 'user' && userNav) createButtonElement(btn, 'burger', userNav, 0);
         });
     }
 }
 
-function createButtonElement(btn, location, container) {
+function createButtonElement(btn, location, container, index) {
     const wrapper = document.createElement('div');
-    wrapper.className = `btn-wrapper ${location === 'main' ? 'grid-item' : ''}`;
+    wrapper.className = `btn-wrapper`;
     wrapper.dataset.id = btn.text;
     wrapper.dataset.loc = location;
     
     const b = document.createElement('button');
     b.className = 'cyber-btn';
     if (btn.role === 'owner') b.classList.add('secret-btn');
-    
-    b.innerHTML = processEmojiInText(btn.text);
+    b.innerHTML = btn.text;
     b.onclick = () => openTerminalPage(btn.text);
     
     wrapper.appendChild(b);
-    makeDraggable(wrapper);
+    
+    // В Бургер-меню абсолютне позиціонування не потрібне (там просто список)
+    if (location !== 'burger') {
+        makeDraggable(wrapper);
+        applyAbsolutePosition(wrapper, index, location);
+    }
     
     if(container) container.appendChild(wrapper);
 }
@@ -511,7 +484,7 @@ function changeBackground(event) {
         let currentPage = 'global';
         if (navStack.length > 0) currentPage = navStack[navStack.length - 1]; 
         tg.sendData(JSON.stringify({ action: "request_photo", page: currentPage }));
-        alert(`🦾 Сигнал передано Питону! \n\nВідправ фото боту в повідомлення. Воно встановиться для сторінки: ${currentPage}`);
+        alert(`🦾 Сигнал передано Питону! \n\nВідправ фото боту в повідомлення.`);
         setTimeout(() => { tg.close(); }, 500);
     }
 }
@@ -521,7 +494,7 @@ function resetBackground() {
         let currentPage = 'global';
         if (navStack.length > 0) currentPage = navStack[navStack.length - 1]; 
         tg.sendData(JSON.stringify({ action: "reset_bg", page: currentPage }));
-        alert(`🧹 Фон для сторінки ${currentPage} видалено!`);
+        alert(`🧹 Фон видалено!`);
         setTimeout(() => { tg.close(); }, 500);
     }
     hideContextMenu();
@@ -531,11 +504,10 @@ function toggleMenu() {
     const sideMenu = document.getElementById('side-menu');
     if (sideMenu) sideMenu.classList.toggle('active'); 
 }
-
 function closeApp() { tg.close(); }
 
 // =======================================================================
-// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ ---
+// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (БЕЗ ЗМІН) ---
 // =======================================================================
 const chatInput = document.getElementById('chat-input');
 const formatTrigger = document.getElementById('format-trigger');
