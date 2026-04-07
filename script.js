@@ -11,7 +11,7 @@ const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 const encodedData = urlParams.get('cd'); 
 
-let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {} };
+let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {} };
 let isEditMode = false;
 let navStack = []; 
 
@@ -65,7 +65,7 @@ function openTerminalPage(pageTitle) {
 }
 
 // =======================================================================
-// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (РОБОЧИЙ СТІЛ) ---
+// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (РОБОЧИЙ СТІЛ ДЛЯ ВСІХ) ---
 // =======================================================================
 function applyAbsolutePosition(wrapper, index, loc) {
     wrapper.style.position = 'absolute';
@@ -74,11 +74,11 @@ function applyAbsolutePosition(wrapper, index, loc) {
 
     let foundCoord = null;
     
-    // ПРІОРИТЕТ 1: Дані з бази даних (Python), якщо вони там є
+    // ПРІОРИТЕТ 1: Дані з Питона (глобально для всіх)
     if (cyberPages.pages_coords && cyberPages.pages_coords[loc] && cyberPages.pages_coords[loc][wrapper.dataset.id]) {
         foundCoord = cyberPages.pages_coords[loc][wrapper.dataset.id];
     } 
-    // ПРІОРИТЕТ 2: Локальна пам'ять (тимчасово)
+    // ПРІОРИТЕТ 2: Локальні незбережені зміни
     else {
         let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
         if (localLayout[loc] && localLayout[loc][wrapper.dataset.id]) {
@@ -90,7 +90,6 @@ function applyAbsolutePosition(wrapper, index, loc) {
         wrapper.style.left = foundCoord.left;
         wrapper.style.top = foundCoord.top;
     } else {
-        // По замовчуванню в 2 колонки
         let isRightCol = index % 2 !== 0;
         let row = Math.floor(index / 2);
         wrapper.style.left = isRightCol ? '52%' : '3%';
@@ -143,18 +142,10 @@ function makeDraggable(wrapper) {
         tg.HapticFeedback.impactOccurred('light');
 
         let parentRect = this.parentNode.getBoundingClientRect();
-        let leftPx = parseFloat(this.style.left);
-        let topPx = parseFloat(this.style.top);
-
-        // Фіксуємо у відсотках
-        this.style.left = (leftPx / parentRect.width * 100) + '%';
-        this.style.top = (topPx / parentRect.height * 100) + '%';
+        this.style.left = (parseFloat(this.style.left) / parentRect.width * 100) + '%';
+        this.style.top = (parseFloat(this.style.top) / parentRect.height * 100) + '%';
     });
 }
-
-// =======================================================================
-// --- ЛОГІКА ЗБЕРЕЖЕННЯ ТА ВІДПРАВКИ ПИТОНУ ---
-// =======================================================================
 
 function saveLayout(type) {
     isEditMode = false;
@@ -176,22 +167,22 @@ function saveLayout(type) {
         newOrderIds.push(w.dataset.id);
     });
 
-    // 1. Зберігаємо локально для миттєвого ефекту
+    // Зберігаємо локально
     let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
     localLayout[loc] = coordsData;
     localStorage.setItem('milka_coords_' + userId, JSON.stringify(localLayout));
 
     tg.HapticFeedback.impactOccurred('heavy');
 
-    // 2. ВІДПРАВЛЯЄМО ПИТОНУ (ДЛЯ ВСІХ І НАЗАВЖДИ)
+    // ВІДПРАВЛЯЄМО ПИТОНУ (ДЛЯ ВСІХ ЮЗЕРІВ)
     tg.sendData(JSON.stringify({ 
         action: "reorder", 
         loc: loc, 
-        coords: coordsData, // Python повинен це зберегти!
+        coords: coordsData, 
         new_order: newOrderIds 
     }));
 
-    alert("✅ Дизайн збережено та відправлено в систему!");
+    alert("✅ Позиції збережено для всіх користувачів!");
 }
 
 function cancelDragAndDrop(type) {
