@@ -15,18 +15,27 @@ let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pa
 let isEditMode = false;
 let navStack = []; 
 
+// НАДІЙНЕ ДЕКОДУВАННЯ BASE64 З ПИТОНА
 if (encodedData) {
     try {
         let decodedString;
-        try { decodedString = decodeURIComponent(encodedData); } 
-        catch (e) { decodedString = decodeURIComponent(escape(atob(encodedData))); }
+        try { 
+            decodedString = decodeURIComponent(escape(atob(decodeURIComponent(encodedData)))); 
+        } catch (e) {
+            try { decodedString = decodeURIComponent(escape(atob(encodedData))); } 
+            catch (e2) { decodedString = decodeURIComponent(encodedData); }
+        }
+        
         const parsed = JSON.parse(decodedString);
         if (parsed.main) cyberPages.main = parsed.main;
         if (parsed.burger) cyberPages.burger = parsed.burger;
         if (parsed.pages) cyberPages.pages = parsed.pages;
         if (parsed.pages_bg) cyberPages.pages_bg = parsed.pages_bg;
         if (parsed.pages_coords) cyberPages.pages_coords = parsed.pages_coords;
-    } catch (e) { console.error("Помилка декодування бази", e); }
+    } catch (e) { 
+        console.error("Помилка декодування бази", e);
+        alert("⚠️ ПОМИЛКА: Дані дизайну не завантажено. Не зберігайте позиції, щоб не стерти базу!");
+    }
 }
 
 const initGlobalBg = cyberPages.pages_bg && cyberPages.pages_bg['global'];
@@ -68,9 +77,6 @@ function openTerminalPage(pageTitle) {
     renderTerminal();
 }
 
-// =======================================================================
-// --- АБСОЛЮТНЕ ПОЗИЦІОНУВАННЯ (ЗЧИТУВАННЯ З БАЗИ ПИТОНА) ---
-// =======================================================================
 function applyAbsolutePosition(wrapper, index, loc) {
     wrapper.style.position = 'absolute';
     wrapper.style.width = '45%'; 
@@ -91,7 +97,7 @@ function applyAbsolutePosition(wrapper, index, loc) {
         wrapper.style.left = foundCoord.left;
         wrapper.style.top = foundCoord.top;
     } else {
-        // Щоб нові кнопки не налізали на шапку з бургер-меню (top: 80px)
+        // ВІДСТУП 80px: щоб кнопки не налізали на шапку і бургер
         let isRightCol = index % 2 !== 0;
         let row = Math.floor(index / 2);
         wrapper.style.left = isRightCol ? '52%' : '3%';
@@ -160,10 +166,7 @@ function saveLayout(type) {
     let newOrderIds = [];
 
     wrappers.forEach(w => {
-        coordsData[w.dataset.id] = {
-            left: w.style.left,
-            top: w.style.top
-        };
+        coordsData[w.dataset.id] = { left: w.style.left, top: w.style.top };
         newOrderIds.push(w.dataset.id);
     });
 
@@ -172,14 +175,7 @@ function saveLayout(type) {
     localStorage.setItem('milka_coords_' + userId, JSON.stringify(localLayout));
 
     tg.HapticFeedback.impactOccurred('heavy');
-
-    tg.sendData(JSON.stringify({ 
-        action: "reorder", 
-        loc: loc, 
-        coords: coordsData, 
-        new_order: newOrderIds 
-    }));
-
+    tg.sendData(JSON.stringify({ action: "reorder", loc: loc, coords: coordsData, new_order: newOrderIds }));
     alert("✅ Позиції збережено для всіх користувачів!");
 }
 
@@ -198,10 +194,12 @@ function renderTerminal() {
     terminal = document.createElement('div');
     terminal.id = 'dynamic-terminal-page';
     terminal.className = 'neon-border';
+    
     // ЕФЕКТ ТЕМНОГО СКЛА
     terminal.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
     terminal.style.backdropFilter = 'blur(10px)';
     terminal.style.webkitBackdropFilter = 'blur(10px)';
+    
     document.body.appendChild(terminal);
     
     let dotsHtml = '';
@@ -241,7 +239,7 @@ function renderTerminal() {
             const b = document.createElement('button');
             b.className = 'cyber-btn' + (btn.role === 'owner' ? ' secret-btn' : '');
             
-            // НЕОНОВА НАПІВПРОЗОРА КНОПКА
+            // НЕОНОВИЙ СТИЛЬ
             b.style.background = 'rgba(21, 21, 21, 0.5)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
@@ -267,6 +265,7 @@ function openUserEyeStudio() {
     modal = document.createElement('div');
     modal.id = 'user-eye-studio';
     modal.className = 'neon-border'; 
+    
     // ЕФЕКТ ТЕМНОГО СКЛА
     modal.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
     modal.style.backdropFilter = 'blur(10px)';
@@ -277,25 +276,19 @@ function openUserEyeStudio() {
         dotsHtml = `<div class="admin-dots" onclick="toggleContextMenu(event, 'user_eye', 'main')">⋮</div>`;
     }
 
-    const header = document.createElement('div');
-    header.className = 'terminal-header';
-    header.innerHTML = `
-        <div class="terminal-burger" onclick="toggleMenu()">
-            <span></span><span></span><span></span>
+    modal.innerHTML = `
+        <div class="terminal-header">
+            <div class="terminal-burger" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="terminal-title"></div>
+            <div class="terminal-right-controls">
+                ${dotsHtml}
+                <div class="close-cross-btn" id="close-eye-btn">❌</div>
+            </div>
         </div>
-        <div class="terminal-title"></div>
-        <div class="terminal-right-controls">
-            ${dotsHtml}
-            <div class="close-cross-btn" id="close-eye-btn">❌</div>
-        </div>
+        <div class="eye-safe-zone" id="user-eye-grid" style="background:transparent; position:relative; width:100%; height:100%;"></div>
     `;
-    modal.appendChild(header);
-
-    const grid = document.createElement('div');
-    grid.id = 'user-eye-grid';
-    grid.className = 'eye-safe-zone';
-    grid.style.background = 'transparent';
-    modal.appendChild(grid);
     document.body.appendChild(modal);
 
     document.getElementById('close-eye-btn').onclick = () => {
@@ -310,8 +303,7 @@ function openUserEyeStudio() {
     const globalBgValue = cyberPages.pages_bg && cyberPages.pages_bg['global'];
     if (globalBgValue) { modal.style.backgroundImage = `url('${globalBgValue}')`; modal.style.backgroundSize = 'cover'; }
     
-    grid.innerHTML = ''; 
-
+    const grid = document.getElementById('user-eye-grid');
     if (cyberPages.main && cyberPages.main.buttons) {
         let visibleIndex = 0;
         cyberPages.main.buttons.forEach((btn) => {
@@ -324,7 +316,7 @@ function openUserEyeStudio() {
                 const b = document.createElement('button');
                 b.className = 'cyber-btn';
                 
-                // НЕОНОВА НАПІВПРОЗОРА КНОПКА
+                // НЕОНОВИЙ СТИЛЬ
                 b.style.background = 'rgba(21, 21, 21, 0.5)';
                 b.style.border = '1px solid #bc13fe';
                 b.style.color = '#bc13fe';
@@ -520,7 +512,10 @@ function resetBackground() {
     hideContextMenu();
 }
 
-function toggleMenu() { document.getElementById('side-menu')?.classList.toggle('active'); }
+function toggleMenu() { 
+    const sideMenu = document.getElementById('side-menu');
+    if (sideMenu) sideMenu.classList.toggle('active'); 
+}
 function closeApp() { tg.close(); }
 
 // =======================================================================
@@ -603,7 +598,7 @@ if (document.getElementById('btn-confirm-delete')) { document.getElementById('bt
 function loadChatHistory() {
     const box = document.getElementById('chat-messages'); if (!box) return;
     box.innerHTML = ''; let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
-    if (history.length === 0) { appendMsg('bot', 'Чекаю на команду, Максиме.'); } 
+    if (history.length === 0) { appendMsg('bot', 'Система активна. Чекаю на команду, Максиме.'); } 
     else { history.forEach(item => { if (!item.id) item.id = Date.now().toString(); appendMsgDOM(item.sender, item.text, item.id); }); localStorage.setItem(CHAT_KEY, JSON.stringify(history)); }
 }
 function saveMsgToHistory(sender, htmlText, id) { let history = JSON.parse(localStorage.getItem(CHAT_KEY)) || []; history.push({ id: id, sender: sender, text: htmlText }); localStorage.setItem(CHAT_KEY, JSON.stringify(history)); }
