@@ -80,7 +80,6 @@ function applyAbsolutePosition(wrapper, index, loc) {
     wrapper.style.position = 'absolute';
     wrapper.style.margin = '0';
     
-    // БМ залишаємо широким, інші (ГМ і термінали) - компактними (38% для 2 в ряд)
     if (loc === 'burger') {
         wrapper.style.width = '100%'; 
     } else {
@@ -102,7 +101,6 @@ function applyAbsolutePosition(wrapper, index, loc) {
         wrapper.style.left = foundCoord.left;
         wrapper.style.top = foundCoord.top;
     } else if (loc !== 'burger') {
-        // Логіка 2 в ряд
         let isRightCol = index % 2 !== 0;
         let row = Math.floor(index / 2);
         wrapper.style.left = isRightCol ? '54%' : '8%';
@@ -162,7 +160,6 @@ function saveLayout(type) {
     isEditMode = false;
     hideContextMenu();
     
-    // Ховаємо хрестики для текстових блоків
     document.querySelectorAll('.delete-text-btn').forEach(btn => btn.classList.add('hidden'));
     
     let loc = currentLocationForSave;
@@ -172,7 +169,7 @@ function saveLayout(type) {
 
     let coordsData = {};
     let newOrderIds = [];
-    let textBlocks = []; // Масив для текстів
+    let textBlocks = []; 
 
     wrappers.forEach(w => {
         coordsData[w.dataset.id] = { left: w.style.left, top: w.style.top };
@@ -182,7 +179,8 @@ function saveLayout(type) {
                 id: w.dataset.id,
                 html: w.querySelector('.custom-text-block').innerHTML,
                 left: w.style.left,
-                top: w.style.top
+                top: w.style.top,
+                size: w.dataset.size || 12 // Зберігаємо масштаб
             });
         } else {
             newOrderIds.push(w.dataset.id);
@@ -278,11 +276,11 @@ function renderTerminal() {
         });
     }
 
-    // Завантаження текстових блоків
+    // Відмальовуємо збережені тексти з правильним розміром
     let localTexts = JSON.parse(localStorage.getItem('milka_custom_texts_' + userId)) || {};
     if (localTexts[currentPage]) {
         localTexts[currentPage].forEach(tb => {
-            renderTextBlockDOM(tb.id, tb.html, currentPage, tb.left, tb.top);
+            renderTextBlockDOM(tb.id, tb.html, currentPage, tb.left, tb.top, tb.size);
         });
     }
 }
@@ -417,14 +415,18 @@ function toggleContextMenu(event, type, loc) {
             menu.appendChild(resetBtn);
             menu.appendChild(editBtn);
 
-            // Кнопка ДОДАТИ ТЕКСТ тільки для терміналів
+            // Кнопка ТЕКСТ тільки для терміналів
             if (loc !== 'main' && loc !== 'burger') {
                 const addTextBtn = document.createElement('button');
                 addTextBtn.className = 'settings-item';
                 addTextBtn.innerHTML = '📝 Додати текст';
                 addTextBtn.onclick = () => {
                     hideContextMenu();
-                    document.getElementById('custom-text-input').innerHTML = '';
+                    const input = document.getElementById('custom-text-input');
+                    input.innerHTML = '';
+                    input.style.fontSize = '12px'; // Скидаємо масштаб при відкритті
+                    document.getElementById('text-size-slider').value = 12;
+                    document.getElementById('text-size-display').innerText = '12px';
                     document.getElementById('text-editor-modal').classList.remove('hidden');
                 };
                 menu.appendChild(addTextBtn);
@@ -702,6 +704,12 @@ window.onload = () => { renderCyberButtons(); };
 // --- ЛОГІКА ТЕКСТОВИХ БЛОКІВ (ТЕРМІНАЛИ) ---
 // =========================================================
 
+// Функція повзунка розміру
+function updateTextSize(size) {
+    document.getElementById('text-size-display').innerText = size + 'px';
+    document.getElementById('custom-text-input').style.fontSize = size + 'px';
+}
+
 function applyTextFormat(command, value = null) {
     document.getElementById('custom-text-input').focus();
     if (command === 'monospaced') {
@@ -716,17 +724,18 @@ function saveNewTextBlock() {
     const html = input.innerHTML.trim();
     if (!html) return;
     
+    const size = document.getElementById('text-size-slider').value; // Отримуємо масштаб
     const loc = currentLocationForSave;
     const id = 'text_' + Date.now();
     
-    renderTextBlockDOM(id, html, loc, '10%', '10%');
+    // Передаємо розмір у функцію малювання
+    renderTextBlockDOM(id, html, loc, '10%', '10%', size);
     document.getElementById('text-editor-modal').classList.add('hidden');
     
-    // Автозбереження після створення
     saveLayout('auto');
 }
 
-function renderTextBlockDOM(id, html, loc, left, top) {
+function renderTextBlockDOM(id, html, loc, left, top, size = 12) {
     const contentContainer = document.getElementById('terminal-buttons-container');
     if (!contentContainer) return;
 
@@ -735,14 +744,15 @@ function renderTextBlockDOM(id, html, loc, left, top) {
     wrapper.dataset.id = id;
     wrapper.dataset.loc = loc;
     wrapper.dataset.type = 'text'; 
+    wrapper.dataset.size = size; // Записуємо розмір у data-атрибут
     wrapper.style.position = 'absolute';
     wrapper.style.left = left;
     wrapper.style.top = top;
-    wrapper.style.width = 'auto'; // Текст не розтягується як кнопка
 
     const content = document.createElement('div');
     content.className = 'custom-text-block';
     content.innerHTML = html;
+    content.style.fontSize = size + 'px'; // Застосовуємо масштаб на екран
 
     const delBtn = document.createElement('div');
     delBtn.className = 'delete-text-btn ' + (isEditMode ? '' : 'hidden');
