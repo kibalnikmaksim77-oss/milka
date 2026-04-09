@@ -237,9 +237,9 @@ function renderTerminal() {
             wrapper.dataset.loc = currentPage; 
             
             const b = document.createElement('button');
-            b.className = 'cyber-btn' + (btn.role === 'owner' ? ' secret-btn' : '');
+            // ДОДАНО КЛАС btn-small ДЛЯ ТЕРМІНАЛІВ
+            b.className = 'cyber-btn btn-small' + (btn.role === 'owner' ? ' secret-btn' : '');
             
-            // НЕОНОВИЙ СТИЛЬ
             b.style.background = 'rgba(21, 21, 21, 0.5)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
@@ -314,9 +314,9 @@ function openUserEyeStudio() {
                 wrapper.dataset.loc = 'main';
                 
                 const b = document.createElement('button');
-                b.className = 'cyber-btn';
+                // ДОДАНО КЛАС btn-small ДЛЯ ОКА ЮЗЕРА (оскільки це ГМ)
+                b.className = 'cyber-btn btn-small';
                 
-                // НЕОНОВИЙ СТИЛЬ
                 b.style.background = 'rgba(21, 21, 21, 0.5)';
                 b.style.border = '1px solid #bc13fe';
                 b.style.color = '#bc13fe';
@@ -434,6 +434,7 @@ function renderCyberButtons() {
         const homeBtn = document.createElement('button');
         homeBtn.id = 'home-btn-burger';
         homeBtn.innerHTML = '🏠';
+        // БМ залишається ОРИГІНАЛЬНИМ
         homeBtn.className = 'cyber-btn';
         homeBtn.onclick = goHome;
         menuContent.insertBefore(homeBtn, menuContent.firstChild);
@@ -442,6 +443,7 @@ function renderCyberButtons() {
     if (access === 'admin_king' && !document.getElementById('trigger-eye-btn') && ownerNav) {
         const eyeBtn = document.createElement('button');
         eyeBtn.id = 'trigger-eye-btn';
+        // БМ залишається ОРИГІНАЛЬНИМ
         eyeBtn.className = 'cyber-btn secret-btn';
         eyeBtn.innerHTML = '👁️ Око Юзера';
         eyeBtn.onclick = openUserEyeStudio;
@@ -474,7 +476,9 @@ function createButtonElement(btn, location, container, index) {
     wrapper.dataset.loc = location;
     
     const b = document.createElement('button');
-    b.className = 'cyber-btn' + (btn.role === 'owner' ? ' secret-btn' : '');
+    // ЯКЩО ЛОКАЦІЯ НЕ БУРГЕР (Тобто ГМ), ДАЄМО КЛАС btn-small
+    const sizeClass = (location !== 'burger') ? 'btn-small' : '';
+    b.className = ('cyber-btn ' + sizeClass + (btn.role === 'owner' ? ' secret-btn' : '')).trim();
     b.innerHTML = btn.text;
     b.onclick = () => openTerminalPage(btn.text);
     
