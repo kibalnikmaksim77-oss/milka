@@ -34,7 +34,7 @@ body {
     position: relative; flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; 
 }
 
-/* --- ЄДИНИЙ СТИЛЬ КНОПОК ЯК "Milka Bot" + СУЧАСНІ ЕМОДЗІ --- */
+/* --- ЄДИНИЙ СТИЛЬ КНОПОК (ЦЕ І Є ОРИГІНАЛЬНИЙ РОЗМІР ДЛЯ БУРГЕРА) --- */
 .cyber-btn {
     width: 100%; 
     padding: 10px; 
@@ -53,7 +53,6 @@ body {
     text-shadow: 0 0 5px #bc13fe;
     box-shadow: 0 0 5px rgba(188, 19, 254, 0.2);
     transition: transform 0.1s, opacity 0.2s;
-    /* Оцей рядок змушує всі емодзі бути кольоровими і цілими */
     font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", sans-serif;
 }
 
@@ -61,6 +60,14 @@ body {
 .cyber-btn:active { transform: scale(0.95); }
 
 .secret-btn { background: rgba(188, 19, 254, 0.15) !important; }
+
+/* 🔴 ДОДАНО: КЛАС ДЛЯ ЗМЕНШЕНИХ КНОПОК (ГМ ТА ТЕРМІНАЛИ) 🔴 */
+.cyber-btn.btn-small { 
+    padding: 7px 10px !important; 
+    font-size: 10px !important; 
+    border-radius: 4px !important; 
+    margin-bottom: 4px !important; 
+}
 
 /* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА --- */
 #dynamic-terminal-page, #user-eye-studio {
