@@ -15,7 +15,6 @@ let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pa
 let isEditMode = false;
 let navStack = []; 
 
-// НАДІЙНЕ ДЕКОДУВАННЯ BASE64 З ПИТОНА
 if (encodedData) {
     try {
         let decodedString;
@@ -79,8 +78,14 @@ function openTerminalPage(pageTitle) {
 
 function applyAbsolutePosition(wrapper, index, loc) {
     wrapper.style.position = 'absolute';
-    wrapper.style.width = '45%'; 
     wrapper.style.margin = '0';
+    
+    // БМ залишаємо широким, інші (ГМ і термінали) - компактними (38% для 2 в ряд)
+    if (loc === 'burger') {
+        wrapper.style.width = '100%'; 
+    } else {
+        wrapper.style.width = '38%'; 
+    }
 
     let foundCoord = null;
     
@@ -96,11 +101,11 @@ function applyAbsolutePosition(wrapper, index, loc) {
     if (foundCoord) {
         wrapper.style.left = foundCoord.left;
         wrapper.style.top = foundCoord.top;
-    } else {
-        // ВІДСТУП 80px: щоб кнопки не налізали на шапку і бургер
+    } else if (loc !== 'burger') {
+        // Логіка 2 в ряд
         let isRightCol = index % 2 !== 0;
         let row = Math.floor(index / 2);
-        wrapper.style.left = isRightCol ? '52%' : '3%';
+        wrapper.style.left = isRightCol ? '54%' : '8%';
         wrapper.style.top = (80 + row * 60) + 'px';
     }
 }
@@ -157,6 +162,9 @@ function saveLayout(type) {
     isEditMode = false;
     hideContextMenu();
     
+    // Ховаємо хрестики для текстових блоків
+    document.querySelectorAll('.delete-text-btn').forEach(btn => btn.classList.add('hidden'));
+    
     let loc = currentLocationForSave;
     let wrappers = [];
     if (type === 'user_eye') wrappers = document.querySelectorAll('#user-eye-grid .btn-wrapper');
@@ -164,19 +172,35 @@ function saveLayout(type) {
 
     let coordsData = {};
     let newOrderIds = [];
+    let textBlocks = []; // Масив для текстів
 
     wrappers.forEach(w => {
         coordsData[w.dataset.id] = { left: w.style.left, top: w.style.top };
-        newOrderIds.push(w.dataset.id);
+        
+        if (w.dataset.type === 'text') {
+            textBlocks.push({
+                id: w.dataset.id,
+                html: w.querySelector('.custom-text-block').innerHTML,
+                left: w.style.left,
+                top: w.style.top
+            });
+        } else {
+            newOrderIds.push(w.dataset.id);
+        }
     });
 
     let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
     localLayout[loc] = coordsData;
     localStorage.setItem('milka_coords_' + userId, JSON.stringify(localLayout));
+    
+    let localTexts = JSON.parse(localStorage.getItem('milka_custom_texts_' + userId)) || {};
+    localTexts[loc] = textBlocks;
+    localStorage.setItem('milka_custom_texts_' + userId, JSON.stringify(localTexts));
 
     tg.HapticFeedback.impactOccurred('heavy');
     tg.sendData(JSON.stringify({ action: "reorder", loc: loc, coords: coordsData, new_order: newOrderIds }));
-    alert("✅ Позиції збережено для всіх користувачів!");
+    
+    if (type !== 'auto') alert("✅ Позиції та тексти збережено!");
 }
 
 function renderTerminal() {
@@ -195,7 +219,6 @@ function renderTerminal() {
     terminal.id = 'dynamic-terminal-page';
     terminal.className = 'neon-border';
     
-    // ЕФЕКТ ТЕМНОГО СКЛА
     terminal.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
     terminal.style.backdropFilter = 'blur(10px)';
     terminal.style.webkitBackdropFilter = 'blur(10px)';
@@ -237,7 +260,6 @@ function renderTerminal() {
             wrapper.dataset.loc = currentPage; 
             
             const b = document.createElement('button');
-            // ДОДАНО КЛАС btn-small ДЛЯ ТЕРМІНАЛІВ
             b.className = 'cyber-btn btn-small' + (btn.role === 'owner' ? ' secret-btn' : '');
             
             b.style.background = 'rgba(21, 21, 21, 0.5)';
@@ -255,6 +277,14 @@ function renderTerminal() {
             visibleIndex++;
         });
     }
+
+    // Завантаження текстових блоків
+    let localTexts = JSON.parse(localStorage.getItem('milka_custom_texts_' + userId)) || {};
+    if (localTexts[currentPage]) {
+        localTexts[currentPage].forEach(tb => {
+            renderTextBlockDOM(tb.id, tb.html, currentPage, tb.left, tb.top);
+        });
+    }
 }
 
 function openUserEyeStudio() {
@@ -266,7 +296,6 @@ function openUserEyeStudio() {
     modal.id = 'user-eye-studio';
     modal.className = 'neon-border'; 
     
-    // ЕФЕКТ ТЕМНОГО СКЛА
     modal.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
     modal.style.backdropFilter = 'blur(10px)';
     modal.style.webkitBackdropFilter = 'blur(10px)';
@@ -314,7 +343,6 @@ function openUserEyeStudio() {
                 wrapper.dataset.loc = 'main';
                 
                 const b = document.createElement('button');
-                // ДОДАНО КЛАС btn-small ДЛЯ ОКА ЮЗЕРА (оскільки це ГМ)
                 b.className = 'cyber-btn btn-small';
                 
                 b.style.background = 'rgba(21, 21, 21, 0.5)';
@@ -388,6 +416,19 @@ function toggleContextMenu(event, type, loc) {
             menu.appendChild(bgBtn);
             menu.appendChild(resetBtn);
             menu.appendChild(editBtn);
+
+            // Кнопка ДОДАТИ ТЕКСТ тільки для терміналів
+            if (loc !== 'main' && loc !== 'burger') {
+                const addTextBtn = document.createElement('button');
+                addTextBtn.className = 'settings-item';
+                addTextBtn.innerHTML = '📝 Додати текст';
+                addTextBtn.onclick = () => {
+                    hideContextMenu();
+                    document.getElementById('custom-text-input').innerHTML = '';
+                    document.getElementById('text-editor-modal').classList.remove('hidden');
+                };
+                menu.appendChild(addTextBtn);
+            }
         }
     }
 
@@ -405,12 +446,15 @@ function hideContextMenu() {
 function toggleEditMode(type) {
     isEditMode = true;
     hideContextMenu();
-    alert("🛠 Вільне Переміщення УВІМКНЕНО.\nПеретягуйте кнопки куди завгодно. Потім натисніть 3 крапки і виберіть 'Зберегти позиції'.");
+    document.querySelectorAll('.delete-text-btn').forEach(btn => btn.classList.remove('hidden'));
+    alert("🛠 Вільне Переміщення УВІМКНЕНО.\nПеретягуйте кнопки та текст куди завгодно. Щоб видалити текст, натисніть на червоний хрестик.");
 }
 
 function cancelDragAndDrop(type) {
     isEditMode = false;
     hideContextMenu();
+    document.querySelectorAll('.delete-text-btn').forEach(btn => btn.classList.add('hidden'));
+    
     if (currentLocationForSave === 'main') {
         if (document.getElementById('user-eye-studio')) openUserEyeStudio();
         else renderCyberButtons();
@@ -434,7 +478,6 @@ function renderCyberButtons() {
         const homeBtn = document.createElement('button');
         homeBtn.id = 'home-btn-burger';
         homeBtn.innerHTML = '🏠';
-        // БМ залишається ОРИГІНАЛЬНИМ
         homeBtn.className = 'cyber-btn';
         homeBtn.onclick = goHome;
         menuContent.insertBefore(homeBtn, menuContent.firstChild);
@@ -443,7 +486,6 @@ function renderCyberButtons() {
     if (access === 'admin_king' && !document.getElementById('trigger-eye-btn') && ownerNav) {
         const eyeBtn = document.createElement('button');
         eyeBtn.id = 'trigger-eye-btn';
-        // БМ залишається ОРИГІНАЛЬНИМ
         eyeBtn.className = 'cyber-btn secret-btn';
         eyeBtn.innerHTML = '👁️ Око Юзера';
         eyeBtn.onclick = openUserEyeStudio;
@@ -476,7 +518,6 @@ function createButtonElement(btn, location, container, index) {
     wrapper.dataset.loc = location;
     
     const b = document.createElement('button');
-    // ЯКЩО ЛОКАЦІЯ НЕ БУРГЕР (Тобто ГМ), ДАЄМО КЛАС btn-small
     const sizeClass = (location !== 'burger') ? 'btn-small' : '';
     b.className = ('cyber-btn ' + sizeClass + (btn.role === 'owner' ? ' secret-btn' : '')).trim();
     b.innerHTML = btn.text;
@@ -522,9 +563,6 @@ function toggleMenu() {
 }
 function closeApp() { tg.close(); }
 
-// =======================================================================
-// --- ЧАТ, ФОРМАТУВАННЯ ТА ПАМ'ЯТКИ (БЕЗ УРІЗАНЬ) ---
-// =======================================================================
 const chatInput = document.getElementById('chat-input');
 const formatTrigger = document.getElementById('format-trigger');
 const formatMenu = document.getElementById('format-menu');
@@ -659,3 +697,64 @@ function sendMessage() {
 }
 
 window.onload = () => { renderCyberButtons(); };
+
+// =========================================================
+// --- ЛОГІКА ТЕКСТОВИХ БЛОКІВ (ТЕРМІНАЛИ) ---
+// =========================================================
+
+function applyTextFormat(command, value = null) {
+    document.getElementById('custom-text-input').focus();
+    if (command === 'monospaced') {
+        document.execCommand('fontName', false, 'monospace');
+    } else {
+        document.execCommand(command, false, value);
+    }
+}
+
+function saveNewTextBlock() {
+    const input = document.getElementById('custom-text-input');
+    const html = input.innerHTML.trim();
+    if (!html) return;
+    
+    const loc = currentLocationForSave;
+    const id = 'text_' + Date.now();
+    
+    renderTextBlockDOM(id, html, loc, '10%', '10%');
+    document.getElementById('text-editor-modal').classList.add('hidden');
+    
+    // Автозбереження після створення
+    saveLayout('auto');
+}
+
+function renderTextBlockDOM(id, html, loc, left, top) {
+    const contentContainer = document.getElementById('terminal-buttons-container');
+    if (!contentContainer) return;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'btn-wrapper text-wrapper';
+    wrapper.dataset.id = id;
+    wrapper.dataset.loc = loc;
+    wrapper.dataset.type = 'text'; 
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = left;
+    wrapper.style.top = top;
+    wrapper.style.width = 'auto'; // Текст не розтягується як кнопка
+
+    const content = document.createElement('div');
+    content.className = 'custom-text-block';
+    content.innerHTML = html;
+
+    const delBtn = document.createElement('div');
+    delBtn.className = 'delete-text-btn ' + (isEditMode ? '' : 'hidden');
+    delBtn.innerHTML = '❌';
+    delBtn.onclick = () => { 
+        wrapper.remove(); 
+        if(isEditMode) saveLayout('auto'); 
+    };
+
+    wrapper.appendChild(content);
+    wrapper.appendChild(delBtn);
+
+    makeDraggable(wrapper);
+    contentContainer.appendChild(wrapper);
+}
