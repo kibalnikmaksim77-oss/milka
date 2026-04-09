@@ -24,7 +24,6 @@ body {
 
 #app-container { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 25px; }
 
-/* ЗОНИ ТЕРМІНАЛІВ ТЕПЕР МАЮТЬ position: relative ДЛЯ ВІЛЬНОГО ПЕРЕМІЩЕННЯ */
 #user-commands-safe-zone, .eye-safe-zone {
     position: absolute; top: 50%; width: 90%; height: 38%; 
     overflow-y: auto; overflow-x: hidden;
@@ -34,7 +33,7 @@ body {
     position: relative; flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; 
 }
 
-/* --- ЄДИНИЙ СТИЛЬ КНОПОК (ЦЕ І Є ОРИГІНАЛЬНИЙ РОЗМІР ДЛЯ БУРГЕРА) --- */
+/* ОРИГІНАЛЬНИЙ РОЗМІР (Бургер-меню) */
 .cyber-btn {
     width: 100%; 
     padding: 10px; 
@@ -58,18 +57,16 @@ body {
 
 .cyber-btn:hover { background: rgba(188, 19, 254, 0.2); box-shadow: 0 0 10px rgba(188, 19, 254, 0.8); }
 .cyber-btn:active { transform: scale(0.95); }
-
 .secret-btn { background: rgba(188, 19, 254, 0.15) !important; }
 
-/* 🔴 ДОДАНО: КЛАС ДЛЯ ЗМЕНШЕНИХ КНОПОК (ГМ ТА ТЕРМІНАЛИ) 🔴 */
+/* КОМПАКТНИЙ РОЗМІР (ГМ і Термінали, для 2 в ряд) */
 .cyber-btn.btn-small { 
-    padding: 7px 10px !important; 
-    font-size: 10px !important; 
-    border-radius: 4px !important; 
-    margin-bottom: 4px !important; 
+    padding: 12px 10px !important; 
+    font-size: 11px !important; 
+    border-radius: 8px !important; 
+    margin-bottom: 5px !important; 
 }
 
-/* --- ТЕРМІНАЛИ ТА ОКО ЮЗЕРА --- */
 #dynamic-terminal-page, #user-eye-studio {
     background-color: #050505; z-index: 500; display: flex; flex-direction: column; overflow: hidden;
 }
@@ -85,14 +82,12 @@ body {
 
 .terminal-burger { display: flex; flex-direction: column; justify-content: center; width: 24px; height: 24px; cursor: pointer; z-index: 10; }
 .terminal-burger span { display: block; width: 100%; height: 2px; background: #bc13fe; margin: 3px 0; box-shadow: 0 0 10px #bc13fe; }
-
 .terminal-title { display: none; }
 
 .terminal-right-controls { display: flex; align-items: center; gap: 15px; height: 100%; z-index: 10; }
 .admin-dots { cursor: pointer; color: #bc13fe; font-size: 26px; font-weight: bold; text-shadow: 0 0 10px #bc13fe; user-select: none; display: flex; align-items: center; justify-content: center; line-height: 0; height: 24px; padding: 5px; z-index: 9999; }
 .close-cross-btn { color: #ff4d4d; font-size: 22px; font-weight: bold; cursor: pointer; text-shadow: 0 0 10px #ff4d4d; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 5px; z-index: 9999;}
 
-/* --- МЕНЮ НАЛАШТУВАНЬ --- */
 #burger-btn { position: absolute; top: 20px; left: 20px; cursor: pointer; z-index: 50; padding: 5px; display: flex; flex-direction: column; justify-content: center; height: 24px; }
 #burger-btn span { display: block; width: 24px; height: 2px; background: #bc13fe; margin: 3px 0; box-shadow: 0 0 10px #bc13fe; }
 #settings-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; z-index: 50; padding: 5px 10px; color: #bc13fe; font-size: 26px; font-weight: bold; text-shadow: 0 0 10px #bc13fe; user-select: none; display: flex; align-items: center; justify-content: center; height: 24px; line-height: 0; }
@@ -106,7 +101,6 @@ body {
 .settings-item:last-child { border-bottom: none; }
 .settings-item:hover { background: rgba(188, 19, 254, 0.1); }
 
-/* --- БУРГЕР-МЕНЮ --- */
 #side-menu { position: fixed; top: 0; left: 0; width: 170px; height: 100%; background: #0f0f0f; border-right: 1px solid #bc13fe; z-index: 999999; transition: 0.4s ease; transform: translateX(-100%); }
 #side-menu.active { transform: translateX(0); }
 .menu-header { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; color: #bc13fe; font-size: 12px; font-weight: bold; }
@@ -116,7 +110,6 @@ body {
 .divider { height: 1px; background: #222; margin: 15px 0; }
 .hidden { display: none !important; }
 
-/* --- ЧАТ --- */
 #chat-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 200; display: flex; flex-direction: column; }
 .chat-header { position: relative; padding: 15px 20px; background: #0a0a0a; border-bottom: 2px solid #bc13fe; display: flex; justify-content: space-between; align-items: center; z-index: 400; }
 .neon-title { text-shadow: 0 0 10px #bc13fe; font-weight: bold; }
@@ -161,3 +154,37 @@ body {
 .delete-btn.confirm { background: rgba(188, 19, 254, 0.2); border: 1px solid #bc13fe; color: #bc13fe; box-shadow: 0 0 10px rgba(188,19,254,0.4); text-shadow: 0 0 5px #bc13fe; }
 .delete-btn:active { transform: scale(0.95); }
 .notes-list-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+/* --- СТИЛІ ДЛЯ ТЕКСТОВИХ БЛОКІВ (НОВЕ) --- */
+.text-wrapper {
+    z-index: 10;
+    cursor: move;
+    min-width: 100px;
+}
+.custom-text-block {
+    font-size: 12px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    text-shadow: 0 0 5px currentColor;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    border-left: 2px solid currentColor;
+}
+.delete-text-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4d4d;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 0 0 10px #ff4d4d;
+}
