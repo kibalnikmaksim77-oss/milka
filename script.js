@@ -139,6 +139,9 @@ function makeDraggable(wrapper) {
 
     wrapper.addEventListener('touchend', function(e) {
         if (!isEditMode || access !== 'admin_king') return;
+        
+        if(e.target.classList.contains('delete-text-btn') || e.target.classList.contains('edit-text-btn')) return;
+
         this.style.zIndex = '1';
         this.style.boxShadow = '0 0 5px rgba(188, 19, 254, 0.2)';
         this.style.opacity = '1';
@@ -799,15 +802,25 @@ function renderTextBlockDOM(id, html, loc, left, top, size = 12) {
     const delBtn = document.createElement('div');
     delBtn.className = 'action-text-btn delete-text-btn';
     delBtn.innerHTML = '❌';
-    delBtn.onclick = () => { 
+    
+    const handleDel = (e) => { 
+        e.preventDefault(); e.stopPropagation(); 
         wrapper.remove(); 
         if(isEditMode) saveLayout('auto'); 
     };
+    delBtn.addEventListener('touchstart', handleDel, {passive: false});
+    delBtn.addEventListener('click', handleDel);
 
     const editBtn = document.createElement('div');
     editBtn.className = 'action-text-btn edit-text-btn';
     editBtn.innerHTML = '✏️';
-    editBtn.onclick = () => openTextEditorFor(id);
+    
+    const handleEdit = (e) => { 
+        e.preventDefault(); e.stopPropagation(); 
+        openTextEditorFor(id); 
+    };
+    editBtn.addEventListener('touchstart', handleEdit, {passive: false});
+    editBtn.addEventListener('click', handleEdit);
 
     wrapper.appendChild(content);
     wrapper.appendChild(delBtn);
