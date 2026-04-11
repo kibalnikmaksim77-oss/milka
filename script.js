@@ -216,8 +216,8 @@ function renderTerminal() {
     terminal.id = 'dynamic-terminal-page';
     terminal.className = 'neon-border';
     
-    // Ефект терміналу точно як на скріншоті
-    terminal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    // Глибоке затемнення терміналу (80%)
+    terminal.style.backgroundColor = 'rgba(10, 10, 10, 0.8)';
     terminal.style.backdropFilter = 'blur(10px)';
     terminal.style.webkitBackdropFilter = 'blur(10px)';
     
@@ -260,7 +260,8 @@ function renderTerminal() {
             const b = document.createElement('button');
             b.className = 'cyber-btn btn-small' + (btn.role === 'owner' ? ' secret-btn' : '');
             
-            b.style.background = 'rgba(21, 21, 21, 0.5)';
+            // Темніша прозорість кнопки (70% чорний)
+            b.style.background = 'rgba(0, 0, 0, 0.7)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
             b.style.boxShadow = '0 0 10px rgba(188, 19, 254, 0.4)';
@@ -293,8 +294,8 @@ function openUserEyeStudio() {
     modal.id = 'user-eye-studio';
     modal.className = 'neon-border'; 
     
-    // Ефект терміналу точно як на скріншоті
-    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    // Глибоке затемнення (80%)
+    modal.style.backgroundColor = 'rgba(10, 10, 10, 0.8)';
     modal.style.backdropFilter = 'blur(10px)';
     modal.style.webkitBackdropFilter = 'blur(10px)';
     
@@ -343,7 +344,8 @@ function openUserEyeStudio() {
                 const b = document.createElement('button');
                 b.className = 'cyber-btn btn-small';
                 
-                b.style.background = 'rgba(21, 21, 21, 0.5)';
+                // Темніша прозорість кнопки (70% чорний)
+                b.style.background = 'rgba(0, 0, 0, 0.7)';
                 b.style.border = '1px solid #bc13fe';
                 b.style.color = '#bc13fe';
                 b.style.boxShadow = '0 0 10px rgba(188, 19, 254, 0.4)';
@@ -537,6 +539,10 @@ function createButtonElement(btn, location, container, index) {
     const b = document.createElement('button');
     const sizeClass = (location !== 'burger') ? 'btn-small' : '';
     b.className = ('cyber-btn ' + sizeClass + (btn.role === 'owner' ? ' secret-btn' : '')).trim();
+    
+    // Темна прозорість для кнопок основного меню
+    b.style.background = 'rgba(0, 0, 0, 0.7)';
+    
     b.innerHTML = btn.text;
     b.onclick = () => openTerminalPage(btn.text);
     
