@@ -12,9 +12,9 @@ const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 const encodedData = urlParams.get('cd'); 
-const appRoute = urlParams.get('route'); // ДОДАНО: маршрутизатор
+const appRoute = urlParams.get('route'); 
 
-let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {}, pages_texts: {} };
+let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {}, pages_texts: {}, translations: {} };
 let isEditMode = false;
 let navStack = []; 
 let editingTextId = null;
@@ -36,11 +36,16 @@ if (encodedData) {
         if (parsed.pages_bg) cyberPages.pages_bg = parsed.pages_bg;
         if (parsed.pages_coords) cyberPages.pages_coords = parsed.pages_coords;
         if (parsed.pages_texts) cyberPages.pages_texts = parsed.pages_texts; 
+        if (parsed.translations) cyberPages.translations = parsed.translations; // 🌍 Словник перекладів
     } catch (e) { 
         console.error("Помилка декодування бази", e);
         alert("⚠️ ПОМИЛКА: Дані дизайну не завантажено. Не зберігайте позиції, щоб не стерти базу!");
     }
 }
+
+// 🔥 ФУНКЦІЯ ПЕРЕКЛАДУ: бере оригінал, віддає переклад (якщо є) 🔥
+const cyberTrans = cyberPages.translations || {};
+function tr(text) { return cyberTrans[text] || text; }
 
 const initGlobalBg = cyberPages.pages_bg && cyberPages.pages_bg['global'];
 if (initGlobalBg) { document.body.style.backgroundImage = `url('${initGlobalBg}')`; } 
@@ -53,7 +58,6 @@ if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     if (settingsBtn) settingsBtn.classList.remove('hidden');
 }
 
-// ДОДАНО: Меню мов, яке формується ТІЛЬКИ з того, що лежить у папці 🌏
 function openLanguageMenu() {
     navStack.push("Мова");
     document.getElementById('app-container').classList.add('hidden');
@@ -81,7 +85,6 @@ function openLanguageMenu() {
     document.body.appendChild(terminal);
     
     const grid = document.getElementById('languages-grid');
-    
     const langButtons = cyberPages.pages && cyberPages.pages['🌏'] ? cyberPages.pages['🌏'].buttons : [];
     
     if (langButtons.length > 0) {
@@ -123,6 +126,12 @@ function goBack() {
 function openTerminalPage(pageTitle) {
     if (isEditMode) return; 
     if(pageTitle.includes('Око Юзера') || pageTitle.includes('Milka Bot') || pageTitle === '🏠') return;
+    
+    if (pageTitle === '🌏') {
+        openLanguageMenu();
+        return;
+    }
+
     navStack.push(pageTitle); 
     renderTerminal();
 }
@@ -190,9 +199,7 @@ function makeDraggable(wrapper) {
 
     wrapper.addEventListener('touchend', function(e) {
         if (!isEditMode || access !== 'admin_king') return;
-        
         if(e.target.classList.contains('delete-text-btn') || e.target.classList.contains('edit-text-btn')) return;
-
         this.style.zIndex = '1';
         this.style.boxShadow = 'none'; 
         this.style.opacity = '1';
@@ -229,7 +236,8 @@ function saveLayout(type) {
         if (w.dataset.type === 'text') {
             textBlocks.push({
                 id: w.dataset.id,
-                html: w.querySelector('.custom-text-block').innerHTML,
+                // БЕРЕМО ОРИГІНАЛ, щоб зберегти базу цілою!
+                html: w.dataset.originalHtml || w.querySelector('.custom-text-block').innerHTML,
                 left: w.style.left,
                 top: w.style.top,
                 size: w.dataset.size || 12 
@@ -309,7 +317,6 @@ function renderTerminal() {
             
             const b = document.createElement('button');
             b.className = 'cyber-btn btn-small' + (btn.role === 'owner' ? ' secret-btn' : '');
-            
             b.style.background = 'rgba(0, 0, 0, 0.3)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
@@ -317,8 +324,8 @@ function renderTerminal() {
             b.style.backdropFilter = 'blur(4px)';
             b.style.webkitBackdropFilter = 'blur(4px)';
             
-            b.innerHTML = btn.text; 
-            b.onclick = () => openTerminalPage(btn.text);
+            b.innerHTML = tr(btn.text); // ВІЗУАЛЬНИЙ ПЕРЕКЛАД
+            b.onclick = () => openTerminalPage(btn.text); // Сигнал йде оригіналом
             
             wrapper.appendChild(b);
             makeDraggable(wrapper);
@@ -344,7 +351,6 @@ function openUserEyeStudio() {
     modal = document.createElement('div');
     modal.id = 'user-eye-studio';
     modal.className = 'neon-border'; 
-    
     modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
     modal.style.backdropFilter = 'blur(10px)';
     modal.style.webkitBackdropFilter = 'blur(10px)';
@@ -393,7 +399,6 @@ function openUserEyeStudio() {
                 
                 const b = document.createElement('button');
                 b.className = 'cyber-btn btn-small';
-                
                 b.style.background = 'rgba(0, 0, 0, 0.3)';
                 b.style.border = '1px solid #bc13fe';
                 b.style.color = '#bc13fe';
@@ -401,7 +406,7 @@ function openUserEyeStudio() {
                 b.style.backdropFilter = 'blur(4px)';
                 b.style.webkitBackdropFilter = 'blur(4px)';
                 
-                b.innerHTML = btn.text;
+                b.innerHTML = tr(btn.text); // ВІЗУАЛЬНИЙ ПЕРЕКЛАД
                 b.onclick = () => openTerminalPage(btn.text);
                 
                 wrapper.appendChild(b);
@@ -445,7 +450,7 @@ function toggleContextMenu(event, type, loc) {
         if (type === 'user_eye') {
             const editBtn = document.createElement('button');
             editBtn.className = 'settings-item';
-            editBtn.innerHTML = '🛠 Віль Переміщення';
+            editBtn.innerHTML = '🛠 Вільне Переміщення';
             editBtn.onclick = () => toggleEditMode(type);
             menu.appendChild(editBtn);
         } else {
@@ -598,7 +603,7 @@ function createButtonElement(btn, location, container, index) {
     b.style.backdropFilter = 'blur(4px)';
     b.style.webkitBackdropFilter = 'blur(4px)';
     
-    b.innerHTML = btn.text;
+    b.innerHTML = tr(btn.text); // ВІЗУАЛЬНИЙ ПЕРЕКЛАД
     b.onclick = () => openTerminalPage(btn.text);
     
     wrapper.appendChild(b);
@@ -775,7 +780,6 @@ function sendMessage() {
     }, 600);
 }
 
-// ДОДАНО МАРШРУТ ПРИ ЗАПУСКУ
 window.onload = () => { 
     renderCyberButtons(); 
     if (appRoute === 'lang') {
@@ -802,10 +806,10 @@ function openTextEditorFor(id) {
     if (!wrapper) return;
     
     editingTextId = id; 
-    const content = wrapper.querySelector('.custom-text-block');
     const input = document.getElementById('custom-text-input');
+    // Відкриваємо ОРИГІНАЛ для редагування
+    input.innerHTML = wrapper.dataset.originalHtml || wrapper.querySelector('.custom-text-block').innerHTML;
     
-    input.innerHTML = content.innerHTML;
     const currentSize = wrapper.dataset.size || 12;
     input.style.fontSize = currentSize + 'px';
     document.getElementById('text-size-slider').value = currentSize;
@@ -831,7 +835,8 @@ function saveNewTextBlock() {
         const wrapper = document.querySelector(`.text-wrapper[data-id="${editingTextId}"]`);
         if (wrapper) {
             const content = wrapper.querySelector('.custom-text-block');
-            content.innerHTML = html;
+            wrapper.dataset.originalHtml = html; // Зберігаємо новий оригінал
+            content.innerHTML = tr(html); // Показуємо переклад
             content.style.fontSize = size + 'px';
             wrapper.dataset.size = size;
         }
@@ -859,13 +864,14 @@ function renderTextBlockDOM(id, html, loc, left, top, size = 12) {
     wrapper.dataset.loc = loc;
     wrapper.dataset.type = 'text'; 
     wrapper.dataset.size = size; 
+    wrapper.dataset.originalHtml = html; // Зберігаємо оригінал
     wrapper.style.position = 'absolute';
     wrapper.style.left = left;
     wrapper.style.top = top;
 
     const content = document.createElement('div');
     content.className = 'custom-text-block';
-    content.innerHTML = html;
+    content.innerHTML = tr(html); // ВІЗУАЛЬНИЙ ПЕРЕКЛАД
     content.style.fontSize = size + 'px'; 
 
     const delBtn = document.createElement('div');
