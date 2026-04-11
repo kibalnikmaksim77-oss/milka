@@ -216,9 +216,10 @@ function renderTerminal() {
     terminal.id = 'dynamic-terminal-page';
     terminal.className = 'neon-border';
     
-    terminal.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
-    terminal.style.backdropFilter = 'blur(10px)';
-    terminal.style.webkitBackdropFilter = 'blur(10px)';
+    // Ефект матового скла для терміналу
+    terminal.style.backgroundColor = 'rgba(10, 10, 10, 0.3)';
+    terminal.style.backdropFilter = 'blur(15px)';
+    terminal.style.webkitBackdropFilter = 'blur(15px)';
     
     document.body.appendChild(terminal);
     
@@ -292,9 +293,10 @@ function openUserEyeStudio() {
     modal.id = 'user-eye-studio';
     modal.className = 'neon-border'; 
     
-    modal.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
-    modal.style.backdropFilter = 'blur(10px)';
-    modal.style.webkitBackdropFilter = 'blur(10px)';
+    // Ефект матового скла для Ока Юзера
+    modal.style.backgroundColor = 'rgba(10, 10, 10, 0.3)';
+    modal.style.backdropFilter = 'blur(15px)';
+    modal.style.webkitBackdropFilter = 'blur(15px)';
     
     let dotsHtml = '';
     if (access === 'admin_king') {
