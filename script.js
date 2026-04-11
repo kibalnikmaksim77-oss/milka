@@ -12,6 +12,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 const encodedData = urlParams.get('cd'); 
+const appRoute = urlParams.get('route'); // ДОДАНО: маршрутизатор
 
 let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {}, pages_texts: {} };
 let isEditMode = false;
@@ -50,6 +51,56 @@ if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     if (adminSection) adminSection.classList.remove('hidden');
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) settingsBtn.classList.remove('hidden');
+}
+
+// ДОДАНО: Меню мов, яке формується ТІЛЬКИ з того, що лежить у папці 🌏
+function openLanguageMenu() {
+    navStack.push("Мова");
+    document.getElementById('app-container').classList.add('hidden');
+    
+    let terminal = document.getElementById('dynamic-terminal-page');
+    if (terminal) terminal.remove(); 
+    
+    terminal = document.createElement('div');
+    terminal.id = 'dynamic-terminal-page';
+    terminal.className = 'neon-border';
+    
+    terminal.innerHTML = `
+        <div class="terminal-header">
+            <div class="terminal-burger"></div>
+            <div class="terminal-right-controls"><div class="close-cross-btn" onclick="goHome()">❌</div></div>
+        </div>
+        <div class="terminal-content mask-scroll" id="terminal-buttons-container">
+            <div style="text-align:center; padding: 20px; border: 1px solid #bc13fe; border-radius: 10px; background: rgba(0,0,0,0.5); margin-bottom: 20px; box-shadow: inset 0 0 15px rgba(0,0,0,0.9);">
+                <p style="font-size: 11px; color: #fff; margin: 0; font-family: monospace;">ОБЕРІТЬ МОВУ / CHOOSE LANGUAGE:</p>
+                <p style="font-size: 10px; color: #bc13fe; margin: 5px 0 0 0; text-shadow: 0 0 5px #bc13fe;">MILKA BOT | APP</p>
+            </div>
+            <div id="languages-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+        </div>
+    `;
+    document.body.appendChild(terminal);
+    
+    const grid = document.getElementById('languages-grid');
+    
+    const langButtons = cyberPages.pages && cyberPages.pages['🌏'] ? cyberPages.pages['🌏'].buttons : [];
+    
+    if (langButtons.length > 0) {
+        langButtons.forEach(btn => {
+            const b = document.createElement('button');
+            b.className = 'cyber-btn'; 
+            b.style.padding = "15px";
+            b.style.fontSize = "24px"; 
+            b.innerHTML = btn.text; 
+            b.onclick = () => {
+                tg.HapticFeedback.impactOccurred('heavy');
+                tg.sendData(JSON.stringify({ action: "set_lang", flag: btn.text }));
+                tg.close();
+            };
+            grid.appendChild(b);
+        });
+    } else {
+        grid.innerHTML = '<p style="color:#888; text-align:center; grid-column: span 2; font-size: 12px;">Папка 🌏 зараз порожня.<br>Адміністратор ще не додав жодної мови.</p>';
+    }
 }
 
 function goHome() {
@@ -259,7 +310,6 @@ function renderTerminal() {
             const b = document.createElement('button');
             b.className = 'cyber-btn btn-small' + (btn.role === 'owner' ? ' secret-btn' : '');
             
-            // ВНУТРІШНЯ ТІНЬ ЯК ТОНІРОВКА
             b.style.background = 'rgba(0, 0, 0, 0.3)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
@@ -344,7 +394,6 @@ function openUserEyeStudio() {
                 const b = document.createElement('button');
                 b.className = 'cyber-btn btn-small';
                 
-                // ВНУТРІШНЯ ТІНЬ ЯК ТОНІРОВКА
                 b.style.background = 'rgba(0, 0, 0, 0.3)';
                 b.style.border = '1px solid #bc13fe';
                 b.style.color = '#bc13fe';
@@ -396,7 +445,7 @@ function toggleContextMenu(event, type, loc) {
         if (type === 'user_eye') {
             const editBtn = document.createElement('button');
             editBtn.className = 'settings-item';
-            editBtn.innerHTML = '🛠 Вільне Переміщення';
+            editBtn.innerHTML = '🛠 Віль Переміщення';
             editBtn.onclick = () => toggleEditMode(type);
             menu.appendChild(editBtn);
         } else {
@@ -542,7 +591,6 @@ function createButtonElement(btn, location, container, index) {
     const sizeClass = (location !== 'burger') ? 'btn-small' : '';
     b.className = ('cyber-btn ' + sizeClass + (btn.role === 'owner' ? ' secret-btn' : '')).trim();
     
-    // ВНУТРІШНЯ ТІНЬ ЯК ТОНІРОВКА (ДЛЯ ГМ)
     b.style.background = 'rgba(0, 0, 0, 0.3)';
     b.style.border = '1px solid #bc13fe';
     b.style.color = '#bc13fe';
@@ -727,7 +775,13 @@ function sendMessage() {
     }, 600);
 }
 
-window.onload = () => { renderCyberButtons(); };
+// ДОДАНО МАРШРУТ ПРИ ЗАПУСКУ
+window.onload = () => { 
+    renderCyberButtons(); 
+    if (appRoute === 'lang') {
+        setTimeout(() => openLanguageMenu(), 100);
+    }
+};
 
 function updateTextSize(size) {
     document.getElementById('text-size-display').innerText = size + 'px';
