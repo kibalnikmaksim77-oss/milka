@@ -90,11 +90,6 @@ function applyAbsolutePosition(wrapper, index, loc) {
     
     if (cyberPages.pages_coords && cyberPages.pages_coords[loc] && cyberPages.pages_coords[loc][wrapper.dataset.id]) {
         foundCoord = cyberPages.pages_coords[loc][wrapper.dataset.id];
-    } else {
-        let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
-        if (localLayout[loc] && localLayout[loc][wrapper.dataset.id]) {
-            foundCoord = localLayout[loc][wrapper.dataset.id];
-        }
     }
 
     if (foundCoord) {
@@ -190,10 +185,6 @@ function saveLayout(type) {
         }
     });
 
-    let localLayout = JSON.parse(localStorage.getItem('milka_coords_' + userId)) || {};
-    localLayout[loc] = coordsData;
-    localStorage.setItem('milka_coords_' + userId, JSON.stringify(localLayout));
-    
     if (!cyberPages.pages_coords) cyberPages.pages_coords = {};
     cyberPages.pages_coords[loc] = coordsData;
     
@@ -435,6 +426,18 @@ function toggleContextMenu(event, type, loc) {
                     document.getElementById('text-editor-modal').classList.remove('hidden');
                 };
                 menu.appendChild(addTextBtn);
+                
+                const clearTextBtn = document.createElement('button');
+                clearTextBtn.className = 'settings-item';
+                clearTextBtn.innerHTML = '🧹 Очистити тексти';
+                clearTextBtn.onclick = () => {
+                    if(confirm("Очистити цю сторінку від усіх текстів?")) {
+                        hideContextMenu();
+                        document.querySelectorAll(`.text-wrapper[data-loc="${loc}"]`).forEach(el => el.remove());
+                        saveLayout('auto');
+                    }
+                };
+                menu.appendChild(clearTextBtn);
             }
         }
     }
@@ -742,7 +745,13 @@ function openTextEditorFor(id) {
 function saveNewTextBlock() {
     const input = document.getElementById('custom-text-input');
     const html = input.innerHTML.trim();
-    if (!html) return;
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    if (!tempDiv.innerText.trim() && !html.includes('<img') && !html.includes('<br>')) {
+        alert("Текст не може бути порожнім!");
+        return;
+    }
     
     const size = document.getElementById('text-size-slider').value; 
     
