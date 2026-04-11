@@ -143,7 +143,7 @@ function makeDraggable(wrapper) {
         if(e.target.classList.contains('delete-text-btn') || e.target.classList.contains('edit-text-btn')) return;
 
         this.style.zIndex = '1';
-        this.style.boxShadow = '0 0 5px rgba(188, 19, 254, 0.2)';
+        this.style.boxShadow = 'none'; // Прибираємо тінь з обгортки, бо вона є на самій кнопці
         this.style.opacity = '1';
         tg.HapticFeedback.impactOccurred('light');
 
@@ -216,8 +216,7 @@ function renderTerminal() {
     terminal.id = 'dynamic-terminal-page';
     terminal.className = 'neon-border';
     
-    // Глибоке затемнення терміналу (80%)
-    terminal.style.backgroundColor = 'rgba(10, 10, 10, 0.8)';
+    terminal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
     terminal.style.backdropFilter = 'blur(10px)';
     terminal.style.webkitBackdropFilter = 'blur(10px)';
     
@@ -260,11 +259,11 @@ function renderTerminal() {
             const b = document.createElement('button');
             b.className = 'cyber-btn btn-small' + (btn.role === 'owner' ? ' secret-btn' : '');
             
-            // Темніша прозорість кнопки (70% чорний)
-            b.style.background = 'rgba(0, 0, 0, 0.7)';
+            // ЄДИНИЙ СТИЛЬ КНОПОК ДЛЯ ТЕРМІНАЛУ
+            b.style.background = 'rgba(15, 15, 15, 0.95)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
-            b.style.boxShadow = '0 0 10px rgba(188, 19, 254, 0.4)';
+            b.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.95)';
             
             b.innerHTML = btn.text; 
             b.onclick = () => openTerminalPage(btn.text);
@@ -294,8 +293,7 @@ function openUserEyeStudio() {
     modal.id = 'user-eye-studio';
     modal.className = 'neon-border'; 
     
-    // Глибоке затемнення (80%)
-    modal.style.backgroundColor = 'rgba(10, 10, 10, 0.8)';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
     modal.style.backdropFilter = 'blur(10px)';
     modal.style.webkitBackdropFilter = 'blur(10px)';
     
@@ -344,11 +342,11 @@ function openUserEyeStudio() {
                 const b = document.createElement('button');
                 b.className = 'cyber-btn btn-small';
                 
-                // Темніша прозорість кнопки (70% чорний)
-                b.style.background = 'rgba(0, 0, 0, 0.7)';
+                // ЄДИНИЙ СТИЛЬ КНОПОК ДЛЯ ОКА ЮЗЕРА
+                b.style.background = 'rgba(15, 15, 15, 0.95)';
                 b.style.border = '1px solid #bc13fe';
                 b.style.color = '#bc13fe';
-                b.style.boxShadow = '0 0 10px rgba(188, 19, 254, 0.4)';
+                b.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.95)';
                 
                 b.innerHTML = btn.text;
                 b.onclick = () => openTerminalPage(btn.text);
@@ -540,8 +538,11 @@ function createButtonElement(btn, location, container, index) {
     const sizeClass = (location !== 'burger') ? 'btn-small' : '';
     b.className = ('cyber-btn ' + sizeClass + (btn.role === 'owner' ? ' secret-btn' : '')).trim();
     
-    // Темна прозорість для кнопок основного меню
-    b.style.background = 'rgba(0, 0, 0, 0.7)';
+    // ЄДИНИЙ СТИЛЬ КНОПОК ДЛЯ ГОЛОВНОГО МЕНЮ
+    b.style.background = 'rgba(15, 15, 15, 0.95)';
+    b.style.border = '1px solid #bc13fe';
+    b.style.color = '#bc13fe';
+    b.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.95)';
     
     b.innerHTML = btn.text;
     b.onclick = () => openTerminalPage(btn.text);
