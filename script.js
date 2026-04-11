@@ -143,7 +143,7 @@ function makeDraggable(wrapper) {
         if(e.target.classList.contains('delete-text-btn') || e.target.classList.contains('edit-text-btn')) return;
 
         this.style.zIndex = '1';
-        this.style.boxShadow = 'none'; // Прибираємо тінь з обгортки, бо вона є на самій кнопці
+        this.style.boxShadow = 'none'; 
         this.style.opacity = '1';
         tg.HapticFeedback.impactOccurred('light');
 
@@ -259,11 +259,13 @@ function renderTerminal() {
             const b = document.createElement('button');
             b.className = 'cyber-btn btn-small' + (btn.role === 'owner' ? ' secret-btn' : '');
             
-            // ЄДИНИЙ СТИЛЬ КНОПОК ДЛЯ ТЕРМІНАЛУ
-            b.style.background = 'rgba(15, 15, 15, 0.95)';
+            // ВНУТРІШНЯ ТІНЬ ЯК ТОНІРОВКА
+            b.style.background = 'rgba(0, 0, 0, 0.3)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
-            b.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.95)';
+            b.style.boxShadow = 'inset 0 0 18px rgba(0, 0, 0, 0.95), 0 4px 10px rgba(0, 0, 0, 0.6)';
+            b.style.backdropFilter = 'blur(4px)';
+            b.style.webkitBackdropFilter = 'blur(4px)';
             
             b.innerHTML = btn.text; 
             b.onclick = () => openTerminalPage(btn.text);
@@ -342,11 +344,13 @@ function openUserEyeStudio() {
                 const b = document.createElement('button');
                 b.className = 'cyber-btn btn-small';
                 
-                // ЄДИНИЙ СТИЛЬ КНОПОК ДЛЯ ОКА ЮЗЕРА
-                b.style.background = 'rgba(15, 15, 15, 0.95)';
+                // ВНУТРІШНЯ ТІНЬ ЯК ТОНІРОВКА
+                b.style.background = 'rgba(0, 0, 0, 0.3)';
                 b.style.border = '1px solid #bc13fe';
                 b.style.color = '#bc13fe';
-                b.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.95)';
+                b.style.boxShadow = 'inset 0 0 18px rgba(0, 0, 0, 0.95), 0 4px 10px rgba(0, 0, 0, 0.6)';
+                b.style.backdropFilter = 'blur(4px)';
+                b.style.webkitBackdropFilter = 'blur(4px)';
                 
                 b.innerHTML = btn.text;
                 b.onclick = () => openTerminalPage(btn.text);
@@ -538,11 +542,13 @@ function createButtonElement(btn, location, container, index) {
     const sizeClass = (location !== 'burger') ? 'btn-small' : '';
     b.className = ('cyber-btn ' + sizeClass + (btn.role === 'owner' ? ' secret-btn' : '')).trim();
     
-    // ЄДИНИЙ СТИЛЬ КНОПОК ДЛЯ ГОЛОВНОГО МЕНЮ
-    b.style.background = 'rgba(15, 15, 15, 0.95)';
+    // ВНУТРІШНЯ ТІНЬ ЯК ТОНІРОВКА (ДЛЯ ГМ)
+    b.style.background = 'rgba(0, 0, 0, 0.3)';
     b.style.border = '1px solid #bc13fe';
     b.style.color = '#bc13fe';
-    b.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.95)';
+    b.style.boxShadow = 'inset 0 0 18px rgba(0, 0, 0, 0.95), 0 4px 10px rgba(0, 0, 0, 0.6)';
+    b.style.backdropFilter = 'blur(4px)';
+    b.style.webkitBackdropFilter = 'blur(4px)';
     
     b.innerHTML = btn.text;
     b.onclick = () => openTerminalPage(btn.text);
