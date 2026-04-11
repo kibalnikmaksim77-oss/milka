@@ -166,6 +166,14 @@ body {
     min-width: 50px;
     max-width: 85vw;
     width: fit-content;
+    /* ДОДАНО: неоновий ефект навколо коробки */
+    border: 1px solid rgba(188, 19, 254, 0.5);
+    border-radius: 8px;
+    background: rgba(21, 21, 21, 0.5);
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.4);
+    animation: neonPulse 2s infinite ease-in-out;
+    padding: 2px;
+    transition: 0.3s;
 }
 
 .custom-text-block {
@@ -173,13 +181,16 @@ body {
     white-space: pre-wrap;
     word-break: break-word;
     overflow-wrap: break-word;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.8);
+    /* Чорна тінь для читабельності та неонове світіння */
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.9), 
+        -1px -1px 2px rgba(0, 0, 0, 0.8),
+        0 0 5px rgba(188, 19, 254, 0.8);
     padding: 8px;
     background: transparent;
     border: none;
     outline: none;
     box-sizing: border-box;
-    transition: 0.3s;
     max-height: 55vh; 
     overflow-y: auto; 
     scrollbar-width: none;
@@ -187,11 +198,17 @@ body {
 
 .custom-text-block::-webkit-scrollbar { display: none; }
 
-.text-wrapper.editing-active { cursor: move; }
+.text-wrapper.editing-active {
+    cursor: move;
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.8);
+}
+
 .text-wrapper.editing-active .custom-text-block {
-    background: rgba(0, 0, 0, 0.7);
-    border-left: 2px solid currentColor;
+    border-left: 2px solid rgba(255, 255, 255, 0.7);
     box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    color: #fff !important;
 }
 
 .action-text-btn {
