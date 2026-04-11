@@ -43,9 +43,13 @@ if (encodedData) {
     }
 }
 
-// 🔥 ФУНКЦІЯ ПЕРЕКЛАДУ: бере оригінал, віддає переклад (якщо є) 🔥
-const cyberTrans = cyberPages.translations || {};
-function tr(text) { return cyberTrans[text] || text; }
+// 🔥 ВІДРЕМОНТОВАНА ФУНКЦІЯ ПЕРЕКЛАДУ 🔥
+function tr(text) { 
+    if (cyberPages.translations && cyberPages.translations[text]) {
+        return cyberPages.translations[text];
+    }
+    return text; // Якщо перекладу немає — віддає оригінал
+}
 
 const initGlobalBg = cyberPages.pages_bg && cyberPages.pages_bg['global'];
 if (initGlobalBg) { document.body.style.backgroundImage = `url('${initGlobalBg}')`; } 
@@ -79,7 +83,7 @@ function openLanguageMenu() {
                 <p style="font-size: 11px; color: #fff; margin: 0; font-family: monospace;">ОБЕРІТЬ МОВУ / CHOOSE LANGUAGE:</p>
                 <p style="font-size: 10px; color: #bc13fe; margin: 5px 0 0 0; text-shadow: 0 0 5px #bc13fe;">MILKA BOT | APP</p>
             </div>
-            <div id="languages-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+            <div id="languages-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"></div>
         </div>
     `;
     document.body.appendChild(terminal);
@@ -91,8 +95,12 @@ function openLanguageMenu() {
         langButtons.forEach(btn => {
             const b = document.createElement('button');
             b.className = 'cyber-btn'; 
-            b.style.padding = "15px";
-            b.style.fontSize = "24px"; 
+            
+            // ⚙️ Зменшені компактні відступи та розміри кнопок
+            b.style.padding = "8px";
+            b.style.fontSize = "18px"; 
+            b.style.height = "45px"; 
+            
             b.innerHTML = btn.text; 
             b.onclick = () => {
                 tg.HapticFeedback.impactOccurred('heavy');
@@ -324,7 +332,8 @@ function renderTerminal() {
             b.style.backdropFilter = 'blur(4px)';
             b.style.webkitBackdropFilter = 'blur(4px)';
             
-            b.innerHTML = tr(btn.text); // ВІЗУАЛЬНИЙ ПЕРЕКЛАД
+            // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
+            b.innerHTML = tr(btn.text); 
             b.onclick = () => openTerminalPage(btn.text); // Сигнал йде оригіналом
             
             wrapper.appendChild(b);
@@ -406,7 +415,8 @@ function openUserEyeStudio() {
                 b.style.backdropFilter = 'blur(4px)';
                 b.style.webkitBackdropFilter = 'blur(4px)';
                 
-                b.innerHTML = tr(btn.text); // ВІЗУАЛЬНИЙ ПЕРЕКЛАД
+                // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
+                b.innerHTML = tr(btn.text); 
                 b.onclick = () => openTerminalPage(btn.text);
                 
                 wrapper.appendChild(b);
@@ -603,7 +613,8 @@ function createButtonElement(btn, location, container, index) {
     b.style.backdropFilter = 'blur(4px)';
     b.style.webkitBackdropFilter = 'blur(4px)';
     
-    b.innerHTML = tr(btn.text); // ВІЗУАЛЬНИЙ ПЕРЕКЛАД
+    // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
+    b.innerHTML = tr(btn.text); 
     b.onclick = () => openTerminalPage(btn.text);
     
     wrapper.appendChild(b);
@@ -836,7 +847,9 @@ function saveNewTextBlock() {
         if (wrapper) {
             const content = wrapper.querySelector('.custom-text-block');
             wrapper.dataset.originalHtml = html; // Зберігаємо новий оригінал
-            content.innerHTML = tr(html); // Показуємо переклад
+            
+            // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
+            content.innerHTML = tr(html); 
             content.style.fontSize = size + 'px';
             wrapper.dataset.size = size;
         }
@@ -871,7 +884,9 @@ function renderTextBlockDOM(id, html, loc, left, top, size = 12) {
 
     const content = document.createElement('div');
     content.className = 'custom-text-block';
-    content.innerHTML = tr(html); // ВІЗУАЛЬНИЙ ПЕРЕКЛАД
+    
+    // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
+    content.innerHTML = tr(html); 
     content.style.fontSize = size + 'px'; 
 
     const delBtn = document.createElement('div');
