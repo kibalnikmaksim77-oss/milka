@@ -4,19 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Milka Mini App</title>
-    <link rel="stylesheet" href="style.css?v=20">
+    <link rel="stylesheet" href="style.css?v=17">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     
     <div id="app-container" class="neon-border">
         <div id="main-content-view" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative;">
+            
             <div id="burger-btn" onclick="toggleMenu()">
-                <span></span><span></span><span></span>
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
+
             <div id="settings-btn" class="hidden" onclick="toggleContextMenu(event, 'main', 'main')">⋮</div>
+
             <input type="file" id="bg-upload" accept="image/*" class="hidden" onchange="changeBackground(event)">
-            <div id="user-commands-safe-zone" class="mask-scroll"></div>
+
+            <div id="user-commands-safe-zone"></div>
+            
         </div>
     </div>
 
@@ -29,21 +36,28 @@
         </div>
         <div class="menu-content">
             <div id="user-view"></div>
+            
             <div id="admin-view" class="hidden">
                 <div class="divider"></div>
                 <button class="cyber-btn secret-btn" onclick="openChat()">⚡ Milka Bot</button>
+                
                 <div id="owner-view" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
             </div>
         </div>
     </div>
 
     <div id="chat-modal" class="hidden neon-border">
+        
         <div class="chat-header">
-            <span class="neon-title"><span class="neon-bot">🤖</span> Milka System</span>
+            <span class="neon-title">
+                <span class="neon-bot">🤖</span> Milka System
+            </span>
+            
             <div class="header-controls">
                 <div id="format-trigger" class="hidden" onclick="toggleFormatMenu()">⋮</div>
                 <button onclick="closeChat()" class="close-btn">❌</button>
             </div>
+            
             <div id="format-menu" class="hidden">
                 <div class="format-item" onmousedown="applyFormat('codeBlock', event)">Кодовий <code>&lt;/&gt;</code></div>
                 <div class="format-item" onmousedown="applyFormat('bold', event)"><b>Жирний</b></div>
@@ -56,7 +70,7 @@
             </div>
         </div>
         
-        <div id="chat-messages" class="mask-scroll"></div>
+        <div id="chat-messages"></div>
         <div id="media-preview-container" class="hidden"></div>
         
         <div class="chat-input-area">
@@ -81,10 +95,10 @@
 
     <div id="save-layout-modal" class="hidden">
         <div class="delete-modal-box neon-border">
-            <p>🛠 Зберегти позиції та тексти?</p>
+            <p>🛠 Зберегти новий порядок кнопок?</p>
             <div class="delete-modal-buttons">
-                <button id="btn-cancel-layout" class="delete-btn cancel" onclick="cancelDragAndDrop()">Скасувати</button>
-                <button id="btn-confirm-layout" class="delete-btn confirm" onclick="saveLayout('auto')">Зберегти</button>
+                <button id="btn-cancel-layout" class="delete-btn cancel">Скасувати</button>
+                <button id="btn-confirm-layout" class="delete-btn confirm">Зберегти</button>
             </div>
         </div>
     </div>
@@ -114,8 +128,8 @@
             <div id="custom-text-input" contenteditable="true" class="editor" style="min-height: 80px; max-height: 150px; background: #000; border: 1px solid #bc13fe; margin-bottom: 15px; border-radius: 8px; text-align: left; font-family: monospace; color: #00ffcc; text-shadow: 0 0 5px currentColor; padding: 10px; overflow-y: auto; font-size: 12px;" data-placeholder="Твій кібер-лог..."></div>
             
             <div class="delete-modal-buttons" style="display: flex; gap: 10px;">
-                <button class="delete-btn cancel" style="flex: 1;" onclick="closeTextEditor()">Скасувати</button>
-                <button class="delete-btn confirm" style="flex: 1;" onclick="saveNewTextBlock()">Зберегти</button>
+                <button class="delete-btn cancel" style="flex: 1;" onclick="document.getElementById('text-editor-modal').classList.add('hidden')">Скасувати</button>
+                <button class="delete-btn confirm" style="flex: 1;" onclick="saveNewTextBlock()">На екран</button>
             </div>
         </div>
     </div>
