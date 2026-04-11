@@ -13,7 +13,7 @@ const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 const encodedData = urlParams.get('cd'); 
 
-let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {} };
+let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {}, pages_texts: {} };
 let isEditMode = false;
 let navStack = []; 
 let editingTextId = null;
@@ -34,6 +34,7 @@ if (encodedData) {
         if (parsed.pages) cyberPages.pages = parsed.pages;
         if (parsed.pages_bg) cyberPages.pages_bg = parsed.pages_bg;
         if (parsed.pages_coords) cyberPages.pages_coords = parsed.pages_coords;
+        if (parsed.pages_texts) cyberPages.pages_texts = parsed.pages_texts; 
     } catch (e) { 
         console.error("Помилка декодування бази", e);
         alert("⚠️ ПОМИЛКА: Дані дизайну не завантажено. Не зберігайте позиції, щоб не стерти базу!");
@@ -43,10 +44,6 @@ if (encodedData) {
 const initGlobalBg = cyberPages.pages_bg && cyberPages.pages_bg['global'];
 if (initGlobalBg) { document.body.style.backgroundImage = `url('${initGlobalBg}')`; } 
 else if (globalBg) { document.body.style.backgroundImage = `url('${globalBg}')`; } 
-else {
-    const savedBg = localStorage.getItem(`milka_bg_${userId}`);
-    if (savedBg) document.body.style.backgroundImage = `url('${savedBg}')`; 
-}
 
 if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
     const adminSection = document.getElementById('admin-view');
@@ -197,14 +194,16 @@ function saveLayout(type) {
     localLayout[loc] = coordsData;
     localStorage.setItem('milka_coords_' + userId, JSON.stringify(localLayout));
     
-    let localTexts = JSON.parse(localStorage.getItem('milka_custom_texts_' + userId)) || {};
-    localTexts[loc] = textBlocks;
-    localStorage.setItem('milka_custom_texts_' + userId, JSON.stringify(localTexts));
+    if (!cyberPages.pages_coords) cyberPages.pages_coords = {};
+    cyberPages.pages_coords[loc] = coordsData;
+    
+    if (!cyberPages.pages_texts) cyberPages.pages_texts = {};
+    cyberPages.pages_texts[loc] = textBlocks; 
 
     tg.HapticFeedback.impactOccurred('heavy');
-    tg.sendData(JSON.stringify({ action: "reorder", loc: loc, coords: coordsData, new_order: newOrderIds }));
+    tg.sendData(JSON.stringify({ action: "reorder", loc: loc, coords: coordsData, new_order: newOrderIds, texts: textBlocks }));
     
-    if (type !== 'auto') alert("✅ Позиції та тексти збережено!");
+    if (type !== 'auto') alert("✅ Позиції та тексти збережено у Глобальну Базу Даних!");
 }
 
 function renderTerminal() {
@@ -282,9 +281,9 @@ function renderTerminal() {
         });
     }
 
-    let localTexts = JSON.parse(localStorage.getItem('milka_custom_texts_' + userId)) || {};
-    if (localTexts[currentPage]) {
-        localTexts[currentPage].forEach(tb => {
+    let pythonTexts = cyberPages.pages_texts && cyberPages.pages_texts[currentPage];
+    if (pythonTexts && pythonTexts.length > 0) {
+        pythonTexts.forEach(tb => {
             renderTextBlockDOM(tb.id, tb.html, currentPage, tb.left, tb.top, tb.size);
         });
     }
@@ -708,10 +707,6 @@ function sendMessage() {
 }
 
 window.onload = () => { renderCyberButtons(); };
-
-// =========================================================
-// --- ЛОГІКА ТЕКСТОВИХ БЛОКІВ (ТЕРМІНАЛИ) ---
-// =========================================================
 
 function updateTextSize(size) {
     document.getElementById('text-size-display').innerText = size + 'px';
