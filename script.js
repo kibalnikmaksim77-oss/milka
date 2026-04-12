@@ -5,7 +5,6 @@ const userId = tg.initDataUnsafe?.user?.id || 'guest';
 const tgName = tg.initDataUnsafe?.user?.first_name || 'Користувач';
 
 const CHAT_KEY = `milka_chat_${userId}`;
-const CABINET_KEY = `cabinet_active_${userId}`;
 const NOTES_KEY = `milka_notes_${userId}`;
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -43,16 +42,28 @@ if (encodedData) {
     }
 }
 
-// 🔥 ВІДРЕМОНТОВАНА ФУНКЦІЯ ПЕРЕКЛАДУ (SMART SEARCH) 🔥
+// 🔥 СУПЕР-БРОНЯ ПЕРЕКЛАДУ (Емодзі + Шрифти) 🔥
 function tr(text) { 
     if (!text) return text;
-    // 1. Спроба точного збігу
+    
+    // 1. ЗАХИСТ ВІД ЕМОДЗІ (Якщо немає літер — віддаємо як є)
+    const plainText = text.replace(/<[^>]*>/g, '').trim(); 
+    const hasLetters = /[a-zA-Zа-яА-ЯіїєґІЇЄҐ]/.test(plainText);
+    if (!hasLetters && plainText.length > 0) return text;
+
+    // 2. Точний збіг
     if (cyberPages.translations && cyberPages.translations[text]) {
         return cyberPages.translations[text];
     }
-    // 2. Розумний пошук: ігноруємо "бруд" від Google Перекладача (пробіли, переноси)
+    
+    // 3. Броньований пошук HTML (ігнорує різницю лапок, пробілів та форматування)
     if (cyberPages.translations) {
-        const normalize = (str) => str.replace(/\s+/g, '').toLowerCase();
+        const normalize = (str) => {
+            return str.replace(/\s+/g, '') // видаляємо всі пробіли
+                      .replace(/'/g, '"')  // всі одинарні лапки робимо подвійними
+                      .replace(/;/g, '')   // видаляємо крапки з комою (стилі)
+                      .toLowerCase();
+        };
         const cleanText = normalize(text);
         for (let key in cyberPages.translations) {
             if (normalize(key) === cleanText) {
@@ -60,14 +71,15 @@ function tr(text) {
             }
         }
     }
-    return text; // Якщо перекладу немає — віддає оригінал
+    return text; 
 }
 
 const initGlobalBg = cyberPages.pages_bg && cyberPages.pages_bg['global'];
 if (initGlobalBg) { document.body.style.backgroundImage = `url('${initGlobalBg}')`; } 
 else if (globalBg) { document.body.style.backgroundImage = `url('${globalBg}')`; } 
 
-if (access === 'admin_king' || localStorage.getItem(CABINET_KEY) === 'true') {
+// 🛡 АДМІН-КОНТРОЛЬ ТІЛЬКИ ЧЕРЕЗ ACCESS ВІД PYTHON
+if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
     const settingsBtn = document.getElementById('settings-btn');
@@ -107,8 +119,6 @@ function openLanguageMenu() {
         langButtons.forEach(btn => {
             const b = document.createElement('button');
             b.className = 'cyber-btn'; 
-            
-            // ⚙️ Зменшені компактні відступи та розміри кнопок
             b.style.padding = "8px";
             b.style.fontSize = "18px"; 
             b.style.height = "45px"; 
@@ -256,7 +266,6 @@ function saveLayout(type) {
         if (w.dataset.type === 'text') {
             textBlocks.push({
                 id: w.dataset.id,
-                // БЕРЕМО ОРИГІНАЛ, щоб зберегти базу цілою!
                 html: w.dataset.originalHtml || w.querySelector('.custom-text-block').innerHTML,
                 left: w.style.left,
                 top: w.style.top,
@@ -344,9 +353,8 @@ function renderTerminal() {
             b.style.backdropFilter = 'blur(4px)';
             b.style.webkitBackdropFilter = 'blur(4px)';
             
-            // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
             b.innerHTML = tr(btn.text); 
-            b.onclick = () => openTerminalPage(btn.text); // Сигнал йде оригіналом
+            b.onclick = () => openTerminalPage(btn.text); 
             
             wrapper.appendChild(b);
             makeDraggable(wrapper);
@@ -427,7 +435,6 @@ function openUserEyeStudio() {
                 b.style.backdropFilter = 'blur(4px)';
                 b.style.webkitBackdropFilter = 'blur(4px)';
                 
-                // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
                 b.innerHTML = tr(btn.text); 
                 b.onclick = () => openTerminalPage(btn.text);
                 
@@ -589,13 +596,21 @@ function renderCyberButtons() {
         ownerNav.appendChild(eyeBtn); 
     }
 
+    // 🛡 ЗАХИСНИЙ СПИСОК СИСТЕМНИХ КНОПОК
+    const sysBtns = ["🏠", "👁️ Око Юзера", "⚡ Milka Bot", "🌏"];
+
     if (cyberPages.main && cyberPages.main.buttons) {
         let visibleIndex = 0;
         cyberPages.main.buttons.forEach((btn) => {
             if (access === 'admin_king') {
                 if (btn.role === 'owner') { createButtonElement(btn, 'main', mainGrid, visibleIndex); visibleIndex++; }
             } else {
-                if (btn.role === 'user') { createButtonElement(btn, 'main', mainGrid, visibleIndex); visibleIndex++; }
+                if (btn.role === 'user') { 
+                    // 🛡 БЛОКУЄМО СИСТЕМНІ КНОПКИ ДЛЯ ЮЗЕРА
+                    if (sysBtns.includes(btn.text)) return; 
+                    createButtonElement(btn, 'main', mainGrid, visibleIndex); 
+                    visibleIndex++; 
+                }
             }
         });
     }
@@ -603,7 +618,11 @@ function renderCyberButtons() {
     if (cyberPages.burger && cyberPages.burger.buttons) {
         cyberPages.burger.buttons.forEach((btn) => {
             if(btn.role === 'owner' && ownerNav) createButtonElement(btn, 'burger', ownerNav, 0);
-            if(btn.role === 'user' && userNav) createButtonElement(btn, 'burger', userNav, 0);
+            if(btn.role === 'user' && userNav) {
+                // 🛡 БЛОКУЄМО СИСТЕМНІ КНОПКИ ДЛЯ ЮЗЕРА
+                if (sysBtns.includes(btn.text)) return;
+                createButtonElement(btn, 'burger', userNav, 0);
+            }
         });
     }
 }
@@ -625,7 +644,6 @@ function createButtonElement(btn, location, container, index) {
     b.style.backdropFilter = 'blur(4px)';
     b.style.webkitBackdropFilter = 'blur(4px)';
     
-    // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
     b.innerHTML = tr(btn.text); 
     b.onclick = () => openTerminalPage(btn.text);
     
@@ -797,8 +815,6 @@ function sendMessage() {
         const lowerText = rawText.toLowerCase();
         if (lowerText === '+пам\'ятка') { awaitingNote = true; appendMsg('bot', 'Відправ текст у вигляді кода.'); } 
         else if (lowerText === 'пам\'ятки') { let notes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {}; let keys = Object.keys(notes); const msgId = Date.now().toString(); if (keys.length === 0) { appendMsg('bot', `📭 Порожньо.`, msgId); } else { appendMsg('bot', generateNotesListHTML(msgId), msgId); } }
-        else if (lowerText === 'кабінет') { localStorage.setItem(CABINET_KEY, 'true'); if(document.getElementById('settings-btn')) document.getElementById('settings-btn').classList.remove('hidden'); appendMsg('bot', 'Власник активний.'); } 
-        else if (lowerText === 'вихід') { localStorage.removeItem(CABINET_KEY); if(document.getElementById('settings-btn')) document.getElementById('settings-btn').classList.add('hidden'); appendMsg('bot', 'Користувач.'); } 
         else if (lowerText === 'очистити') { localStorage.removeItem(CHAT_KEY); document.getElementById('chat-messages').innerHTML = ''; appendMsg('bot', '🧹 Очищено.'); } 
     }, 600);
 }
@@ -830,7 +846,6 @@ function openTextEditorFor(id) {
     
     editingTextId = id; 
     const input = document.getElementById('custom-text-input');
-    // Відкриваємо ОРИГІНАЛ для редагування
     input.innerHTML = wrapper.dataset.originalHtml || wrapper.querySelector('.custom-text-block').innerHTML;
     
     const currentSize = wrapper.dataset.size || 12;
@@ -858,7 +873,7 @@ function saveNewTextBlock() {
         const wrapper = document.querySelector(`.text-wrapper[data-id="${editingTextId}"]`);
         if (wrapper) {
             const content = wrapper.querySelector('.custom-text-block');
-            wrapper.dataset.originalHtml = html; // Зберігаємо новий оригінал
+            wrapper.dataset.originalHtml = html; 
             
             // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
             content.innerHTML = tr(html); 
@@ -889,7 +904,7 @@ function renderTextBlockDOM(id, html, loc, left, top, size = 12) {
     wrapper.dataset.loc = loc;
     wrapper.dataset.type = 'text'; 
     wrapper.dataset.size = size; 
-    wrapper.dataset.originalHtml = html; // Зберігаємо оригінал
+    wrapper.dataset.originalHtml = html; 
     wrapper.style.position = 'absolute';
     wrapper.style.left = left;
     wrapper.style.top = top;
