@@ -43,10 +43,22 @@ if (encodedData) {
     }
 }
 
-// 🔥 ВІДРЕМОНТОВАНА ФУНКЦІЯ ПЕРЕКЛАДУ 🔥
+// 🔥 ВІДРЕМОНТОВАНА ФУНКЦІЯ ПЕРЕКЛАДУ (SMART SEARCH) 🔥
 function tr(text) { 
+    if (!text) return text;
+    // 1. Спроба точного збігу
     if (cyberPages.translations && cyberPages.translations[text]) {
         return cyberPages.translations[text];
+    }
+    // 2. Розумний пошук: ігноруємо "бруд" від Google Перекладача (пробіли, переноси)
+    if (cyberPages.translations) {
+        const normalize = (str) => str.replace(/\s+/g, '').toLowerCase();
+        const cleanText = normalize(text);
+        for (let key in cyberPages.translations) {
+            if (normalize(key) === cleanText) {
+                return cyberPages.translations[key];
+            }
+        }
     }
     return text; // Якщо перекладу немає — віддає оригінал
 }
