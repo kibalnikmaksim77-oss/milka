@@ -12,8 +12,9 @@ const access = urlParams.get('access');
 const globalBg = urlParams.get('bg'); 
 const encodedData = urlParams.get('cd'); 
 const appRoute = urlParams.get('route'); 
+const appLang = urlParams.get('lang') || 'uk'; 
 
-let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {}, pages_texts: {}, translations: {} };
+let cyberPages = { main: { buttons: [] }, burger: { buttons: [] }, pages: {}, pages_bg: {}, pages_coords: {}, pages_texts: {} };
 let isEditMode = false;
 let navStack = []; 
 let editingTextId = null;
@@ -35,50 +36,66 @@ if (encodedData) {
         if (parsed.pages_bg) cyberPages.pages_bg = parsed.pages_bg;
         if (parsed.pages_coords) cyberPages.pages_coords = parsed.pages_coords;
         if (parsed.pages_texts) cyberPages.pages_texts = parsed.pages_texts; 
-        if (parsed.translations) cyberPages.translations = parsed.translations; // 🌍 Словник перекладів
     } catch (e) { 
         console.error("Помилка декодування бази", e);
-        alert("⚠️ ПОМИЛКА: Дані дизайну не завантажено. Не зберігайте позиції, щоб не стерти базу!");
+        alert("⚠️ ПОМИЛКА: Дані дизайну не завантажено.");
     }
 }
 
-// 🔥 СУПЕР-БРОНЯ ПЕРЕКЛАДУ (Емодзі + Шрифти) 🔥
-function tr(text) { 
-    if (!text) return text;
+// 🔥 КІБЕР-ПОЛІГЛОТ (Прямий API-переклад через браузер без лімітів) 🔥
+const translationCache = {}; 
+
+async function tr(text) { 
+    if (!text || appLang === 'uk') return text;
     
-    // 1. ЗАХИСТ ВІД ЕМОДЗІ (Якщо немає літер — віддаємо як є)
     const plainText = text.replace(/<[^>]*>/g, '').trim(); 
     const hasLetters = /[a-zA-Zа-яА-ЯіїєґІЇЄҐ]/.test(plainText);
     if (!hasLetters && plainText.length > 0) return text;
 
-    // 2. Точний збіг
-    if (cyberPages.translations && cyberPages.translations[text]) {
-        return cyberPages.translations[text];
-    }
-    
-    // 3. Броньований пошук HTML (ігнорує різницю лапок, пробілів та форматування)
-    if (cyberPages.translations) {
-        const normalize = (str) => {
-            return str.replace(/\s+/g, '') // видаляємо всі пробіли
-                      .replace(/'/g, '"')  // всі одинарні лапки робимо подвійними
-                      .replace(/;/g, '')   // видаляємо крапки з комою (стилі)
-                      .toLowerCase();
-        };
-        const cleanText = normalize(text);
-        for (let key in cyberPages.translations) {
-            if (normalize(key) === cleanText) {
-                return cyberPages.translations[key];
+    if (translationCache[text]) return translationCache[text];
+
+    try {
+        if (text.includes('<') && text.includes('>')) {
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+
+            async function translateNode(node) {
+                if (node.nodeType === 3) { 
+                    let t = node.nodeValue;
+                    if (t.trim().length > 0 && /[a-zA-Zа-яА-ЯіїєґІЇЄҐ]/.test(t)) {
+                        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${appLang}&dt=t&q=${encodeURIComponent(t)}`;
+                        let res = await fetch(url);
+                        let data = await res.json();
+                        node.nodeValue = data[0].map(x => x[0]).join('');
+                    }
+                } else {
+                    const children = Array.from(node.childNodes);
+                    for (let child of children) {
+                        await translateNode(child);
+                    }
+                }
             }
+            await translateNode(tempDiv);
+            translationCache[text] = tempDiv.innerHTML;
+            return tempDiv.innerHTML;
+        } else {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${appLang}&dt=t&q=${encodeURIComponent(text)}`;
+            let res = await fetch(url);
+            let data = await res.json();
+            let translated = data[0].map(x => x[0]).join('');
+            translationCache[text] = translated;
+            return translated;
         }
+    } catch(e) {
+        console.error("Помилка Google API:", e);
+        return text; 
     }
-    return text; 
 }
 
 const initGlobalBg = cyberPages.pages_bg && cyberPages.pages_bg['global'];
 if (initGlobalBg) { document.body.style.backgroundImage = `url('${initGlobalBg}')`; } 
 else if (globalBg) { document.body.style.backgroundImage = `url('${globalBg}')`; } 
 
-// 🛡 АДМІН-КОНТРОЛЬ ТІЛЬКИ ЧЕРЕЗ ACCESS ВІД PYTHON
 if (access === 'admin_king') {
     const adminSection = document.getElementById('admin-view');
     if (adminSection) adminSection.classList.remove('hidden');
@@ -177,7 +194,6 @@ function applyAbsolutePosition(wrapper, index, loc) {
     }
 
     let foundCoord = null;
-    
     if (cyberPages.pages_coords && cyberPages.pages_coords[loc] && cyberPages.pages_coords[loc][wrapper.dataset.id]) {
         foundCoord = cyberPages.pages_coords[loc][wrapper.dataset.id];
     }
@@ -288,7 +304,7 @@ function saveLayout(type) {
     if (type !== 'auto') alert("✅ Позиції та тексти збережено у Глобальну Базу Даних!");
 }
 
-function renderTerminal() {
+async function renderTerminal() {
     if (navStack.length === 0) return;
     const currentPage = navStack[navStack.length - 1]; 
     
@@ -337,8 +353,9 @@ function renderTerminal() {
 
     if (cyberPages.pages && cyberPages.pages[currentPage]) {
         let visibleIndex = 0;
-        cyberPages.pages[currentPage].buttons.forEach((btn) => {
-            if (btn.role === 'owner' && access !== 'admin_king') return;
+        for (let btn of cyberPages.pages[currentPage].buttons) {
+            if (btn.role === 'owner' && access !== 'admin_king') continue;
+            
             const wrapper = document.createElement('div');
             wrapper.className = 'btn-wrapper';
             wrapper.dataset.id = btn.text;
@@ -353,7 +370,7 @@ function renderTerminal() {
             b.style.backdropFilter = 'blur(4px)';
             b.style.webkitBackdropFilter = 'blur(4px)';
             
-            b.innerHTML = tr(btn.text); 
+            b.innerHTML = await tr(btn.text); 
             b.onclick = () => openTerminalPage(btn.text); 
             
             wrapper.appendChild(b);
@@ -361,18 +378,18 @@ function renderTerminal() {
             applyAbsolutePosition(wrapper, visibleIndex, currentPage);
             contentContainer.appendChild(wrapper);
             visibleIndex++;
-        });
+        }
     }
 
     let pythonTexts = cyberPages.pages_texts && cyberPages.pages_texts[currentPage];
     if (pythonTexts && pythonTexts.length > 0) {
-        pythonTexts.forEach(tb => {
-            renderTextBlockDOM(tb.id, tb.html, currentPage, tb.left, tb.top, tb.size);
-        });
+        for (let tb of pythonTexts) {
+            await renderTextBlockDOM(tb.id, tb.html, currentPage, tb.left, tb.top, tb.size);
+        }
     }
 }
 
-function openUserEyeStudio() {
+async function openUserEyeStudio() {
     let modal = document.getElementById('user-eye-studio');
     const adminView = document.getElementById('admin-view'); 
     if (modal) modal.remove();
@@ -419,7 +436,7 @@ function openUserEyeStudio() {
     const grid = document.getElementById('user-eye-grid');
     if (cyberPages.main && cyberPages.main.buttons) {
         let visibleIndex = 0;
-        cyberPages.main.buttons.forEach((btn) => {
+        for (let btn of cyberPages.main.buttons) {
             if (btn.role === 'user' && btn.location === 'main') {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'btn-wrapper';
@@ -435,7 +452,7 @@ function openUserEyeStudio() {
                 b.style.backdropFilter = 'blur(4px)';
                 b.style.webkitBackdropFilter = 'blur(4px)';
                 
-                b.innerHTML = tr(btn.text); 
+                b.innerHTML = await tr(btn.text); 
                 b.onclick = () => openTerminalPage(btn.text);
                 
                 wrapper.appendChild(b);
@@ -444,7 +461,7 @@ function openUserEyeStudio() {
                 grid.appendChild(wrapper);
                 visibleIndex++;
             }
-        });
+        }
     }
 
     modal.style.display = 'flex';
@@ -484,7 +501,6 @@ function toggleContextMenu(event, type, loc) {
             menu.appendChild(editBtn);
         } else {
             const bgBtn = document.createElement('button');
-
             bgBtn.className = 'settings-item';
             bgBtn.innerHTML = '🖼 Встановити фон';
             bgBtn.onclick = () => triggerBgUpload();
@@ -568,7 +584,7 @@ function cancelDragAndDrop(type) {
     alert("❌ Зміни скасовано.");
 }
 
-function renderCyberButtons() {
+async function renderCyberButtons() {
     const mainGrid = document.getElementById('user-commands-safe-zone');
     const userNav = document.getElementById('user-view');
     const ownerNav = document.getElementById('owner-view'); 
@@ -596,38 +612,35 @@ function renderCyberButtons() {
         ownerNav.appendChild(eyeBtn); 
     }
 
-    // 🛡 ЗАХИСНИЙ СПИСОК СИСТЕМНИХ КНОПОК
     const sysBtns = ["🏠", "👁️ Око Юзера", "⚡ Milka Bot", "🌏"];
 
     if (cyberPages.main && cyberPages.main.buttons) {
         let visibleIndex = 0;
-        cyberPages.main.buttons.forEach((btn) => {
+        for (let btn of cyberPages.main.buttons) {
             if (access === 'admin_king') {
-                if (btn.role === 'owner') { createButtonElement(btn, 'main', mainGrid, visibleIndex); visibleIndex++; }
+                if (btn.role === 'owner') { await createButtonElement(btn, 'main', mainGrid, visibleIndex); visibleIndex++; }
             } else {
                 if (btn.role === 'user') { 
-                    // 🛡 БЛОКУЄМО СИСТЕМНІ КНОПКИ ДЛЯ ЮЗЕРА
-                    if (sysBtns.includes(btn.text)) return; 
-                    createButtonElement(btn, 'main', mainGrid, visibleIndex); 
+                    if (sysBtns.includes(btn.text)) continue; 
+                    await createButtonElement(btn, 'main', mainGrid, visibleIndex); 
                     visibleIndex++; 
                 }
             }
-        });
+        }
     }
     
     if (cyberPages.burger && cyberPages.burger.buttons) {
-        cyberPages.burger.buttons.forEach((btn) => {
-            if(btn.role === 'owner' && ownerNav) createButtonElement(btn, 'burger', ownerNav, 0);
+        for (let btn of cyberPages.burger.buttons) {
+            if(btn.role === 'owner' && ownerNav) await createButtonElement(btn, 'burger', ownerNav, 0);
             if(btn.role === 'user' && userNav) {
-                // 🛡 БЛОКУЄМО СИСТЕМНІ КНОПКИ ДЛЯ ЮЗЕРА
-                if (sysBtns.includes(btn.text)) return;
-                createButtonElement(btn, 'burger', userNav, 0);
+                if (sysBtns.includes(btn.text)) continue;
+                await createButtonElement(btn, 'burger', userNav, 0);
             }
-        });
+        }
     }
 }
 
-function createButtonElement(btn, location, container, index) {
+async function createButtonElement(btn, location, container, index) {
     const wrapper = document.createElement('div');
     wrapper.className = `btn-wrapper`;
     wrapper.dataset.id = btn.text;
@@ -644,7 +657,7 @@ function createButtonElement(btn, location, container, index) {
     b.style.backdropFilter = 'blur(4px)';
     b.style.webkitBackdropFilter = 'blur(4px)';
     
-    b.innerHTML = tr(btn.text); 
+    b.innerHTML = await tr(btn.text); 
     b.onclick = () => openTerminalPage(btn.text);
     
     wrapper.appendChild(b);
@@ -856,7 +869,7 @@ function openTextEditorFor(id) {
     document.getElementById('text-editor-modal').classList.remove('hidden');
 }
 
-function saveNewTextBlock() {
+async function saveNewTextBlock() {
     const input = document.getElementById('custom-text-input');
     const html = input.innerHTML.trim();
     
@@ -875,8 +888,7 @@ function saveNewTextBlock() {
             const content = wrapper.querySelector('.custom-text-block');
             wrapper.dataset.originalHtml = html; 
             
-            // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
-            content.innerHTML = tr(html); 
+            content.innerHTML = await tr(html); 
             content.style.fontSize = size + 'px';
             wrapper.dataset.size = size;
         }
@@ -884,7 +896,7 @@ function saveNewTextBlock() {
     } else {
         const loc = currentLocationForSave;
         const id = 'text_' + Date.now();
-        renderTextBlockDOM(id, html, loc, '10%', '10%', size);
+        await renderTextBlockDOM(id, html, loc, '10%', '10%', size);
     }
     
     document.getElementById('text-editor-modal').classList.add('hidden');
@@ -892,7 +904,7 @@ function saveNewTextBlock() {
     if (isEditMode) document.querySelectorAll('.text-wrapper').forEach(w => w.classList.add('editing-active'));
 }
 
-function renderTextBlockDOM(id, html, loc, left, top, size = 12) {
+async function renderTextBlockDOM(id, html, loc, left, top, size = 12) {
     const contentContainer = document.getElementById('terminal-buttons-container');
     if (!contentContainer) return;
 
@@ -912,8 +924,7 @@ function renderTextBlockDOM(id, html, loc, left, top, size = 12) {
     const content = document.createElement('div');
     content.className = 'custom-text-block';
     
-    // 🔥 ВІЗУАЛЬНИЙ ПЕРЕКЛАД 🔥
-    content.innerHTML = tr(html); 
+    content.innerHTML = await tr(html); 
     content.style.fontSize = size + 'px'; 
 
     const delBtn = document.createElement('div');
