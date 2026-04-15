@@ -21,24 +21,36 @@ let editingTextId = null;
 
 if (encodedData) {
     try {
-        let decodedString;
-        try { 
-            decodedString = decodeURIComponent(escape(atob(decodeURIComponent(encodedData)))); 
-        } catch (e) {
-            try { decodedString = decodeURIComponent(escape(atob(encodedData))); } 
-            catch (e2) { decodedString = decodeURIComponent(encodedData); }
+        // Знімаємо URL-кодування, яке накладає Python (urllib.parse.quote)
+        let b64Str = encodedData;
+        if (b64Str.includes('%')) {
+            b64Str = decodeURIComponent(b64Str);
+        }
+
+        // Декодуємо Base64 у бінарний рядок
+        const binaryStr = atob(b64Str);
+        
+        // Переводимо у масив байтів для збереження 4-байтних емодзі ⚡💬
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
         }
         
+        // Правильний сучасний декодер UTF-8
+        const decodedString = new TextDecoder('utf-8').decode(bytes);
+        
         const parsed = JSON.parse(decodedString);
+        
         if (parsed.main) cyberPages.main = parsed.main;
         if (parsed.burger) cyberPages.burger = parsed.burger;
         if (parsed.pages) cyberPages.pages = parsed.pages;
         if (parsed.pages_bg) cyberPages.pages_bg = parsed.pages_bg;
         if (parsed.pages_coords) cyberPages.pages_coords = parsed.pages_coords;
         if (parsed.pages_texts) cyberPages.pages_texts = parsed.pages_texts; 
+        
     } catch (e) { 
         console.error("Помилка декодування бази", e);
-        alert("⚠️ ПОМИЛКА: Дані дизайну не завантажено.");
+        alert("⚠️ ПОМИЛКА: Дані дизайну не завантажено. Перевірте консоль.");
     }
 }
 
