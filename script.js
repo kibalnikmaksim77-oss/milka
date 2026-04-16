@@ -184,7 +184,9 @@ function goBack() {
 
 function openTerminalPage(pageTitle) {
     if (isEditMode) return; 
-    if(pageTitle.includes('Око Юзера') || pageTitle.includes('Milka Bot') || pageTitle === '🏠') return;
+    
+    // 🔥 ВИПРАВЛЕНО: Замість includes використовуємо сувору перевірку (===)
+    if(pageTitle === '👁️ Око Юзера' || pageTitle === '⚡ Milka Bot' || pageTitle === '🏠') return;
     
     if (pageTitle === '🌏') {
         openLanguageMenu();
@@ -374,7 +376,8 @@ async function renderTerminal() {
             wrapper.dataset.loc = currentPage; 
             
             const b = document.createElement('button');
-            b.className = 'cyber-btn btn-small' + (btn.role === 'owner' ? ' secret-btn' : '');
+            // 🔥 ВИПРАВЛЕНО: Прибрано клас 'secret-btn', тепер вони виглядають однаково
+            b.className = 'cyber-btn btn-small';
             b.style.background = 'rgba(0, 0, 0, 0.3)';
             b.style.border = '1px solid #bc13fe';
             b.style.color = '#bc13fe';
@@ -660,7 +663,8 @@ async function createButtonElement(btn, location, container, index) {
     
     const b = document.createElement('button');
     const sizeClass = (location !== 'burger') ? 'btn-small' : '';
-    b.className = ('cyber-btn ' + sizeClass + (btn.role === 'owner' ? ' secret-btn' : '')).trim();
+    // 🔥 ВИПРАВЛЕНО: Прибрано 'secret-btn', тепер кнопки гм власника як у юзера
+    b.className = ('cyber-btn ' + sizeClass).trim();
     
     b.style.background = 'rgba(0, 0, 0, 0.3)';
     b.style.border = '1px solid #bc13fe';
